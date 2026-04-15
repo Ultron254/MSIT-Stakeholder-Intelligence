@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useMemo } from 'react';
 import type { Quadrant, Sector, Confidence, ScoreSnapshot } from './types';
 import {
   stakeholders, scoreSnapshots, engagementRecords, evidenceRecords,
@@ -51,9 +52,7 @@ interface AppState {
   removeToast: (id: string) => void;
   toggleSearch: () => void;
 
-  // Data accessors
-  getStakeholdersWithScores: () => StakeholderWithScore[];
-  getFilteredStakeholders: () => StakeholderWithScore[];
+  // Data accessors — use hooks useStakeholdersWithScores / useFilteredStakeholders instead
 
   // Score snapshots (mutable for new submissions)
   snapshots: ScoreSnapshot[];
@@ -96,37 +95,55 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleSearch: () => set(s => ({ searchOpen: !s.searchOpen })),
 
   addSnapshot: (snapshot) => set(s => ({ snapshots: [...s.snapshots, snapshot] })),
+}));
 
-  getStakeholdersWithScores: () => {
-    const snaps = get().snapshots;
-    return stakeholders.map(s => {
-      const stakeholderSnaps = snaps
-        .filter(snap => snap.stakeholder_id === s.id)
-        .sort((a, b) => new Date(b.scored_at).getTime() - new Date(a.scored_at).getTime());
-      const latest = stakeholderSnaps[0] ?? null;
-      const stakeEngagements = engagementRecords.filter(e => e.stakeholder_id === s.id);
-      const lastEngDate = stakeEngagements.length > 0
-        ? stakeEngagements.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].date
-        : null;
-      const flags = detectRedFlags(s, latest, engagementRecords);
-      return {
-        ...s,
-        latestSnapshot: latest,
-        engagementCount: stakeEngagements.length,
-        lastEngagementDate: lastEngDate,
-        redFlags: flags,
-      };
-    });
-  },
+// Re-export data for direct use in components
+export {
+  stakeholders, scoreSnapshots, engagementRecords, evidenceRecords,
+  engagementPlans, watchlistSignals, activityFeed, users,
+  scoringWeights, objectives, countries, stakeholderObjectives, componentScores,
+  getLatestSnapshot,
+};
 
-  getFilteredStakeholders: () => {
-    const all = get().getStakeholdersWithScores();
-    const f = get().filters;
+// ---------------------------------------------------------------------------
+// Derived-data hooks (memoised on `snapshots` / `filters` to avoid new refs)
+// ---------------------------------------------------------------------------
 
-    let filtered = all;
+function computeStakeholdersWithScores(snaps: ScoreSnapshot[]): StakeholderWithScore[] {
+  return stakeholders.map(s => {
+    const stakeholderSnaps = snaps
+      .filter(snap => snap.stakeholder_id === s.id)
+      .sort((a, b) => new Date(b.scored_at).getTime() - new Date(a.scored_at).getTime());
+    const latest = stakeholderSnaps[0] ?? null;
+    const stakeEngagements = engagementRecords.filter(e => e.stakeholder_id === s.id);
+    const lastEngDate = stakeEngagements.length > 0
+      ? [...stakeEngagements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].date
+      : null;
+    const flags = detectRedFlags(s, latest, engagementRecords);
+    return {
+      ...s,
+      latestSnapshot: latest,
+      engagementCount: stakeEngagements.length,
+      lastEngagementDate: lastEngDate,
+      redFlags: flags,
+    };
+  });
+}
 
-    if (f.search) {
-      const q = f.search.toLowerCase();
+export function useStakeholdersWithScores(): StakeholderWithScore[] {
+  const snapshots = useAppStore(s => s.snapshots);
+  return useMemo(() => computeStakeholdersWithScores(snapshots), [snapshots]);
+}
+
+export function useFilteredStakeholders(): StakeholderWithScore[] {
+  const snapshots = useAppStore(s => s.snapshots);
+  const filters = useAppStore(s => s.filters);
+
+  return useMemo(() => {
+    let filtered = computeStakeholdersWithScores(snapshots);
+
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
       filtered = filtered.filter(s =>
         s.full_name.toLowerCase().includes(q) ||
         s.organization.toLowerCase().includes(q) ||
@@ -134,24 +151,23 @@ export const useAppStore = create<AppState>((set, get) => ({
       );
     }
 
-    if (f.quadrants.length > 0) {
-      filtered = filtered.filter(s => s.latestSnapshot && f.quadrants.includes(s.latestSnapshot.quadrant));
+    if (filters.quadrants.length > 0) {
+      filtered = filtered.filter(s => s.latestSnapshot && filters.quadrants.includes(s.latestSnapshot.quadrant));
     }
 
-    if (f.sectors.length > 0) {
-      filtered = filtered.filter(s => f.sectors.includes(s.sector));
+    if (filters.sectors.length > 0) {
+      filtered = filtered.filter(s => filters.sectors.includes(s.sector));
     }
 
-    if (f.layers.length > 0) {
-      filtered = filtered.filter(s => f.layers.includes(s.proximity_layer));
+    if (filters.layers.length > 0) {
+      filtered = filtered.filter(s => filters.layers.includes(s.proximity_layer));
     }
 
-    if (f.confidence.length > 0) {
-      filtered = filtered.filter(s => s.latestSnapshot && f.confidence.includes(s.latestSnapshot.overall_confidence));
+    if (filters.confidence.length > 0) {
+      filtered = filtered.filter(s => s.latestSnapshot && filters.confidence.includes(s.latestSnapshot.overall_confidence));
     }
 
-    // Sort
-    switch (f.sortBy) {
+    switch (filters.sortBy) {
       case 'sis_desc':
         filtered.sort((a, b) => (b.latestSnapshot?.sis_score ?? 0) - (a.latestSnapshot?.sis_score ?? 0));
         break;
@@ -171,13 +187,5 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     return filtered;
-  },
-}));
-
-// Re-export data for direct use in components
-export {
-  stakeholders, scoreSnapshots, engagementRecords, evidenceRecords,
-  engagementPlans, watchlistSignals, activityFeed, users,
-  scoringWeights, objectives, countries, stakeholderObjectives, componentScores,
-  getLatestSnapshot,
-};
+  }, [snapshots, filters]);
+}

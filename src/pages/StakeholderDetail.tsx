@@ -7,6 +7,7 @@ import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts';
 import { useAppStore, engagementRecords, evidenceRecords, engagementPlans } from '../lib/store';
+import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge, ConfidenceBadge, SectorBadge, LayerIndicator, ScoreBar, WorkflowBadge, EngagementTypeBadge, OutcomeBadge, EmptyState } from '../components/ui/Badges';
 import { QUADRANT_COLORS, COMPONENT_DESCRIPTIONS } from '../lib/types';
 import type { Quadrant, Component } from '../lib/types';
@@ -17,7 +18,7 @@ type Tab = 'overview' | 'engagements' | 'evidence' | 'history' | 'plan';
 
 export default function StakeholderDetail() {
   const { selectedStakeholderId, setPage, openScoreUpdate } = useAppStore();
-  const all = useAppStore(s => s.getStakeholdersWithScores());
+  const all = useStakeholdersWithScores();
   const snapshots = useAppStore(s => s.snapshots);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 

@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { useAppStore, engagementPlans } from '../lib/store';
+import { useStakeholdersWithScores } from '../lib/store';
 import { QuadrantBadge, SISBadge } from '../components/ui/Badges';
 import { QUADRANT_COLORS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 
 export default function EngagementPlans() {
-  const all = useAppStore(s => s.getStakeholdersWithScores());
+  const all = useStakeholdersWithScores();
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
 
   const columns: { quadrant: Quadrant; label: string }[] = [

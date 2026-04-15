@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Label } from 'recharts';
 import { useAppStore } from '../lib/store';
+import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge } from '../components/ui/Badges';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 import { formatSIS, formatAxis } from '../lib/formatters';
 
 export default function QuadrantMap() {
-  const all = useAppStore(s => s.getStakeholdersWithScores());
+  const all = useStakeholdersWithScores();
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const [activeQuadrant, setActiveQuadrant] = useState<Quadrant | null>(null);
   const [showLabels, setShowLabels] = useState(false);

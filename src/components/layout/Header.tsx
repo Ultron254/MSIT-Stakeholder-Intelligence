@@ -1,5 +1,6 @@
 import { Search, Bell, X } from 'lucide-react';
 import { useAppStore, watchlistSignals } from '../../lib/store';
+import { useStakeholdersWithScores } from '../../lib/store';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import type { Quadrant } from '../../lib/types';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../../lib/types';
@@ -23,7 +24,7 @@ export default function Header() {
   const searchRef = useRef<HTMLInputElement>(null);
   const activeAlerts = watchlistSignals.filter(s => !s.is_resolved).length;
 
-  const allWithScores = useAppStore(s => s.getStakeholdersWithScores());
+  const allWithScores = useStakeholdersWithScores();
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];

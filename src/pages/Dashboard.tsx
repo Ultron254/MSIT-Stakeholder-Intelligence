@@ -8,13 +8,14 @@ import {
   FileText, MessageSquare, Shield, CheckCircle,
 } from 'lucide-react';
 import { useAppStore, objectives, watchlistSignals, activityFeed } from '../lib/store';
+import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge, SeverityBadge } from '../components/ui/Badges';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 import { formatRelativeDate, formatDate, formatSIS, daysUntil } from '../lib/formatters';
 
 export default function Dashboard() {
-  const all = useAppStore(s => s.getStakeholdersWithScores());
+  const all = useStakeholdersWithScores();
   const setPage = useAppStore(s => s.setPage);
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
 
