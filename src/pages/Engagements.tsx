@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { MessageSquare, Phone, Mail, Calendar, Users } from 'lucide-react';
 import { useAppStore, engagementRecords, stakeholders } from '../lib/store';
+import { NOW } from '../lib/constants';
 import { Card, EngagementTypeBadge, OutcomeBadge, EmptyState } from '../components/ui/Badges';
 import { formatDate } from '../lib/formatters';
 
@@ -28,10 +29,9 @@ export default function Engagements() {
   }, [typeFilter, outcomeFilter, searchQuery]);
 
   const stats = useMemo(() => {
-    const now = new Date();
     const thisMonth = engagementRecords.filter(e => {
       const d = new Date(e.date);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      return d.getMonth() === NOW.getMonth() && d.getFullYear() === NOW.getFullYear();
     });
     const pendingFollowups = engagementRecords.filter(e => e.follow_up_required && e.follow_up_date);
     const positiveRate = engagementRecords.length > 0

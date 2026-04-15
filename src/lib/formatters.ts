@@ -1,9 +1,10 @@
-import { formatDistanceToNow, format, differenceInDays } from 'date-fns';
+import { formatDistance, format, differenceInDays } from 'date-fns';
 import type { Confidence, Quadrant, Sector, WorkflowStatus } from './types';
 import { QUADRANT_LABELS, SECTOR_LABELS } from './types';
+import { NOW } from './constants';
 
 export function formatRelativeDate(dateStr: string): string {
-  return formatDistanceToNow(new Date(dateStr), { addSuffix: true });
+  return formatDistance(new Date(dateStr), NOW, { addSuffix: true });
 }
 
 export function formatDate(dateStr: string): string {
@@ -15,7 +16,7 @@ export function formatDateShort(dateStr: string): string {
 }
 
 export function daysUntil(dateStr: string): number {
-  return differenceInDays(new Date(dateStr), new Date());
+  return differenceInDays(new Date(dateStr), NOW);
 }
 
 export function formatSIS(sis: number): string {
