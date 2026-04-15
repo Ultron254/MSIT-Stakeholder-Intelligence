@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 import { useAppStore } from '../lib/store';
+import { useStakeholdersWithScores } from '../lib/store';
 import { NOW } from '../lib/constants';
 import { calculateFullScore, getSISColor } from '../lib/scoring-engine';
 import { QuadrantBadge } from './ui/Badges';
@@ -21,7 +22,7 @@ const scoreMeanings: Record<Component, string[]> = {
 
 export default function ScoreUpdatePanel() {
   const { scoreUpdateOpen, scoreUpdateStakeholderId, closeScoreUpdate, addToast, addSnapshot } = useAppStore();
-  const all = useAppStore(s => s.getStakeholdersWithScores());
+  const all = useStakeholdersWithScores();
   const snapshots = useAppStore(s => s.snapshots);
 
   const stakeholder = useMemo(

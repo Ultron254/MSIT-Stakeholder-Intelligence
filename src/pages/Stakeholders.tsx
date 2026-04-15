@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppStore } from '../lib/store';
+import { useFilteredStakeholders, useStakeholdersWithScores } from '../lib/store';
 import { QuadrantBadge, SISBadge, ConfidenceBadge, SectorBadge, LayerIndicator, Card } from '../components/ui/Badges';
 import { QUADRANT_LABELS, SECTOR_LABELS } from '../lib/types';
 import type { Quadrant, Sector } from '../lib/types';
@@ -10,8 +11,8 @@ const ITEMS_PER_PAGE = 25;
 
 export default function Stakeholders() {
   const { filters, setFilter, clearFilters, setSelectedStakeholder } = useAppStore();
-  const filtered = useAppStore(s => s.getFilteredStakeholders());
-  const totalCount = useAppStore(s => s.getStakeholdersWithScores().length);
+  const filtered = useFilteredStakeholders();
+  const totalCount = useStakeholdersWithScores().length;
   const [page, setPage] = useState(0);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
