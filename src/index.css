@@ -1,6 +1,6 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
 
 :root {
   --bg-primary: #FAFAF8;
@@ -101,6 +101,33 @@ body {
   to { transform: translateY(0); opacity: 1; }
 }
 .page-enter { animation: fadeInUp 0.3s ease-out; }
+
+/* Focus visible ring for keyboard navigation */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Subtle table row hover */
+tr.hoverable:hover {
+  background: var(--bg-secondary);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(37, 99, 235, 0.15);
+  color: var(--text-primary);
+}
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
+
+/* Print styles */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}
 
 .recharts-cartesian-axis-tick-value { font-family: var(--font-body); font-size: 0.75rem; fill: var(--text-muted); }
 .recharts-legend-item-text { font-family: var(--font-body); font-size: 0.8125rem; color: var(--text-secondary) !important; }

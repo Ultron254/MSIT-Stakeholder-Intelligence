@@ -176,6 +176,7 @@ export default function QuadrantMap() {
                     stroke={QUADRANT_COLORS[entry.quadrant].dot}
                     strokeWidth={1}
                     cursor="pointer"
+                    onClick={() => setSelectedStakeholder(entry.id)}
                   />
                 ))}
               </Scatter>

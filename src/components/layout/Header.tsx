@@ -37,6 +37,22 @@ export default function Header() {
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
 
+  // Cmd+K keyboard shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        toggleSearch();
+      }
+      if (e.key === 'Escape' && searchOpen) {
+        setSearchQuery('');
+        toggleSearch();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [searchOpen, toggleSearch]);
+
   return (
     <header
       className="sticky top-0 z-30 flex items-center justify-between h-14 px-6 border-b"
@@ -61,7 +77,12 @@ export default function Header() {
             onMouseLeave={(e) => { if (!searchOpen) e.currentTarget.style.background = 'transparent'; }}
           >
             <Search size={16} />
-            {!searchOpen && <span className="text-body-sm hidden md:inline">Search</span>}
+            {!searchOpen && (
+              <>
+                <span className="text-body-sm hidden md:inline">Search</span>
+                <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-xs" style={{ background: 'var(--bg-inset)', color: 'var(--text-muted)', fontSize: '0.625rem', fontFamily: 'var(--font-body)' }}>⌘K</kbd>
+              </>
+            )}
           </button>
           {searchOpen && (
             <div

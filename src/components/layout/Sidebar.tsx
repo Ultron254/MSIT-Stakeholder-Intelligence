@@ -120,6 +120,20 @@ export default function Sidebar() {
                   )}
                   <Icon size={18} />
                   {!sidebarCollapsed && <span>{item.label}</span>}
+                  {sidebarCollapsed && (
+                    <div
+                      className="absolute left-full ml-2 px-2.5 py-1 rounded-md whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 pointer-events-none z-50"
+                      style={{
+                        background: 'var(--bg-dark)',
+                        color: 'var(--text-inverse)',
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
+                        boxShadow: 'var(--shadow-lg)',
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                  )}
                 </button>
               );
             })}
