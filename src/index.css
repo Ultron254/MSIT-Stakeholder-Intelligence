@@ -1,0 +1,106 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg-primary: #FAFAF8;
+  --bg-secondary: #F4F3F0;
+  --bg-elevated: #FFFFFF;
+  --bg-inset: #EEEDEA;
+  --bg-dark: #1C1B18;
+  --text-primary: #1C1B18;
+  --text-secondary: #6B6860;
+  --text-muted: #9C9890;
+  --text-inverse: #FAFAF8;
+  --border-default: #E5E4E0;
+  --border-subtle: #F0EFEC;
+  --border-strong: #D0CFC8;
+  --quadrant-ally: #2D7D46;
+  --quadrant-ally-bg: #EBF5EE;
+  --quadrant-ally-text: #1B5E30;
+  --quadrant-power-gap: #C0392B;
+  --quadrant-power-gap-bg: #FBEAEA;
+  --quadrant-power-gap-text: #922B21;
+  --quadrant-hidden: #D4A017;
+  --quadrant-hidden-bg: #FDF6E3;
+  --quadrant-hidden-text: #9A7611;
+  --quadrant-monitor: #7F8C8D;
+  --quadrant-monitor-bg: #F2F3F3;
+  --quadrant-monitor-text: #5D6868;
+  --accent-primary: #2563EB;
+  --accent-primary-hover: #1D4ED8;
+  --accent-warm: #C4956A;
+  --status-success: #16A34A;
+  --status-warning: #D97706;
+  --status-danger: #DC2626;
+  --status-info: #2563EB;
+  --shadow-sm: 0 1px 2px rgba(28, 27, 24, 0.04);
+  --shadow-md: 0 4px 12px rgba(28, 27, 24, 0.06);
+  --shadow-lg: 0 12px 40px rgba(28, 27, 24, 0.08);
+  --shadow-xl: 0 24px 64px rgba(28, 27, 24, 0.12);
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Instrument Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  line-height: 1.5;
+}
+
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+.text-display-xl { font-family: var(--font-display); font-size: 3rem; line-height: 1.1; letter-spacing: -0.02em; }
+.text-display-lg { font-family: var(--font-display); font-size: 2.25rem; line-height: 1.15; letter-spacing: -0.015em; }
+.text-display-md { font-family: var(--font-display); font-size: 1.75rem; line-height: 1.2; }
+.text-heading-lg { font-family: var(--font-body); font-size: 1.25rem; font-weight: 600; line-height: 1.3; }
+.text-heading-md { font-family: var(--font-body); font-size: 1rem; font-weight: 600; line-height: 1.4; }
+.text-heading-sm { font-family: var(--font-body); font-size: 0.875rem; font-weight: 600; line-height: 1.4; letter-spacing: 0.01em; }
+.text-label { font-family: var(--font-body); font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+.text-body { font-family: var(--font-body); font-size: 0.9375rem; line-height: 1.6; }
+.text-body-sm { font-family: var(--font-body); font-size: 0.8125rem; line-height: 1.5; }
+.text-metric { font-family: var(--font-display); font-size: 2.5rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.text-metric-sm { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; font-variant-numeric: tabular-nums; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-inset) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.toast-enter { animation: slideInRight 0.3s ease-out; }
+
+@keyframes fadeInUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.page-enter { animation: fadeInUp 0.3s ease-out; }
+
+.recharts-cartesian-axis-tick-value { font-family: var(--font-body); font-size: 0.75rem; fill: var(--text-muted); }
+.recharts-legend-item-text { font-family: var(--font-body); font-size: 0.8125rem; color: var(--text-secondary) !important; }
