@@ -11,6 +11,7 @@ const ITEMS_PER_PAGE = 25;
 export default function Stakeholders() {
   const { filters, setFilter, clearFilters, setSelectedStakeholder } = useAppStore();
   const filtered = useAppStore(s => s.getFilteredStakeholders());
+  const totalCount = useAppStore(s => s.getStakeholdersWithScores().length);
   const [page, setPage] = useState(0);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -29,7 +30,7 @@ export default function Stakeholders() {
         <div>
           <h1 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Stakeholders</h1>
           <p className="text-body-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            {filtered.length} of {useAppStore.getState().getStakeholdersWithScores().length} stakeholders
+            {filtered.length} of {totalCount} stakeholders
           </p>
         </div>
       </div>

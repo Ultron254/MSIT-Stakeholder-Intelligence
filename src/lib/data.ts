@@ -9,7 +9,8 @@ import { calculateFullScore } from './scoring-engine';
 // ============================================================
 // Reference date: April 15 2026
 // ============================================================
-const NOW = new Date('2026-04-15');
+export { NOW } from './constants';
+import { NOW } from './constants';
 const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
 
 // ============================================================

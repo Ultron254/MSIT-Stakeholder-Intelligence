@@ -11,6 +11,7 @@
  */
 
 import type { Quadrant, ScoringInput, ScoringResult, ScoringWeights, RedFlag, Stakeholder, ScoreSnapshot, EngagementRecord } from './types';
+import { NOW } from './constants';
 
 const DEFAULT_WEIGHTS: Pick<ScoringWeights, 'influence_weight' | 'relationship_weight' | 'risk_weight' | 'sentiment_weight' | 'alignment_weight' | 'impact_weight' | 'power_threshold' | 'convertibility_threshold'> = {
   influence_weight: 0.30,
@@ -121,7 +122,7 @@ export function detectRedFlags(
   stakeholder: Stakeholder,
   snapshot: ScoreSnapshot | null,
   engagements: EngagementRecord[],
-  now = new Date()
+  now: Date = NOW
 ): RedFlag[] {
   if (!snapshot) return [];
 

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 import { useAppStore } from '../lib/store';
+import { NOW } from '../lib/constants';
 import { calculateFullScore, getSISColor } from '../lib/scoring-engine';
 import { QuadrantBadge } from './ui/Badges';
 import { COMPONENT_LABELS, COMPONENT_DESCRIPTIONS } from '../lib/types';
@@ -94,7 +95,7 @@ export default function ScoreUpdatePanel() {
       workflow_status: status,
       scored_by: 'u-001',
       approved_by: null,
-      scored_at: new Date().toISOString().split('T')[0],
+      scored_at: NOW.toISOString().split('T')[0],
       approved_at: null,
     };
     addSnapshot(newSnapshot);
