@@ -136,14 +136,21 @@ export default function StakeholderDetail() {
         <div className="flex gap-2">
           <button
             onClick={() => openScoreUpdate(stakeholder.id)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
             style={{ background: 'var(--text-primary)', color: 'white' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-primary)'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--text-primary)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
           >
             <Edit3 size={14} /> Update Scores
           </button>
           <button
+            onClick={() => {
+              useAppStore.getState().addToast('Engagement logging coming soon — use the Engagements page for now.', 'info');
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             style={{ background: 'transparent', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
             <MessageSquare size={14} /> Log Engagement
           </button>
