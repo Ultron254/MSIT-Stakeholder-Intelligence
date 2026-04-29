@@ -100,18 +100,18 @@ export default function Dashboard() {
       <div
         className="relative overflow-hidden rounded-2xl"
         style={{
-          background: 'var(--gradient-brand-dark)',
-          boxShadow: 'var(--shadow-brand)',
+          background: 'var(--gradient-brand-hero)',
+          boxShadow: 'var(--shadow-lg)',
         }}
       >
         {/* Decorative gradient orbs */}
         <div
           className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-30 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(0,184,212,0.8) 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, rgba(45,166,126,0.7) 0%, transparent 70%)' }}
         />
         <div
-          className="absolute -bottom-32 -left-16 w-64 h-64 rounded-full opacity-20 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%)' }}
+          className="absolute -bottom-32 -left-16 w-64 h-64 rounded-full opacity-15 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(91,192,157,0.6) 0%, transparent 70%)' }}
         />
         {/* Subtle grid pattern */}
         <div
@@ -269,8 +269,8 @@ export default function Dashboard() {
                 className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${Math.min(100, Math.max(0, ((365 - daysLeft) / 365) * 100))}%`,
-                  background: 'linear-gradient(90deg, var(--brand-accent), #FFFFFF)',
-                  boxShadow: '0 0 12px rgba(0,184,212,0.6)',
+                  background: 'linear-gradient(90deg, var(--brand-primary-light), var(--brand-accent))',
+                  boxShadow: '0 0 12px rgba(45,166,126,0.6)',
                 }}
               />
             </div>
