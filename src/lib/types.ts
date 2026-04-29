@@ -141,6 +141,8 @@ export interface User {
   role: 'analyst' | 'country_lead' | 'approver' | 'viewer' | 'admin';
   country_access: string[];
   is_active: boolean;
+  gender?: 'female' | 'male';
+  job_title?: string;
 }
 
 export interface ScoringWeights {

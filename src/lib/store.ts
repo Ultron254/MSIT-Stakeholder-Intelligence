@@ -40,6 +40,10 @@ interface AppState {
   // Search
   searchOpen: boolean;
 
+  // Current user (for profile / personalization)
+  currentUserId: string;
+  setCurrentUser: (userId: string) => void;
+
   // Actions
   setPage: (page: Page) => void;
   setSelectedStakeholder: (id: string | null) => void;
@@ -77,7 +81,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   scoreUpdateStakeholderId: null,
   toasts: [],
   searchOpen: false,
+  currentUserId: 'u-001',
   snapshots: [...scoreSnapshots],
+
+  setCurrentUser: (userId) => set({ currentUserId: userId }),
 
   setPage: (page) => set({ currentPage: page, selectedStakeholderId: null }),
   setSelectedStakeholder: (id) => set({ selectedStakeholderId: id, currentPage: 'stakeholder-detail' }),

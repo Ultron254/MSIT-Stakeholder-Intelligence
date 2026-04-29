@@ -39,7 +39,10 @@ function App() {
         style={{ marginLeft: sidebarCollapsed ? 64 : 260 }}
       >
         <Header />
-        <main className="flex-1 px-6 py-5 max-w-[1400px] w-full mx-auto">
+        <main
+          className="flex-1 px-6 py-5 w-full mx-auto"
+          style={{ maxWidth: currentPage === 'dashboard' ? 1680 : 1400 }}
+        >
           {renderPage()}
         </main>
       </div>

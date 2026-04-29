@@ -232,6 +232,96 @@ body {
   animation: pulse-ring 2s ease-out infinite;
 }
 
+/* ============================================================
+   AI Insights Panel
+   ============================================================ */
+
+@keyframes ai-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ai-msg-in {
+  animation: ai-msg-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes ai-typing {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.ai-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--text-muted);
+  display: inline-block;
+  animation: ai-typing 1.2s ease-in-out infinite;
+}
+
+.ai-chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.ai-chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.ai-chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ai-chat-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+.ai-chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* User menu dropdown entrance */
+@keyframes menu-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.user-menu-dropdown {
+  animation: menu-pop-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: top right;
+}
+
+/* Subtle premium shadow for cards on hover */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(15,30,41,0.10), 0 2px 6px rgba(15,30,41,0.04);
+}
+
+/* Glass utility */
+.glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
 /* Focus visible ring for keyboard navigation */
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
   outline: 2px solid var(--accent-primary);
