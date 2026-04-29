@@ -36,11 +36,11 @@ export const objectives: Objective[] = [
 // Users
 // ============================================================
 export const users: User[] = [
-  { id: 'u-001', email: 'sarah.wanjiku@momentum.africa', display_name: 'Sarah Wanjiku', role: 'analyst', country_access: ['c-001'], is_active: true },
-  { id: 'u-002', email: 'james.ochieng@momentum.africa', display_name: 'James Ochieng', role: 'country_lead', country_access: ['c-001'], is_active: true },
-  { id: 'u-003', email: 'amara.diallo@momentum.africa', display_name: 'Amara Diallo', role: 'approver', country_access: ['c-001'], is_active: true },
-  { id: 'u-004', email: 'peter.maina@momentum.africa', display_name: 'Peter Maina', role: 'viewer', country_access: ['c-001'], is_active: true },
-  { id: 'u-005', email: 'admin@momentum.africa', display_name: 'System Admin', role: 'admin', country_access: ['c-001'], is_active: true },
+  { id: 'u-001', email: 'sarah.wanjiku@momentum.africa', display_name: 'Sarah Wanjiku', role: 'analyst', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Senior Intelligence Analyst' },
+  { id: 'u-002', email: 'james.ochieng@momentum.africa', display_name: 'James Ochieng', role: 'country_lead', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Kenya Country Lead' },
+  { id: 'u-003', email: 'amara.diallo@momentum.africa', display_name: 'Amara Diallo', role: 'approver', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Director of Engagement' },
+  { id: 'u-004', email: 'peter.maina@momentum.africa', display_name: 'Peter Maina', role: 'viewer', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Policy Researcher' },
+  { id: 'u-005', email: 'admin@momentum.africa', display_name: 'System Admin', role: 'admin', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Platform Administrator' },
 ];
 
 // ============================================================

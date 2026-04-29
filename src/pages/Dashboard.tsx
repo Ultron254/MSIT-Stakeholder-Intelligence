@@ -14,6 +14,7 @@ import { Card, QuadrantBadge, SISBadge, SeverityBadge } from '../components/ui/B
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 import { formatRelativeDate, formatDate, formatSIS, daysUntil } from '../lib/formatters';
+import AIInsightsPanel from '../components/AIInsightsPanel';
 
 export default function Dashboard() {
   const all = useStakeholdersWithScores();
@@ -95,9 +96,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="page-enter space-y-6">
-      {/* Campaign Hero */}
-      <div
+    <div className="page-enter">
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
+        <div className="space-y-6 min-w-0">
+          {/* Campaign Hero */}
+          <div
         className="relative overflow-hidden rounded-2xl"
         style={{
           background: 'var(--gradient-brand-hero)',
@@ -500,6 +503,13 @@ export default function Dashboard() {
             ))}
           </div>
         </Card>
+      </div>
+        </div>
+
+        {/* AI Insights Panel — sticky right column on xl+ */}
+        <div className="xl:block">
+          <AIInsightsPanel />
+        </div>
       </div>
     </div>
   );

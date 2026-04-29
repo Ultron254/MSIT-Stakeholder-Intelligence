@@ -5,6 +5,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import type { Quadrant } from '../../lib/types';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../../lib/types';
 import { formatSIS } from '../../lib/formatters';
+import UserMenu from './UserMenu';
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Intelligence Dashboard',
@@ -165,18 +166,7 @@ export default function Header() {
         </button>
 
         {/* User */}
-        <div
-          className="flex items-center gap-2 px-2 py-1 rounded-lg cursor-default"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--bg-inset)', color: 'var(--text-secondary)', fontSize: '0.6875rem', fontWeight: 600 }}
-          >
-            SW
-          </div>
-          <span className="text-body-sm hidden lg:inline">Sarah Wanjiku</span>
-        </div>
+        <UserMenu />
       </div>
     </header>
   );
