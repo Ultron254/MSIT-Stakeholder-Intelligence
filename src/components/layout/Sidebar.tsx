@@ -52,17 +52,26 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen flex flex-col border-r transition-all duration-250 ease-in-out z-40"
+      className="fixed left-0 top-0 h-screen flex flex-col transition-all duration-250 ease-in-out z-40"
       style={{
         width: sidebarCollapsed ? 64 : 260,
-        background: 'var(--bg-elevated)',
-        borderColor: 'var(--border-default)',
+        background: 'linear-gradient(180deg, #0F1E29 0%, #1A2D3A 100%)',
+        borderRight: '1px solid rgba(45, 166, 126, 0.15)',
+        boxShadow: '4px 0 20px rgba(0,0,0,0.08)',
       }}
     >
+      {/* Subtle pattern overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 50% 0%, #2DA67E 0%, transparent 60%)',
+        }}
+      />
+
       {/* Logo */}
       <div
-        className="flex items-center px-4 h-20 border-b shrink-0"
-        style={{ borderColor: 'var(--border-subtle)' }}
+        className="relative flex items-center px-4 h-20 shrink-0"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
       >
         {sidebarCollapsed ? (
           <div className="w-9 h-9 flex items-center justify-center mx-auto">
@@ -74,7 +83,7 @@ export default function Sidebar() {
           </div>
         ) : (
           <img
-            src="/momentum-logo.svg"
+            src="/momentum-logo-light.svg"
             alt="Momentum Africa Partners"
             className="h-12 w-auto"
             style={{ maxWidth: '100%' }}
@@ -83,11 +92,20 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2">
+      <nav className="relative flex-1 overflow-y-auto py-4 px-2">
         {navGroups.map((group) => (
-          <div key={group.label} className="mb-4">
+          <div key={group.label} className="mb-5">
             {!sidebarCollapsed && (
-              <div className="text-label px-2 mb-1.5" style={{ fontSize: '0.625rem' }}>
+              <div
+                className="px-3 mb-2"
+                style={{
+                  fontSize: '0.625rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.35)',
+                }}
+              >
                 {group.label}
               </div>
             )}
@@ -98,42 +116,57 @@ export default function Sidebar() {
                 <button
                   key={item.id}
                   onClick={() => setPage(item.id)}
-                  className="w-full flex items-center gap-2.5 rounded-lg transition-all duration-150 group relative"
+                  className="w-full flex items-center gap-3 rounded-lg transition-all duration-200 group relative mb-0.5"
                   style={{
-                    height: 38,
-                    padding: sidebarCollapsed ? '0 12px' : '0 10px',
+                    height: 40,
+                    padding: sidebarCollapsed ? '0 12px' : '0 12px',
                     justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-                    background: isActive ? 'var(--bg-secondary)' : 'transparent',
-                    color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                    fontWeight: isActive ? 600 : 400,
+                    background: isActive ? 'rgba(45, 166, 126, 0.15)' : 'transparent',
+                    color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.65)',
+                    fontWeight: isActive ? 600 : 500,
                     fontSize: '0.875rem',
+                    border: isActive ? '1px solid rgba(45, 166, 126, 0.35)' : '1px solid transparent',
                   }}
                   onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.background = 'var(--bg-secondary)';
-                    if (!isActive) e.currentTarget.style.color = 'var(--text-primary)';
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.color = '#FFFFFF';
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.background = 'transparent';
-                    if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)';
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.65)';
+                    }
                   }}
                 >
                   {isActive && (
                     <div
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full"
-                      style={{ background: 'var(--accent-primary)' }}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-r-full"
+                      style={{
+                        background: '#2DA67E',
+                        boxShadow: '0 0 8px rgba(45,166,126,0.6)',
+                      }}
                     />
                   )}
-                  <Icon size={18} />
+                  <Icon
+                    size={18}
+                    style={{
+                      color: isActive ? '#2DA67E' : 'inherit',
+                      transition: 'color 0.2s',
+                    }}
+                  />
                   {!sidebarCollapsed && <span>{item.label}</span>}
                   {sidebarCollapsed && (
                     <div
                       className="absolute left-full ml-2 px-2.5 py-1 rounded-md whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 pointer-events-none z-50"
                       style={{
-                        background: 'var(--bg-dark)',
-                        color: 'var(--text-inverse)',
+                        background: '#0F1E29',
+                        color: '#FFFFFF',
                         fontSize: '0.75rem',
                         fontWeight: 500,
-                        boxShadow: 'var(--shadow-lg)',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(45, 166, 126, 0.25)',
                       }}
                     >
                       {item.label}
@@ -149,28 +182,45 @@ export default function Sidebar() {
       {/* Campaign Context */}
       {!sidebarCollapsed && (
         <div
-          className="mx-3 mb-3 p-3 rounded-lg relative overflow-hidden"
+          className="relative mx-3 mb-3 p-3 rounded-xl overflow-hidden"
           style={{
-            background: 'var(--gradient-brand-dark)',
+            background: 'linear-gradient(135deg, rgba(45,166,126,0.18) 0%, rgba(45,166,126,0.08) 100%)',
             fontSize: '0.75rem',
             color: 'white',
-            boxShadow: 'var(--shadow-sm)',
+            border: '1px solid rgba(45, 166, 126, 0.25)',
           }}
         >
           <div
-            className="absolute inset-0 opacity-20"
+            className="absolute inset-0 opacity-50 pointer-events-none"
             style={{
-              background: 'radial-gradient(circle at top right, rgba(0,184,212,0.6), transparent 60%)',
-              pointerEvents: 'none',
+              background: 'radial-gradient(circle at top right, rgba(45,166,126,0.3), transparent 60%)',
             }}
           />
           <div className="relative">
-            <div className="text-label mb-1" style={{ fontSize: '0.5625rem', color: 'rgba(255,255,255,0.7)' }}>Active Campaign</div>
-            <div style={{ color: 'white', fontWeight: 600 }}>
+            <div
+              style={{
+                fontSize: '0.5625rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.55)',
+                marginBottom: 4,
+              }}
+            >
+              Active Campaign
+            </div>
+            <div style={{ color: 'white', fontWeight: 600, fontSize: '0.8125rem' }}>
               Renewable Energy Bill 2026
             </div>
-            <div style={{ color: 'rgba(255,255,255,0.7)' }} className="mt-0.5 flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: '#4ADE80', boxShadow: '0 0 6px #4ADE80' }} />
+            <div style={{ color: 'rgba(255,255,255,0.7)' }} className="mt-1 flex items-center gap-1.5">
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: '#4ADE80',
+                  boxShadow: '0 0 6px #4ADE80',
+                  animation: 'pulse-dot 2s ease-in-out infinite',
+                }}
+              />
               Kenya · Live
             </div>
           </div>
@@ -180,13 +230,19 @@ export default function Sidebar() {
       {/* Collapse Toggle */}
       <button
         onClick={toggleSidebar}
-        className="flex items-center justify-center h-10 border-t transition-colors duration-150"
+        className="relative flex items-center justify-center h-10 transition-colors duration-150"
         style={{
-          borderColor: 'var(--border-subtle)',
-          color: 'var(--text-muted)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          color: 'rgba(255,255,255,0.5)',
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+          e.currentTarget.style.color = '#FFFFFF';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+        }}
       >
         {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </button>

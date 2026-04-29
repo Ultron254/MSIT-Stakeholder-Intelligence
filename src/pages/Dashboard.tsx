@@ -104,13 +104,13 @@ export default function Dashboard() {
           boxShadow: 'var(--shadow-lg)',
         }}
       >
-        {/* Decorative gradient orbs */}
+        {/* Animated gradient orbs */}
         <div
-          className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-30 pointer-events-none"
+          className="hero-orb-1 absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-30 pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(45,166,126,0.7) 0%, transparent 70%)' }}
         />
         <div
-          className="absolute -bottom-32 -left-16 w-64 h-64 rounded-full opacity-15 pointer-events-none"
+          className="hero-orb-2 absolute -bottom-32 -left-16 w-64 h-64 rounded-full opacity-15 pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(91,192,157,0.6) 0%, transparent 70%)' }}
         />
         {/* Subtle grid pattern */}
@@ -121,21 +121,29 @@ export default function Dashboard() {
             backgroundSize: '32px 32px',
           }}
         />
+        {/* Sweeping shine */}
+        <div className="hero-shine" />
 
         <div className="relative p-6 md:p-8">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             {/* Left: Bill identity */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="hero-fade-in flex items-center gap-2 mb-3" style={{ animationDelay: '0.05s' }}>
                 <div
-                  className="px-2.5 py-1 rounded-full inline-flex items-center gap-1.5"
+                  className="live-badge-pulse px-2.5 py-1 rounded-full inline-flex items-center gap-2"
                   style={{
                     background: 'rgba(74, 222, 128, 0.18)',
                     border: '1px solid rgba(74, 222, 128, 0.4)',
                   }}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#4ADE80', boxShadow: '0 0 8px #4ADE80' }} />
-                  <span style={{ color: '#86EFAC', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+                  <span className="relative inline-flex items-center justify-center w-2 h-2">
+                    <span className="live-dot-ring" />
+                    <span
+                      className="live-dot-pulse w-1.5 h-1.5 rounded-full"
+                      style={{ background: '#4ADE80', boxShadow: '0 0 8px #4ADE80' }}
+                    />
+                  </span>
+                  <span style={{ color: '#86EFAC', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em' }}>
                     LIVE CAMPAIGN
                   </span>
                 </div>
@@ -148,25 +156,26 @@ export default function Dashboard() {
               </div>
 
               <h1
-                className="font-display"
+                className="hero-fade-in font-display"
                 style={{
                   fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
                   lineHeight: 1.05,
                   color: 'white',
                   letterSpacing: '-0.02em',
                   marginBottom: '0.5rem',
+                  animationDelay: '0.15s',
                 }}
               >
                 {objective.name}
               </h1>
               <p
-                className="text-body-sm max-w-2xl"
-                style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.55 }}
+                className="hero-fade-in text-body-sm max-w-2xl"
+                style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.55, animationDelay: '0.25s' }}
               >
                 {objective.description}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 mt-5">
+              <div className="hero-fade-in flex flex-wrap items-center gap-4 mt-5" style={{ animationDelay: '0.35s' }}>
                 <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
                   <MapPin size={14} style={{ color: 'var(--brand-accent)' }} />
                   <span className="text-body-sm" style={{ fontWeight: 500 }}>Kenya</span>
@@ -193,7 +202,7 @@ export default function Dashboard() {
             </div>
 
             {/* Right: Countdown */}
-            <div className="flex items-end gap-4 shrink-0">
+            <div className="hero-fade-in flex items-end gap-4 shrink-0" style={{ animationDelay: '0.45s' }}>
               <div className="text-right">
                 <div
                   className="text-label mb-1"
@@ -247,7 +256,7 @@ export default function Dashboard() {
           </div>
 
           {/* Progress bar */}
-          <div className="mt-6">
+          <div className="hero-fade-in mt-6" style={{ animationDelay: '0.55s' }}>
             <div className="flex items-center justify-between mb-2">
               <span
                 className="text-label"
@@ -266,11 +275,10 @@ export default function Dashboard() {
               style={{ background: 'rgba(255,255,255,0.1)' }}
             >
               <div
-                className="h-full rounded-full transition-all duration-700"
+                className="hero-progress h-full rounded-full"
                 style={{
                   width: `${Math.min(100, Math.max(0, ((365 - daysLeft) / 365) * 100))}%`,
                   background: 'linear-gradient(90deg, var(--brand-primary-light), var(--brand-accent))',
-                  boxShadow: '0 0 12px rgba(45,166,126,0.6)',
                 }}
               />
             </div>
