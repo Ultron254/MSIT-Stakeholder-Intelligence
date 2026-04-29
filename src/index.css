@@ -114,6 +114,124 @@ body {
 }
 .page-enter { animation: fadeInUp 0.3s ease-out forwards; }
 
+/* ============================================================
+   Hero / Campaign Animations
+   ============================================================ */
+
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 6px rgba(74, 222, 128, 0);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -15px) scale(1.05); }
+  66% { transform: translate(-15px, 10px) scale(0.95); }
+}
+
+@keyframes float-orb-reverse {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-25px, 20px) scale(0.95); }
+  66% { transform: translate(15px, -10px) scale(1.05); }
+}
+
+@keyframes shine-sweep {
+  0% { transform: translateX(-100%) skewX(-20deg); }
+  100% { transform: translateX(300%) skewX(-20deg); }
+}
+
+@keyframes count-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+
+@keyframes progress-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(45,166,126,0.5); }
+  50% { box-shadow: 0 0 24px rgba(45,166,126,0.8); }
+}
+
+@keyframes badge-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(74, 222, 128, 0);
+  }
+}
+
+.hero-orb-1 { animation: float-orb 14s ease-in-out infinite; }
+.hero-orb-2 { animation: float-orb-reverse 18s ease-in-out infinite; }
+
+.hero-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  pointer-events: none;
+  animation: shine-sweep 6s ease-in-out infinite;
+}
+
+.hero-fade-in {
+  animation: count-up-fade 0.7s ease-out backwards;
+}
+
+.hero-progress {
+  animation: progress-fill 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+             progress-glow 3s ease-in-out infinite 1.4s;
+}
+
+.live-badge-pulse {
+  animation: badge-glow 2.4s ease-in-out infinite;
+}
+
+.live-dot-pulse {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.live-dot-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid #4ADE80;
+  animation: pulse-ring 2s ease-out infinite;
+}
+
 /* Focus visible ring for keyboard navigation */
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
   outline: 2px solid var(--accent-primary);

@@ -76,7 +76,7 @@ export default function ScoringConfig() {
                   min={0} max={0.5} step={0.05}
                   value={weights[c]}
                   onChange={(e) => setWeights(prev => ({ ...prev, [c]: parseFloat(e.target.value) }))}
-                  className="w-full accent-blue-600"
+                  className="w-full accent-emerald-600"
                 />
               </div>
               <div className="w-16 font-mono text-sm text-right" style={{ color: 'var(--text-primary)' }}>
@@ -124,7 +124,7 @@ export default function ScoringConfig() {
                 min={2} max={5} step={0.1}
                 value={powerThreshold}
                 onChange={(e) => setPowerThreshold(parseFloat(e.target.value))}
-                className="flex-1 accent-blue-600"
+                className="flex-1 accent-emerald-600"
               />
               <span className="font-mono text-sm w-10" style={{ color: 'var(--text-primary)' }}>{powerThreshold.toFixed(1)}</span>
             </div>
@@ -140,7 +140,7 @@ export default function ScoringConfig() {
                 min={2} max={5} step={0.1}
                 value={convertibilityThreshold}
                 onChange={(e) => setConvertibilityThreshold(parseFloat(e.target.value))}
-                className="flex-1 accent-blue-600"
+                className="flex-1 accent-emerald-600"
               />
               <span className="font-mono text-sm w-10" style={{ color: 'var(--text-primary)' }}>{convertibilityThreshold.toFixed(1)}</span>
             </div>
