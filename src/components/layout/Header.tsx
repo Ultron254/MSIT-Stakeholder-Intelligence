@@ -6,6 +6,7 @@ import type { Quadrant } from '../../lib/types';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../../lib/types';
 import { formatSIS } from '../../lib/formatters';
 import UserMenu from './UserMenu';
+import Tooltip from '../ui/Tooltip';
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Intelligence Dashboard',
@@ -67,8 +68,10 @@ export default function Header() {
       <div className="flex items-center gap-3">
         {/* Search */}
         <div className="relative">
+          <Tooltip content="Search stakeholders" shortcut="⌘K" side="bottom" disabled={searchOpen}>
           <button
             onClick={toggleSearch}
+            aria-label="Search"
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors duration-150"
             style={{
               background: searchOpen ? 'var(--bg-inset)' : 'transparent',
@@ -86,6 +89,7 @@ export default function Header() {
               </>
             )}
           </button>
+          </Tooltip>
           {searchOpen && (
             <div
               className="absolute right-0 top-full mt-2 rounded-xl overflow-hidden"
@@ -147,7 +151,9 @@ export default function Header() {
         </div>
 
         {/* Notifications */}
+        <Tooltip content={activeAlerts > 0 ? `${activeAlerts} unresolved alert${activeAlerts > 1 ? 's' : ''}` : 'No active alerts'} side="bottom">
         <button
+          aria-label="Watchlist alerts"
           className="relative flex items-center justify-center w-9 h-9 rounded-lg transition-colors"
           style={{ color: 'var(--text-secondary)' }}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
@@ -164,6 +170,7 @@ export default function Header() {
             </span>
           )}
         </button>
+        </Tooltip>
 
         {/* User */}
         <UserMenu />

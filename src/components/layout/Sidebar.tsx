@@ -4,6 +4,7 @@ import {
   AlertTriangle, Settings, ChevronLeft, ChevronRight, UserCog,
 } from 'lucide-react';
 import { useAppStore, type Page } from '../../lib/store';
+import Tooltip from '../ui/Tooltip';
 
 interface NavItem {
   id: Page;
@@ -228,8 +229,10 @@ export default function Sidebar() {
       )}
 
       {/* Collapse Toggle */}
+      <Tooltip content={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} side="right">
       <button
         onClick={toggleSidebar}
+        aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         className="relative flex items-center justify-center h-10 transition-colors duration-150"
         style={{
           borderTop: '1px solid rgba(255,255,255,0.06)',
@@ -246,6 +249,7 @@ export default function Sidebar() {
       >
         {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </button>
+      </Tooltip>
     </aside>
   );
 }
