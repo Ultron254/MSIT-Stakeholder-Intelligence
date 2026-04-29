@@ -6,6 +6,7 @@ import {
 import {
   AlertTriangle, TrendingUp, ArrowRight,
   FileText, MessageSquare, Shield, CheckCircle,
+  Zap, MapPin, Calendar,
 } from 'lucide-react';
 import { useAppStore, objectives, watchlistSignals, activityFeed } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
@@ -95,47 +96,191 @@ export default function Dashboard() {
 
   return (
     <div className="page-enter space-y-6">
-      {/* Campaign Strip */}
+      {/* Campaign Hero */}
       <div
-        className="flex items-center gap-6 px-5 py-3 rounded-xl text-body-sm flex-wrap"
-        style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)' }}
+        className="relative overflow-hidden rounded-2xl"
+        style={{
+          background: 'var(--gradient-brand-dark)',
+          boxShadow: 'var(--shadow-brand)',
+        }}
       >
-        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{objective.name}</span>
-        <span style={{ color: 'var(--text-muted)' }}>|</span>
-        <span style={{ color: 'var(--text-secondary)' }}>{objective.policy_domain}</span>
-        <span style={{ color: 'var(--text-muted)' }}>|</span>
-        <span style={{ color: 'var(--text-secondary)' }}>Target: {formatDate(objective.target_date)}</span>
-        <span style={{ color: 'var(--text-muted)' }}>|</span>
-        <span style={{ color: daysLeft < 90 ? 'var(--status-warning)' : 'var(--text-secondary)', fontWeight: 500 }}>
-          {daysLeft} days remaining
-        </span>
+        {/* Decorative gradient orbs */}
+        <div
+          className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-30 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(0,184,212,0.8) 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute -bottom-32 -left-16 w-64 h-64 rounded-full opacity-20 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%)' }}
+        />
+        {/* Subtle grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }}
+        />
+
+        <div className="relative p-6 md:p-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            {/* Left: Bill identity */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-3">
+                <div
+                  className="px-2.5 py-1 rounded-full inline-flex items-center gap-1.5"
+                  style={{
+                    background: 'rgba(74, 222, 128, 0.18)',
+                    border: '1px solid rgba(74, 222, 128, 0.4)',
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#4ADE80', boxShadow: '0 0 8px #4ADE80' }} />
+                  <span style={{ color: '#86EFAC', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+                    LIVE CAMPAIGN
+                  </span>
+                </div>
+                <span
+                  className="text-label"
+                  style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.625rem' }}
+                >
+                  {objective.policy_domain}
+                </span>
+              </div>
+
+              <h1
+                className="font-display"
+                style={{
+                  fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+                  lineHeight: 1.05,
+                  color: 'white',
+                  letterSpacing: '-0.02em',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                {objective.name}
+              </h1>
+              <p
+                className="text-body-sm max-w-2xl"
+                style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.55 }}
+              >
+                {objective.description}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4 mt-5">
+                <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                  <MapPin size={14} style={{ color: 'var(--brand-accent)' }} />
+                  <span className="text-body-sm" style={{ fontWeight: 500 }}>Kenya</span>
+                </div>
+                <span style={{ color: 'rgba(255,255,255,0.25)' }}>·</span>
+                <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                  <Calendar size={14} style={{ color: 'var(--brand-accent)' }} />
+                  <span className="text-body-sm" style={{ fontWeight: 500 }}>Target {formatDate(objective.target_date)}</span>
+                </div>
+                <span style={{ color: 'rgba(255,255,255,0.25)' }}>·</span>
+                <div className="flex items-center gap-2">
+                  <Zap size={14} style={{ color: daysLeft < 90 ? '#FBBF24' : 'var(--brand-accent)' }} />
+                  <span
+                    className="text-body-sm"
+                    style={{
+                      fontWeight: 600,
+                      color: daysLeft < 90 ? '#FBBF24' : 'white',
+                    }}
+                  >
+                    {daysLeft} days remaining
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Countdown */}
+            <div className="flex items-end gap-4 shrink-0">
+              <div className="text-right">
+                <div
+                  className="text-label mb-1"
+                  style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.625rem' }}
+                >
+                  Portfolio SIS
+                </div>
+                <div
+                  className="font-display"
+                  style={{
+                    fontSize: '3rem',
+                    lineHeight: 1,
+                    color: 'white',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {formatSIS(stats.avgSIS)}
+                </div>
+                <div className="flex items-center gap-1 mt-1 justify-end" style={{ color: '#86EFAC' }}>
+                  <TrendingUp size={12} />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>+2.4 vs last month</span>
+                </div>
+              </div>
+              <div
+                className="w-px self-stretch"
+                style={{ background: 'rgba(255,255,255,0.15)' }}
+              />
+              <div className="text-right">
+                <div
+                  className="text-label mb-1"
+                  style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.625rem' }}
+                >
+                  Stakeholders
+                </div>
+                <div
+                  className="font-display"
+                  style={{
+                    fontSize: '3rem',
+                    lineHeight: 1,
+                    color: 'white',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {stats.total}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.25rem' }}>
+                  across 7 sectors
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <span
+                className="text-label"
+                style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.625rem' }}
+              >
+                Campaign Progress
+              </span>
+              <span
+                style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.75rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}
+              >
+                {Math.min(100, Math.max(0, Math.round(((365 - daysLeft) / 365) * 100)))}%
+              </span>
+            </div>
+            <div
+              className="h-1.5 rounded-full overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.1)' }}
+            >
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${Math.min(100, Math.max(0, ((365 - daysLeft) / 365) * 100))}%`,
+                  background: 'linear-gradient(90deg, var(--brand-accent), #FFFFFF)',
+                  boxShadow: '0 0 12px rgba(0,184,212,0.6)',
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Portfolio Metrics — asymmetric layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Large metric: Portfolio SIS */}
-        <Card className="lg:col-span-5">
-          <div className="text-label mb-2">Portfolio Intelligence Score</div>
-          <div className="flex items-end gap-3">
-            <span className="text-metric" style={{ color: 'var(--text-primary)' }}>
-              {formatSIS(stats.avgSIS)}
-            </span>
-            <span className="text-body-sm mb-1 flex items-center gap-1" style={{ color: 'var(--status-success)' }}>
-              <TrendingUp size={14} />+2.4 vs last month
-            </span>
-          </div>
-          <div className="text-body-sm mt-2" style={{ color: 'var(--text-muted)' }}>
-            Weighted average across {stats.total} active stakeholders
-          </div>
-        </Card>
-
-        {/* Smaller metrics */}
-        <Card className="lg:col-span-2">
-          <div className="text-label mb-2">Stakeholders</div>
-          <div className="text-metric-sm" style={{ color: 'var(--text-primary)' }}>{stats.total}</div>
-          <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>7 sectors</div>
-        </Card>
-        <Card className="lg:col-span-3">
+      {/* Portfolio Metrics */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
           <div className="text-label mb-2">Quadrant Distribution</div>
           <div className="flex gap-1 h-3 rounded-full overflow-hidden mt-2 mb-2" style={{ background: 'var(--bg-inset)' }}>
             {quadrantData.map(q => (
@@ -158,12 +303,22 @@ export default function Dashboard() {
             ))}
           </div>
         </Card>
-        <Card className="lg:col-span-2">
+        <Card>
           <div className="text-label mb-2">Active Alerts</div>
           <div className="text-metric-sm" style={{ color: stats.activeAlerts > 0 ? 'var(--status-danger)' : 'var(--text-primary)' }}>
             {stats.activeAlerts}
           </div>
           <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>{stats.totalFlags} red flags</div>
+        </Card>
+        <Card>
+          <div className="text-label mb-2">Strategic Allies</div>
+          <div className="text-metric-sm" style={{ color: 'var(--quadrant-ally)' }}>{stats.quadrantCounts.strategic_ally}</div>
+          <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>high-value partners</div>
+        </Card>
+        <Card>
+          <div className="text-label mb-2">Power Gaps</div>
+          <div className="text-metric-sm" style={{ color: 'var(--quadrant-power-gap)' }}>{stats.quadrantCounts.power_gap}</div>
+          <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>need conversion</div>
         </Card>
       </div>
 

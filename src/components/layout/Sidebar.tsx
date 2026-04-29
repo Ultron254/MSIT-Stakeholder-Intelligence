@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard, Users, Target, MessageSquare, ClipboardList,
-  AlertTriangle, Settings, ChevronLeft, ChevronRight, Zap, UserCog,
+  AlertTriangle, Settings, ChevronLeft, ChevronRight, UserCog,
 } from 'lucide-react';
 import { useAppStore, type Page } from '../../lib/store';
 
@@ -61,19 +61,38 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div
-        className="flex items-center gap-2 px-4 h-14 border-b shrink-0"
+        className="flex items-center gap-2.5 px-4 h-16 border-b shrink-0"
         style={{ borderColor: 'var(--border-subtle)' }}
       >
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ background: 'var(--accent-primary)' }}
+          className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden shrink-0"
+          style={{
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-default)',
+            boxShadow: 'var(--shadow-sm)',
+          }}
         >
-          <Zap size={16} color="white" />
+          <img
+            src="/momentum-africa-logo.jpg"
+            alt="Momentum Africa"
+            className="w-full h-full object-cover"
+          />
         </div>
         {!sidebarCollapsed && (
-          <span className="text-heading-md" style={{ color: 'var(--text-primary)' }}>
-            MSIT
-          </span>
+          <div className="flex flex-col leading-tight min-w-0">
+            <span
+              className="font-display"
+              style={{ color: 'var(--text-primary)', fontSize: '1.1rem', letterSpacing: '-0.01em' }}
+            >
+              Momentum
+            </span>
+            <span
+              className="text-label"
+              style={{ fontSize: '0.5625rem', color: 'var(--brand-primary)', letterSpacing: '0.14em' }}
+            >
+              Intelligence
+            </span>
+          </div>
         )}
       </div>
 
@@ -144,15 +163,30 @@ export default function Sidebar() {
       {/* Campaign Context */}
       {!sidebarCollapsed && (
         <div
-          className="mx-3 mb-3 p-3 rounded-lg"
-          style={{ background: 'var(--bg-secondary)', fontSize: '0.75rem' }}
+          className="mx-3 mb-3 p-3 rounded-lg relative overflow-hidden"
+          style={{
+            background: 'var(--gradient-brand-dark)',
+            fontSize: '0.75rem',
+            color: 'white',
+            boxShadow: 'var(--shadow-sm)',
+          }}
         >
-          <div className="text-label mb-1" style={{ fontSize: '0.5625rem' }}>Campaign</div>
-          <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-            Kenya Energy Bill 2026
-          </div>
-          <div style={{ color: 'var(--text-muted)' }} className="mt-0.5">
-            Kenya · Active
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              background: 'radial-gradient(circle at top right, rgba(0,184,212,0.6), transparent 60%)',
+              pointerEvents: 'none',
+            }}
+          />
+          <div className="relative">
+            <div className="text-label mb-1" style={{ fontSize: '0.5625rem', color: 'rgba(255,255,255,0.7)' }}>Active Campaign</div>
+            <div style={{ color: 'white', fontWeight: 600 }}>
+              Renewable Energy Bill 2026
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.7)' }} className="mt-0.5 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: '#4ADE80', boxShadow: '0 0 6px #4ADE80' }} />
+              Kenya · Live
+            </div>
           </div>
         </div>
       )}
