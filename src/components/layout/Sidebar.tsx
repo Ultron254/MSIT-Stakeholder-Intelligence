@@ -61,38 +61,24 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div
-        className="flex items-center gap-2.5 px-4 h-16 border-b shrink-0"
+        className="flex items-center px-4 h-20 border-b shrink-0"
         style={{ borderColor: 'var(--border-subtle)' }}
       >
-        <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden shrink-0"
-          style={{
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-default)',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-        >
-          <img
-            src="/momentum-africa-logo.jpg"
-            alt="Momentum Africa"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        {!sidebarCollapsed && (
-          <div className="flex flex-col leading-tight min-w-0">
-            <span
-              className="font-display"
-              style={{ color: 'var(--text-primary)', fontSize: '1.1rem', letterSpacing: '-0.01em' }}
-            >
-              Momentum
-            </span>
-            <span
-              className="text-label"
-              style={{ fontSize: '0.5625rem', color: 'var(--brand-primary)', letterSpacing: '0.14em' }}
-            >
-              Intelligence
-            </span>
+        {sidebarCollapsed ? (
+          <div className="w-9 h-9 flex items-center justify-center mx-auto">
+            <img
+              src="/momentum-mark.svg"
+              alt="Momentum Africa Partners"
+              className="w-full h-full object-contain"
+            />
           </div>
+        ) : (
+          <img
+            src="/momentum-logo.svg"
+            alt="Momentum Africa Partners"
+            className="h-12 w-auto"
+            style={{ maxWidth: '100%' }}
+          />
         )}
       </div>
 

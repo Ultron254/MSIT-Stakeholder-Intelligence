@@ -5,17 +5,17 @@
   --bg-secondary: #F4F3F0;
   --bg-elevated: #FFFFFF;
   --bg-inset: #EEEDEA;
-  --bg-dark: #0A1F26;
-  --text-primary: #0A1F26;
-  --text-secondary: #4A5C63;
-  --text-muted: #8C9CA1;
+  --bg-dark: #1A2D3A;
+  --text-primary: #1A2D3A;
+  --text-secondary: #4A5C68;
+  --text-muted: #8C9AA3;
   --text-inverse: #FAFAF8;
   --border-default: #E5E4E0;
   --border-subtle: #F0EFEC;
   --border-strong: #D0CFC8;
-  --quadrant-ally: #2D7D46;
-  --quadrant-ally-bg: #EBF5EE;
-  --quadrant-ally-text: #1B5E30;
+  --quadrant-ally: #2DA67E;
+  --quadrant-ally-bg: #E8F6F0;
+  --quadrant-ally-text: #1F7A5C;
   --quadrant-power-gap: #C0392B;
   --quadrant-power-gap-bg: #FBEAEA;
   --quadrant-power-gap-text: #922B21;
@@ -25,27 +25,31 @@
   --quadrant-monitor: #7F8C8D;
   --quadrant-monitor-bg: #F2F3F3;
   --quadrant-monitor-text: #5D6868;
-  /* Momentum Africa brand */
-  --brand-primary: #0080A0;
-  --brand-primary-hover: #006B87;
-  --brand-primary-dark: #004D63;
-  --brand-primary-light: #4DA8C2;
-  --brand-primary-bg: #E6F3F7;
-  --brand-accent: #00B8D4;
-  --accent-primary: #0080A0;
-  --accent-primary-hover: #006B87;
+  /* Momentum Africa Partners brand */
+  --brand-primary: #2DA67E;
+  --brand-primary-hover: #228866;
+  --brand-primary-dark: #1F7A5C;
+  --brand-primary-light: #5BC09D;
+  --brand-primary-bg: #E8F6F0;
+  --brand-navy: #1A2D3A;
+  --brand-navy-dark: #0F1E29;
+  --brand-navy-light: #2A4253;
+  --brand-accent: #2DA67E;
+  --accent-primary: #2DA67E;
+  --accent-primary-hover: #228866;
   --accent-warm: #C4956A;
-  --status-success: #16A34A;
+  --status-success: #2DA67E;
   --status-warning: #D97706;
   --status-danger: #DC2626;
-  --status-info: #0080A0;
-  --shadow-sm: 0 1px 2px rgba(10, 31, 38, 0.04);
-  --shadow-md: 0 4px 12px rgba(10, 31, 38, 0.06);
-  --shadow-lg: 0 12px 40px rgba(10, 31, 38, 0.08);
-  --shadow-xl: 0 24px 64px rgba(10, 31, 38, 0.12);
-  --shadow-brand: 0 8px 24px rgba(0, 128, 160, 0.18);
-  --gradient-brand: linear-gradient(135deg, #0080A0 0%, #00B8D4 100%);
-  --gradient-brand-dark: linear-gradient(135deg, #004D63 0%, #0080A0 100%);
+  --status-info: #1A2D3A;
+  --shadow-sm: 0 1px 2px rgba(26, 45, 58, 0.05);
+  --shadow-md: 0 4px 12px rgba(26, 45, 58, 0.07);
+  --shadow-lg: 0 12px 40px rgba(26, 45, 58, 0.1);
+  --shadow-xl: 0 24px 64px rgba(26, 45, 58, 0.14);
+  --shadow-brand: 0 8px 24px rgba(45, 166, 126, 0.22);
+  --gradient-brand: linear-gradient(135deg, #2DA67E 0%, #5BC09D 100%);
+  --gradient-brand-dark: linear-gradient(135deg, #0F1E29 0%, #1A2D3A 60%, #2A4253 100%);
+  --gradient-brand-hero: linear-gradient(135deg, #0F1E29 0%, #1A2D3A 50%, #1F4D45 100%);
   --font-display: 'Instrument Serif', Georgia, serif;
   --font-body: 'Instrument Sans', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -124,7 +128,7 @@ tr.hoverable:hover {
 
 /* Selection color */
 ::selection {
-  background: rgba(0, 128, 160, 0.18);
+  background: rgba(45, 166, 126, 0.2);
   color: var(--text-primary);
 }
 
