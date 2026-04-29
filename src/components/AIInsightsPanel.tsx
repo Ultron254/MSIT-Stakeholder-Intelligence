@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Sparkles, Send, TrendingUp, AlertTriangle, Target, Lightbulb,
-  RefreshCw, ArrowRight, MessageSquarePlus,
+  RefreshCw, ArrowRight, MessageSquarePlus, PanelRightClose, PanelRightOpen,
 } from 'lucide-react';
 import {
   useAppStore, useStakeholdersWithScores, watchlistSignals, objectives,
@@ -10,6 +10,7 @@ import { QUADRANT_LABELS } from '../lib/types';
 import { formatSIS, daysUntil } from '../lib/formatters';
 import { getAvatarUrl } from '../lib/avatar';
 import { users } from '../lib/store';
+import Tooltip from './ui/Tooltip';
 
 interface ChatMessage {
   id: string;
@@ -30,6 +31,8 @@ export default function AIInsightsPanel() {
   const all = useStakeholdersWithScores();
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const currentUserId = useAppStore(s => s.currentUserId);
+  const collapsed = useAppStore(s => s.aiPanelCollapsed);
+  const toggleCollapse = useAppStore(s => s.toggleAIPanel);
   const user = users.find(u => u.id === currentUserId) ?? users[0];
 
   const objective = objectives[0];
@@ -64,6 +67,18 @@ export default function AIInsightsPanel() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isThinking]);
+
+  // Cmd/Ctrl+\ to toggle AI panel
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+        e.preventDefault();
+        toggleCollapse();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [toggleCollapse]);
 
   // Generate response from real data — no API needed
   function generateResponse(query: string): { content: string; cards?: ChatMessage['insightCards'] } {
@@ -165,7 +180,10 @@ export default function AIInsightsPanel() {
   }
 
   function send(text: string) {
-    const trimmed = text.trim();
+    // Sanitize: trim, cap length to prevent XSS-via-render edge cases and
+    // runaway message bubbles. React already escapes by default, but we cap
+    // input to a reasonable size for chat UX.
+    const trimmed = text.trim().slice(0, 500);
     if (!trimmed) return;
     const userMsg: ChatMessage = {
       id: `m-${Date.now()}`,
@@ -215,7 +233,7 @@ export default function AIInsightsPanel() {
 
   return (
     <aside
-      className="ai-panel rounded-2xl flex flex-col overflow-hidden"
+      className="ai-panel rounded-2xl flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
       style={{
         background: 'var(--bg-elevated)',
         border: '1px solid var(--border-default)',
@@ -223,8 +241,19 @@ export default function AIInsightsPanel() {
         height: 'calc(100vh - 7.5rem)',
         position: 'sticky',
         top: '5rem',
+        width: collapsed ? 56 : '100%',
       }}
     >
+      {collapsed ? (
+        <CollapsedRail
+          onExpand={toggleCollapse}
+          alliesCount={insights.allies.length}
+          risksCount={insights.flagged.length}
+          daysLeft={daysLeft}
+          newMessageCount={messages.filter(m => m.role === 'assistant').length - 1}
+        />
+      ) : (
+      <>
       {/* Header */}
       <div
         className="relative px-4 py-3 overflow-hidden shrink-0"
@@ -272,9 +301,10 @@ export default function AIInsightsPanel() {
               Always-on intelligence co-pilot
             </div>
           </div>
+          <Tooltip content="New conversation" side="bottom">
           <button
             onClick={clearChat}
-            title="New conversation"
+            aria-label="New conversation"
             className="w-7 h-7 rounded-md flex items-center justify-center transition-colors"
             style={{ color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.06)' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = 'white'; }}
@@ -282,6 +312,19 @@ export default function AIInsightsPanel() {
           >
             <RefreshCw size={13} />
           </button>
+          </Tooltip>
+          <Tooltip content="Collapse panel" shortcut="⌘\\" side="bottom">
+          <button
+            onClick={toggleCollapse}
+            aria-label="Collapse AI panel"
+            className="w-7 h-7 rounded-md flex items-center justify-center transition-colors"
+            style={{ color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.06)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = 'white'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+          >
+            <PanelRightClose size={13} />
+          </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -357,6 +400,9 @@ export default function AIInsightsPanel() {
             onKeyDown={handleKeyDown}
             placeholder="Ask about stakeholders, risks, next steps…"
             rows={1}
+            maxLength={500}
+            spellCheck={true}
+            autoComplete="off"
             className="flex-1 bg-transparent outline-none resize-none text-body-sm"
             style={{
               color: 'var(--text-primary)',
@@ -385,7 +431,133 @@ export default function AIInsightsPanel() {
           <span className="hidden md:inline">⏎ to send · ⇧⏎ for newline</span>
         </div>
       </form>
+      </>
+      )}
     </aside>
+  );
+}
+
+function CollapsedRail({
+  onExpand,
+  alliesCount,
+  risksCount,
+  daysLeft,
+  newMessageCount,
+}: {
+  onExpand: () => void;
+  alliesCount: number;
+  risksCount: number;
+  daysLeft: number;
+  newMessageCount: number;
+}) {
+  return (
+    <div
+      className="h-full flex flex-col items-center py-3"
+      style={{
+        background: 'linear-gradient(180deg, #0F1E29 0%, #1A2D3A 60%, #1F4D45 100%)',
+      }}
+    >
+      {/* Expand button */}
+      <Tooltip content="Expand AI Insights" shortcut="⌘\\" side="left">
+        <button
+          onClick={onExpand}
+          aria-label="Expand AI panel"
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150 hover:scale-105"
+          style={{
+            background: 'linear-gradient(135deg, #2DA67E 0%, #5BC09D 100%)',
+            boxShadow: '0 4px 12px rgba(45,166,126,0.4)',
+          }}
+        >
+          <Sparkles size={16} style={{ color: 'white' }} />
+        </button>
+      </Tooltip>
+
+      <div
+        className="my-3 w-6"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}
+      />
+
+      {/* Vertical stats */}
+      <div className="flex flex-col gap-2 items-center">
+        <Tooltip content={`${alliesCount} Strategic Allies`} side="left">
+          <div className="flex flex-col items-center cursor-help">
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#86EFAC', fontVariantNumeric: 'tabular-nums' }}>
+              {alliesCount}
+            </span>
+            <span style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Ally
+            </span>
+          </div>
+        </Tooltip>
+        <Tooltip content={`${risksCount} stakeholders flagged`} side="left">
+          <div className="flex flex-col items-center cursor-help">
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: risksCount > 0 ? '#FCA5A5' : 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums' }}>
+              {risksCount}
+            </span>
+            <span style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Risk
+            </span>
+          </div>
+        </Tooltip>
+        <Tooltip content={`${daysLeft} days until campaign target`} side="left">
+          <div className="flex flex-col items-center cursor-help">
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: daysLeft < 90 ? '#FCD34D' : 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums' }}>
+              {daysLeft}
+            </span>
+            <span style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Days
+            </span>
+          </div>
+        </Tooltip>
+      </div>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* New messages indicator */}
+      {newMessageCount > 0 && (
+        <Tooltip content={`${newMessageCount} insight${newMessageCount > 1 ? 's' : ''} in conversation`} side="left">
+          <button
+            onClick={onExpand}
+            className="relative w-8 h-8 rounded-lg flex items-center justify-center mb-2 transition-colors"
+            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}
+            aria-label={`${newMessageCount} insights`}
+          >
+            <PanelRightOpen size={14} />
+            <span
+              className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center"
+              style={{
+                background: '#2DA67E',
+                color: 'white',
+                fontSize: '0.5625rem',
+                fontWeight: 700,
+                boxShadow: '0 0 0 1.5px #1A2D3A',
+              }}
+            >
+              {newMessageCount}
+            </span>
+          </button>
+        </Tooltip>
+      )}
+
+      {/* Bottom expand button */}
+      <Tooltip content="Open AI Insights" side="left">
+        <button
+          onClick={onExpand}
+          aria-label="Expand AI panel"
+          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150"
+          style={{
+            background: 'rgba(45,166,126,0.15)',
+            color: '#86EFAC',
+            border: '1px solid rgba(45,166,126,0.3)',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(45,166,126,0.25)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(45,166,126,0.15)'; }}
+        >
+          <PanelRightOpen size={14} />
+        </button>
+      </Tooltip>
+    </div>
   );
 }
 

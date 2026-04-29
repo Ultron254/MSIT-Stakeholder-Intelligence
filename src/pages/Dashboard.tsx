@@ -23,6 +23,7 @@ export default function Dashboard() {
 
   const objective = objectives[0];
   const daysLeft = daysUntil(objective.target_date);
+  const aiPanelCollapsed = useAppStore(s => s.aiPanelCollapsed);
 
   // Portfolio stats
   const stats = useMemo(() => {
@@ -97,7 +98,14 @@ export default function Dashboard() {
 
   return (
     <div className="page-enter">
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
+      <div
+        className="grid grid-cols-1 gap-6 items-start transition-[grid-template-columns] duration-300 ease-in-out"
+        style={{
+          gridTemplateColumns: aiPanelCollapsed
+            ? 'minmax(0,1fr) 56px'
+            : 'minmax(0,1fr) 360px',
+        }}
+      >
         <div className="space-y-6 min-w-0">
           {/* Campaign Hero */}
           <div
@@ -161,11 +169,11 @@ export default function Dashboard() {
               <h1
                 className="hero-fade-in font-display"
                 style={{
-                  fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-                  lineHeight: 1.05,
+                  fontSize: 'clamp(1.375rem, 2.6vw, 1.875rem)',
+                  lineHeight: 1.1,
                   color: 'white',
                   letterSpacing: '-0.02em',
-                  marginBottom: '0.5rem',
+                  marginBottom: '0.375rem',
                   animationDelay: '0.15s',
                 }}
               >
@@ -173,7 +181,7 @@ export default function Dashboard() {
               </h1>
               <p
                 className="hero-fade-in text-body-sm max-w-2xl"
-                style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.55, animationDelay: '0.25s' }}
+                style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.5, fontSize: '0.8125rem', animationDelay: '0.25s' }}
               >
                 {objective.description}
               </p>
@@ -216,7 +224,7 @@ export default function Dashboard() {
                 <div
                   className="font-display"
                   style={{
-                    fontSize: '3rem',
+                    fontSize: '2.25rem',
                     lineHeight: 1,
                     color: 'white',
                     fontVariantNumeric: 'tabular-nums',
@@ -243,7 +251,7 @@ export default function Dashboard() {
                 <div
                   className="font-display"
                   style={{
-                    fontSize: '3rem',
+                    fontSize: '2.25rem',
                     lineHeight: 1,
                     color: 'white',
                     fontVariantNumeric: 'tabular-nums',

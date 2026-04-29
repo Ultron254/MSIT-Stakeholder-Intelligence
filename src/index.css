@@ -322,6 +322,25 @@ body {
   border: 1px solid rgba(255,255,255,0.6);
 }
 
+/* Tooltip entrance */
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateY(2px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.tooltip-bubble {
+  animation: tooltip-in 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
+}
+
+/* AI Panel collapse rail hover effect */
+@keyframes ai-rail-shimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.ai-rail-icon-pulse {
+  animation: ai-rail-shimmer 2.4s ease-in-out infinite;
+}
+
 /* Focus visible ring for keyboard navigation */
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
   outline: 2px solid var(--accent-primary);

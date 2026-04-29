@@ -44,6 +44,10 @@ interface AppState {
   currentUserId: string;
   setCurrentUser: (userId: string) => void;
 
+  // AI Insights panel
+  aiPanelCollapsed: boolean;
+  toggleAIPanel: () => void;
+
   // Actions
   setPage: (page: Page) => void;
   setSelectedStakeholder: (id: string | null) => void;
@@ -85,6 +89,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   snapshots: [...scoreSnapshots],
 
   setCurrentUser: (userId) => set({ currentUserId: userId }),
+
+  aiPanelCollapsed: false,
+  toggleAIPanel: () => set(s => ({ aiPanelCollapsed: !s.aiPanelCollapsed })),
 
   setPage: (page) => set({ currentPage: page, selectedStakeholderId: null }),
   setSelectedStakeholder: (id) => set({ selectedStakeholderId: id, currentPage: 'stakeholder-detail' }),
