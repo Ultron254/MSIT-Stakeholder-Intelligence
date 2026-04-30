@@ -15,11 +15,27 @@ import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 import { formatRelativeDate, formatDate, formatSIS, daysUntil } from '../lib/formatters';
 import AIInsightsPanel from '../components/AIInsightsPanel';
+import UITooltip from '../components/ui/Tooltip';
+
+const QUADRANT_TOOLTIPS: Record<Quadrant, string> = {
+  strategic_ally: 'High influence + supportive stance. Protect, leverage and amplify these relationships.',
+  power_gap: 'High influence but unsupportive or neutral. Priority targets for conversion engagement.',
+  hidden_champion: 'Lower influence but strongly supportive. Cultivate; many become future allies.',
+  monitor_exit: 'Low influence and low support. Monitor lightly; deprioritise unless context shifts.',
+};
 
 export default function Dashboard() {
   const all = useStakeholdersWithScores();
   const setPage = useAppStore(s => s.setPage);
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
+  const setFilter = useAppStore(s => s.setFilter);
+  const clearFilters = useAppStore(s => s.clearFilters);
+
+  const goToQuadrant = (q: Quadrant) => {
+    clearFilters();
+    setFilter('quadrants', [q]);
+    setPage('stakeholders');
+  };
 
   const objective = objectives[0];
   const daysLeft = daysUntil(objective.target_date);
@@ -299,7 +315,8 @@ export default function Dashboard() {
 
       {/* Portfolio Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <UITooltip content="Share of stakeholders across the four influence/support quadrants. Click a quadrant card below to filter the stakeholder list." side="bottom">
+        <div><Card>
           <div className="text-label mb-2">Quadrant Distribution</div>
           <div className="flex gap-1 h-3 rounded-full overflow-hidden mt-2 mb-2" style={{ background: 'var(--bg-inset)' }}>
             {quadrantData.map(q => (
@@ -321,24 +338,31 @@ export default function Dashboard() {
               </span>
             ))}
           </div>
-        </Card>
-        <Card>
+        </Card></div>
+        </UITooltip>
+        <UITooltip content={`Unresolved watchlist signals across the portfolio${stats.totalFlags ? ` plus ${stats.totalFlags} stakeholder-level red flags` : ''}.`} side="bottom">
+        <button onClick={() => setPage('watchlist')} className="text-left"><Card>
           <div className="text-label mb-2">Active Alerts</div>
           <div className="text-metric-sm" style={{ color: stats.activeAlerts > 0 ? 'var(--status-danger)' : 'var(--text-primary)' }}>
             {stats.activeAlerts}
           </div>
           <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>{stats.totalFlags} red flags</div>
-        </Card>
-        <Card>
+        </Card></button>
+        </UITooltip>
+        <UITooltip content={QUADRANT_TOOLTIPS.strategic_ally + ' Click to view the list.'} side="bottom">
+        <button onClick={() => goToQuadrant('strategic_ally')} className="text-left"><Card>
           <div className="text-label mb-2">Strategic Allies</div>
           <div className="text-metric-sm" style={{ color: 'var(--quadrant-ally)' }}>{stats.quadrantCounts.strategic_ally}</div>
           <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>high-value partners</div>
-        </Card>
-        <Card>
+        </Card></button>
+        </UITooltip>
+        <UITooltip content={QUADRANT_TOOLTIPS.power_gap + ' Click to view the list.'} side="bottom">
+        <button onClick={() => goToQuadrant('power_gap')} className="text-left"><Card>
           <div className="text-label mb-2">Power Gaps</div>
           <div className="text-metric-sm" style={{ color: 'var(--quadrant-power-gap)' }}>{stats.quadrantCounts.power_gap}</div>
           <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>need conversion</div>
-        </Card>
+        </Card></button>
+        </UITooltip>
       </div>
 
       {/* Quadrant Breakdown Cards */}
@@ -363,9 +387,13 @@ export default function Dashboard() {
               ? qStakeholders.reduce((sum, s) => sum + (s.latestSnapshot?.sis_score ?? 0), 0) / all.filter(s => s.latestSnapshot?.quadrant === q.quadrant).length
               : 0;
             return (
+              <UITooltip key={q.quadrant} content={`${QUADRANT_TOOLTIPS[q.quadrant]} Click to view all ${q.count} ${q.name.toLowerCase()} stakeholder${q.count === 1 ? '' : 's'}.`} side="top">
               <div
-                key={q.quadrant}
-                className="rounded-xl p-4"
+                role="button"
+                tabIndex={0}
+                onClick={() => goToQuadrant(q.quadrant)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToQuadrant(q.quadrant); } }}
+                className="rounded-xl p-4 cursor-pointer transition-all duration-150 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
                 style={{
                   background: 'var(--bg-elevated)',
                   border: '1px solid var(--border-default)',
@@ -373,6 +401,8 @@ export default function Dashboard() {
                   borderLeftColor: q.color,
                   boxShadow: 'var(--shadow-sm)',
                 }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{q.name}</span>
@@ -385,7 +415,7 @@ export default function Dashboard() {
                   {qStakeholders.map(s => (
                     <button
                       key={s.id}
-                      onClick={() => setSelectedStakeholder(s.id)}
+                      onClick={(e) => { e.stopPropagation(); setSelectedStakeholder(s.id); }}
                       className="w-full flex items-center justify-between text-left rounded-md px-2 py-1 transition-colors"
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
@@ -396,6 +426,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
+              </UITooltip>
             );
           })}
         </div>
