@@ -10,7 +10,12 @@ import EngagementPlans from './pages/EngagementPlans';
 import Watchlist from './pages/Watchlist';
 import ScoringConfig from './pages/ScoringConfig';
 import UsersAccess from './pages/UsersAccess';
+import AddStakeholder from './pages/AddStakeholder';
 import ScoreUpdatePanel from './components/ScoreUpdatePanel';
+import EngagementDetailModal from './components/EngagementDetailModal';
+import LogEngagementModal from './components/LogEngagementModal';
+import EditUserModal from './components/EditUserModal';
+import AddWatchlistModal from './components/AddWatchlistModal';
 import { ToastContainer } from './components/ui/Badges';
 
 function App() {
@@ -27,6 +32,7 @@ function App() {
       case 'watchlist': return <Watchlist />;
       case 'scoring-config': return <ScoringConfig />;
       case 'users': return <UsersAccess />;
+      case 'add-stakeholder': return <AddStakeholder />;
       default: return <Dashboard />;
     }
   };
@@ -47,6 +53,10 @@ function App() {
         </main>
       </div>
       <ScoreUpdatePanel />
+      <EngagementDetailModal />
+      <LogEngagementModal />
+      <EditUserModal />
+      <AddWatchlistModal />
       <ToastContainer />
     </div>
   );

@@ -1,28 +1,30 @@
 import { useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle, Clock, Shield } from 'lucide-react';
-import { useAppStore, watchlistSignals, stakeholders } from '../lib/store';
+import { useAppStore } from '../lib/store';
 import { Card, SeverityBadge, EmptyState } from '../components/ui/Badges';
 import { formatRelativeDate } from '../lib/formatters';
 
 export default function Watchlist() {
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const addToast = useAppStore(s => s.addToast);
-  const [resolvedIds, setResolvedIds] = useState<Set<string>>(new Set());
+  const watchlist = useAppStore(s => s.watchlist);
+  const storeStakeholders = useAppStore(s => s.storeStakeholders);
+  const resolveWatchlistSignal = useAppStore(s => s.resolveWatchlistSignal);
   const [showResolved, setShowResolved] = useState(false);
 
   const activeSignals = useMemo(() =>
-    watchlistSignals
-      .filter(w => !w.is_resolved && !resolvedIds.has(w.id))
+    watchlist
+      .filter(w => !w.is_resolved)
       .sort((a, b) => {
         const order = { critical: 0, high: 1, medium: 2, low: 3 };
         return order[a.severity] - order[b.severity] || new Date(b.triggered_at).getTime() - new Date(a.triggered_at).getTime();
       }),
-    [resolvedIds]
+    [watchlist]
   );
 
   const resolvedSignals = useMemo(() =>
-    watchlistSignals.filter(w => w.is_resolved || resolvedIds.has(w.id)),
-    [resolvedIds]
+    watchlist.filter(w => w.is_resolved),
+    [watchlist]
   );
 
   const stats = useMemo(() => {
@@ -36,10 +38,10 @@ export default function Watchlist() {
     };
   }, [activeSignals]);
 
-  const getStakeholderName = (id: string) => stakeholders.find(s => s.id === id)?.full_name ?? 'Portfolio-wide';
+  const getStakeholderName = (id: string) => storeStakeholders.find(s => s.id === id)?.full_name ?? 'Portfolio-wide';
 
   const handleResolve = (id: string) => {
-    setResolvedIds(prev => new Set([...prev, id]));
+    resolveWatchlistSignal(id);
     addToast('Signal resolved successfully', 'success');
   };
 
@@ -89,7 +91,7 @@ export default function Watchlist() {
             {activeSignals.map(signal => (
               <div
                 key={signal.id}
-                className="rounded-xl p-4 transition-all"
+                className={`rounded-xl p-4 transition-all ${signal.severity === 'critical' ? 'critical-pulse' : ''}`}
                 style={{
                   background: 'var(--bg-elevated)',
                   border: '1px solid var(--border-default)',

@@ -184,7 +184,7 @@ export default function UserMenu() {
                 icon={<UserIcon size={15} />}
                 label="My Profile"
                 hint="View your activity"
-                onClick={() => { setOpen(false); addToast('Profile view coming soon', 'info'); }}
+                onClick={() => { setOpen(false); setPage('users'); }}
               />
               <MenuItem
                 icon={<Settings size={15} />}

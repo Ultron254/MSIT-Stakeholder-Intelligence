@@ -8,7 +8,7 @@ import {
   FileText, MessageSquare, Shield, CheckCircle,
   Zap, MapPin, Calendar,
 } from 'lucide-react';
-import { useAppStore, objectives, watchlistSignals, activityFeed } from '../lib/store';
+import { useAppStore, objectives } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge, SeverityBadge } from '../components/ui/Badges';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
@@ -30,6 +30,8 @@ export default function Dashboard() {
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const setFilter = useAppStore(s => s.setFilter);
   const clearFilters = useAppStore(s => s.clearFilters);
+  const watchlist = useAppStore(s => s.watchlist);
+  const activityFeedData = useAppStore(s => s.activityFeed);
 
   const goToQuadrant = (q: Quadrant) => {
     clearFilters();
@@ -47,10 +49,10 @@ export default function Dashboard() {
     const avgSIS = scored.length > 0 ? scored.reduce((sum, s) => sum + (s.latestSnapshot?.sis_score ?? 0), 0) / scored.length : 0;
     const quadrantCounts: Record<Quadrant, number> = { strategic_ally: 0, power_gap: 0, hidden_champion: 0, monitor_exit: 0 };
     scored.forEach(s => { if (s.latestSnapshot) quadrantCounts[s.latestSnapshot.quadrant]++; });
-    const alerts = watchlistSignals.filter(w => !w.is_resolved);
+    const alerts = watchlist.filter(w => !w.is_resolved);
     const totalFlags = all.reduce((sum, s) => sum + s.redFlags.length, 0);
     return { total: all.length, avgSIS, quadrantCounts, activeAlerts: alerts.length, totalFlags };
-  }, [all]);
+  }, [all, watchlist]);
 
   // Quadrant distribution data
   const quadrantData = useMemo(() => {
@@ -75,7 +77,7 @@ export default function Dashboard() {
   // Priority actions
   const priorityActions = useMemo(() => {
     const actions: Array<{ type: string; label: string; stakeholder: string; stakeholderId: string; time: string; severity: 'critical'|'high'|'medium' }> = [];
-    watchlistSignals.filter(w => !w.is_resolved).forEach(w => {
+    watchlist.filter(w => !w.is_resolved).forEach(w => {
       const s = all.find(st => st.id === w.stakeholder_id);
       actions.push({
         type: w.signal_type,
@@ -87,7 +89,7 @@ export default function Dashboard() {
       });
     });
     return actions.slice(0, 6);
-  }, [all]);
+  }, [all, watchlist]);
 
   // SIS trend (simulated monthly data)
   const sisTrend = useMemo(() => {
@@ -109,6 +111,17 @@ export default function Dashboard() {
       case 'plan_created': return <FileText size={14} />;
       case 'evidence_added': return <Shield size={14} />;
       default: return <FileText size={14} />;
+    }
+  };
+
+  const activityDotColor = (type: string) => {
+    switch (type) {
+      case 'score_update': return 'var(--brand-primary)';
+      case 'engagement_logged': return '#2563EB';
+      case 'approval': return 'var(--status-success)';
+      case 'watchlist_alert': return 'var(--status-warning)';
+      case 'evidence_added': return '#7C3AED';
+      default: return 'var(--text-muted)';
     }
   };
 
@@ -475,10 +488,16 @@ export default function Dashboard() {
         {/* Recent Activity */}
         <div className="xl:col-span-2">
           <Card>
-            <h2 className="text-heading-md mb-4" style={{ color: 'var(--text-primary)' }}>Recent Activity</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-heading-md" style={{ color: 'var(--text-primary)' }}>Recent Activity</h2>
+            </div>
             <div className="space-y-0">
-              {activityFeed.slice(0, 8).map((a) => (
+              {activityFeedData.slice(0, 8).map((a) => (
                 <div key={a.id} className="flex items-start gap-3 py-2.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 rounded-full mt-1.5" style={{ background: activityDotColor(a.type) }} />
+                    <div className="w-px flex-1 mt-1" style={{ background: 'var(--border-subtle)' }} />
+                  </div>
                   <div className="mt-0.5" style={{ color: 'var(--text-muted)' }}>
                     {activityIcon(a.type)}
                   </div>

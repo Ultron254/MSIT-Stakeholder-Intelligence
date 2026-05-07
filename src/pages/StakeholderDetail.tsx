@@ -6,7 +6,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts';
-import { useAppStore, engagementRecords, evidenceRecords, engagementPlans } from '../lib/store';
+import { useAppStore, engagementPlans } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge, ConfidenceBadge, SectorBadge, LayerIndicator, ScoreBar, WorkflowBadge, EngagementTypeBadge, OutcomeBadge, EmptyState } from '../components/ui/Badges';
 import { QUADRANT_COLORS, COMPONENT_DESCRIPTIONS } from '../lib/types';
@@ -20,7 +20,12 @@ export default function StakeholderDetail() {
   const { selectedStakeholderId, setPage, openScoreUpdate } = useAppStore();
   const all = useStakeholdersWithScores();
   const snapshots = useAppStore(s => s.snapshots);
+  const engagements = useAppStore(s => s.engagements);
+  const evidence = useAppStore(s => s.evidence);
+  const openLogEngagement = useAppStore(s => s.openLogEngagement);
+  const openAddWatchlist = useAppStore(s => s.openAddWatchlist);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const [expandedEngagement, setExpandedEngagement] = useState<string | null>(null);
 
   const stakeholder = useMemo(() => all.find(s => s.id === selectedStakeholderId), [all, selectedStakeholderId]);
 
@@ -37,10 +42,10 @@ export default function StakeholderDetail() {
   const stakeSnapshots = snapshots
     .filter(s => s.stakeholder_id === stakeholder.id)
     .sort((a, b) => new Date(a.scored_at).getTime() - new Date(b.scored_at).getTime());
-  const stakeEngagements = engagementRecords
+  const stakeEngagements = engagements
     .filter(e => e.stakeholder_id === stakeholder.id)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const stakeEvidence = evidenceRecords
+  const stakeEvidence = evidence
     .filter(e => e.stakeholder_id === stakeholder.id)
     .sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime());
   const plan = engagementPlans.find(p => p.stakeholder_id === stakeholder.id);
@@ -145,15 +150,22 @@ export default function StakeholderDetail() {
             <Edit3 size={14} /> Update Scores
           </button>
           <button
-            onClick={() => {
-              useAppStore.getState().addToast('Engagement logging coming soon — use the Engagements page for now.', 'info');
-            }}
+            onClick={() => openLogEngagement(stakeholder.id)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             style={{ background: 'transparent', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
             <MessageSquare size={14} /> Log Engagement
+          </button>
+          <button
+            onClick={() => openAddWatchlist(stakeholder.id)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            style={{ background: 'transparent', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            <AlertTriangle size={14} /> Add to Watchlist
           </button>
         </div>
       </div>
@@ -366,20 +378,61 @@ export default function StakeholderDetail() {
             ) : (
               <div className="space-y-0">
                 {stakeEngagements.map(e => (
-                  <div key={e.id} className="flex items-start gap-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <div className="text-body-sm whitespace-nowrap font-mono" style={{ color: 'var(--text-muted)', fontSize: '0.75rem', minWidth: 80 }}>
-                      {formatDate(e.date)}
+                  <div key={e.id}>
+                    <div
+                      className="flex items-start gap-4 py-3 border-b cursor-pointer transition-colors"
+                      style={{ borderColor: 'var(--border-subtle)' }}
+                      onClick={() => setExpandedEngagement(expandedEngagement === e.id ? null : e.id)}
+                      onMouseEnter={(ev) => { ev.currentTarget.style.background = 'var(--bg-secondary)'; }}
+                      onMouseLeave={(ev) => { ev.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <div className="text-body-sm whitespace-nowrap font-mono" style={{ color: 'var(--text-muted)', fontSize: '0.75rem', minWidth: 80 }}>
+                        {formatDate(e.date)}
+                      </div>
+                      <EngagementTypeBadge type={e.engagement_type} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-body-sm" style={{ color: 'var(--text-primary)' }}>{e.description}</div>
+                        {e.follow_up_required && e.follow_up_date && (
+                          <div className="text-body-sm mt-1 flex items-center gap-1" style={{ color: 'var(--status-warning)', fontSize: '0.75rem' }}>
+                            <Clock size={12} /> Follow-up: {formatDate(e.follow_up_date)}
+                          </div>
+                        )}
+                      </div>
+                      <OutcomeBadge outcome={e.outcome} />
                     </div>
-                    <EngagementTypeBadge type={e.engagement_type} />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-body-sm" style={{ color: 'var(--text-primary)' }}>{e.description}</div>
-                      {e.follow_up_required && e.follow_up_date && (
-                        <div className="text-body-sm mt-1 flex items-center gap-1" style={{ color: 'var(--status-warning)', fontSize: '0.75rem' }}>
-                          <Clock size={12} /> Follow-up: {formatDate(e.follow_up_date)}
+                    {expandedEngagement === e.id && (
+                      <div className="accordion-expand px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-secondary)' }}>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="text-label mb-1">Full Description</div>
+                            <div className="text-body-sm" style={{ color: 'var(--text-secondary)' }}>{e.description}</div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <div className="text-label mb-0.5">Outcome</div>
+                              <OutcomeBadge outcome={e.outcome} />
+                            </div>
+                            {e.follow_up_required && (
+                              <div>
+                                <div className="text-label mb-0.5">Follow-up</div>
+                                <div className="text-body-sm" style={{ color: 'var(--status-warning)', fontSize: '0.75rem' }}>
+                                  {e.follow_up_date ? formatDate(e.follow_up_date) : 'No date set'}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              onClick={(ev) => { ev.stopPropagation(); openLogEngagement(stakeholder.id); }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                              style={{ background: 'var(--accent-primary)', color: 'white' }}
+                            >
+                              <MessageSquare size={12} /> Log Follow-up
+                            </button>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    <OutcomeBadge outcome={e.outcome} />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

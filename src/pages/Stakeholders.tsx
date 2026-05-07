@@ -1,13 +1,31 @@
 import { useState } from 'react';
-import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import { useFilteredStakeholders, useStakeholdersWithScores } from '../lib/store';
 import { QuadrantBadge, SISBadge, ConfidenceBadge, SectorBadge, LayerIndicator, Card } from '../components/ui/Badges';
 import { QUADRANT_LABELS, SECTOR_LABELS } from '../lib/types';
-import type { Quadrant, Sector } from '../lib/types';
+import type { Quadrant, Sector, StakeholderWithScore } from '../lib/types';
 import { formatRelativeDate } from '../lib/formatters';
+import { getPortraitUrl, getInitials } from '../lib/avatar';
 
 const ITEMS_PER_PAGE = 25;
+
+function exportToCSV(stakeholders: StakeholderWithScore[]) {
+  const headers = ['Name', 'Title', 'Organization', 'Sector', 'Layer', 'SIS', 'Quadrant', 'Confidence', 'Last Updated'];
+  const rows = stakeholders.map(s => [
+    s.full_name, s.title, s.organization, s.sector, s.proximity_layer,
+    s.latestSnapshot?.sis_score ?? '', s.latestSnapshot?.quadrant ?? '',
+    s.latestSnapshot?.overall_confidence ?? '', s.latestSnapshot?.scored_at ?? '',
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `msit-stakeholders-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function Stakeholders() {
   const { filters, setFilter, clearFilters, setSelectedStakeholder } = useAppStore();
@@ -34,6 +52,15 @@ export default function Stakeholders() {
             {filtered.length} of {totalCount} stakeholders
           </p>
         </div>
+        <button
+          onClick={() => exportToCSV(filtered)}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          style={{ border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+        >
+          <Download size={14} /> Export CSV
+        </button>
       </div>
 
       {/* Filter Bar */}
@@ -158,21 +185,36 @@ export default function Stakeholders() {
               </tr>
             </thead>
             <tbody>
-              {paged.map((s, i) => (
+              {paged.map((s) => (
                 <tr
                   key={s.id}
                   onClick={() => setSelectedStakeholder(s.id)}
-                  className="cursor-pointer transition-colors"
-                  style={{
-                    borderBottom: '1px solid var(--border-subtle)',
-                    background: i % 2 === 1 ? 'var(--bg-primary)' : 'transparent',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = i % 2 === 1 ? 'var(--bg-primary)' : 'transparent'; }}
+                  className="cursor-pointer transition-colors stagger-item row-hover"
+                  style={{ borderBottom: '1px solid var(--border-subtle)' }}
                 >
                   <td className="px-4 py-3">
-                    <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{s.full_name}</div>
-                    <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{s.organization}</div>
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--bg-inset)' }}>
+                        <img
+                          src={getPortraitUrl(s.full_name, s.gender)}
+                          alt={s.full_name}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                          onError={e => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <div className="hidden absolute inset-0 flex items-center justify-center text-xs font-semibold"
+                          style={{ background: 'var(--brand-primary-bg)', color: 'var(--brand-primary-dark)' }}>
+                          {getInitials(s.full_name)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{s.full_name}</div>
+                        <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{s.organization}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-body-sm" style={{ color: 'var(--text-secondary)' }}>{s.title}</td>
                   <td className="px-4 py-3"><SectorBadge sector={s.sector} /></td>

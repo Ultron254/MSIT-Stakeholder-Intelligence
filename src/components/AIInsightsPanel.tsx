@@ -4,7 +4,7 @@ import {
   RefreshCw, ArrowRight, MessageSquarePlus, PanelRightClose, PanelRightOpen,
 } from 'lucide-react';
 import {
-  useAppStore, useStakeholdersWithScores, watchlistSignals, objectives,
+  useAppStore, useStakeholdersWithScores, objectives,
 } from '../lib/store';
 import { QUADRANT_LABELS } from '../lib/types';
 import { formatSIS, daysUntil } from '../lib/formatters';
@@ -31,6 +31,7 @@ export default function AIInsightsPanel() {
   const all = useStakeholdersWithScores();
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const currentUserId = useAppStore(s => s.currentUserId);
+  const watchlist = useAppStore(s => s.watchlist);
   const collapsed = useAppStore(s => s.aiPanelCollapsed);
   const toggleCollapse = useAppStore(s => s.toggleAIPanel);
   const user = users.find(u => u.id === currentUserId) ?? users[0];
@@ -47,9 +48,9 @@ export default function AIInsightsPanel() {
     const flagged = scored.filter(s => s.redFlags.length > 0);
     const topAlly = [...allies].sort((a, b) => (b.latestSnapshot!.sis_score - a.latestSnapshot!.sis_score))[0];
     const topPowerGap = [...powerGaps].sort((a, b) => (b.latestSnapshot!.sis_score - a.latestSnapshot!.sis_score))[0];
-    const criticalAlerts = watchlistSignals.filter(w => !w.is_resolved && w.severity === 'critical');
+    const criticalAlerts = watchlist.filter(w => !w.is_resolved && w.severity === 'critical');
     return { scored, allies, powerGaps, monitor, flagged, topAlly, topPowerGap, criticalAlerts };
-  }, [all]);
+  }, [all, watchlist]);
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => [{
     id: 'm-welcome',

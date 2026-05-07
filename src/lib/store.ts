@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useMemo } from 'react';
-import type { Quadrant, Sector, Confidence, ScoreSnapshot } from './types';
+import type { Quadrant, Sector, Confidence, ScoreSnapshot, Stakeholder, EngagementRecord, WatchlistSignal, User, EvidenceRecord, StakeholderWithScore } from './types';
+import type { ActivityItem } from './data';
 import {
   stakeholders, scoreSnapshots, engagementRecords, evidenceRecords,
   engagementPlans, watchlistSignals, activityFeed, users,
@@ -8,9 +9,8 @@ import {
   getLatestSnapshot,
 } from './data';
 import { detectRedFlags } from './scoring-engine';
-import type { StakeholderWithScore } from './types';
 
-export type Page = 'dashboard' | 'stakeholders' | 'stakeholder-detail' | 'quadrant-map' | 'engagements' | 'engagement-plans' | 'watchlist' | 'scoring-config' | 'users';
+export type Page = 'dashboard' | 'stakeholders' | 'stakeholder-detail' | 'quadrant-map' | 'engagements' | 'engagement-plans' | 'watchlist' | 'scoring-config' | 'users' | 'add-stakeholder';
 
 interface Filters {
   search: string;
@@ -60,11 +60,54 @@ interface AppState {
   removeToast: (id: string) => void;
   toggleSearch: () => void;
 
-  // Data accessors — use hooks useStakeholdersWithScores / useFilteredStakeholders instead
-
   // Score snapshots (mutable for new submissions)
   snapshots: ScoreSnapshot[];
   addSnapshot: (snapshot: ScoreSnapshot) => void;
+
+  // Mutable data collections
+  engagements: EngagementRecord[];
+  addEngagement: (record: EngagementRecord) => void;
+
+  watchlist: WatchlistSignal[];
+  addWatchlistSignal: (signal: WatchlistSignal) => void;
+  resolveWatchlistSignal: (id: string) => void;
+
+  storeUsers: User[];
+  addUser: (user: User) => void;
+  updateUser: (userId: string, updates: Partial<User>) => void;
+
+  evidence: EvidenceRecord[];
+  addEvidence: (record: EvidenceRecord) => void;
+
+  storeStakeholders: Stakeholder[];
+  addStakeholder: (stakeholder: Stakeholder) => void;
+
+  // Engagement detail
+  engagementDetailId: string | null;
+  openEngagementDetail: (id: string) => void;
+  closeEngagementDetail: () => void;
+
+  // Log engagement modal
+  logEngagementOpen: boolean;
+  logEngagementStakeholderId: string | null;
+  openLogEngagement: (stakeholderId?: string) => void;
+  closeLogEngagement: () => void;
+
+  // Edit user modal
+  editUserModalOpen: boolean;
+  editUserModalId: string | null;
+  openEditUser: (userId: string | null) => void;
+  closeEditUser: () => void;
+
+  // Add watchlist modal
+  addWatchlistModalOpen: boolean;
+  addWatchlistStakeholderId: string | null;
+  openAddWatchlist: (stakeholderId: string) => void;
+  closeAddWatchlist: () => void;
+
+  // Activity feed
+  activityFeed: ActivityItem[];
+  addActivity: (activity: ActivityItem) => void;
 }
 
 const defaultFilters: Filters = {
@@ -88,6 +131,37 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUserId: 'u-001',
   snapshots: [...scoreSnapshots],
 
+  // Mutable data collections
+  engagements: [...engagementRecords],
+  watchlist: [...watchlistSignals],
+  storeUsers: [...users],
+  evidence: [...evidenceRecords],
+  storeStakeholders: [...stakeholders],
+  activityFeed: [...activityFeed],
+
+  // Engagement detail
+  engagementDetailId: null,
+  openEngagementDetail: (id) => set({ engagementDetailId: id }),
+  closeEngagementDetail: () => set({ engagementDetailId: null }),
+
+  // Log engagement modal
+  logEngagementOpen: false,
+  logEngagementStakeholderId: null,
+  openLogEngagement: (stakeholderId) => set({ logEngagementOpen: true, logEngagementStakeholderId: stakeholderId ?? null }),
+  closeLogEngagement: () => set({ logEngagementOpen: false, logEngagementStakeholderId: null }),
+
+  // Edit user modal
+  editUserModalOpen: false,
+  editUserModalId: null,
+  openEditUser: (userId) => set({ editUserModalOpen: true, editUserModalId: userId }),
+  closeEditUser: () => set({ editUserModalOpen: false, editUserModalId: null }),
+
+  // Add watchlist modal
+  addWatchlistModalOpen: false,
+  addWatchlistStakeholderId: null,
+  openAddWatchlist: (stakeholderId) => set({ addWatchlistModalOpen: true, addWatchlistStakeholderId: stakeholderId }),
+  closeAddWatchlist: () => set({ addWatchlistModalOpen: false, addWatchlistStakeholderId: null }),
+
   setCurrentUser: (userId) => set({ currentUserId: userId }),
 
   aiPanelCollapsed: false,
@@ -109,31 +183,51 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleSearch: () => set(s => ({ searchOpen: !s.searchOpen })),
 
   addSnapshot: (snapshot) => set(s => ({ snapshots: [...s.snapshots, snapshot] })),
+
+  addEngagement: (record) => set(s => ({ engagements: [...s.engagements, record] })),
+
+  addWatchlistSignal: (signal) => set(s => ({ watchlist: [...s.watchlist, signal] })),
+  resolveWatchlistSignal: (id) => set(s => ({
+    watchlist: s.watchlist.map(w => w.id === id ? { ...w, is_resolved: true, resolved_at: new Date().toISOString().slice(0, 10) } : w),
+  })),
+
+  addUser: (user) => set(s => ({ storeUsers: [...s.storeUsers, user] })),
+  updateUser: (userId, updates) => set(s => ({
+    storeUsers: s.storeUsers.map(u => u.id === userId ? { ...u, ...updates } : u),
+  })),
+
+  addEvidence: (record) => set(s => ({ evidence: [...s.evidence, record] })),
+
+  addStakeholder: (stakeholder) => set(s => ({ storeStakeholders: [...s.storeStakeholders, stakeholder] })),
+
+  addActivity: (activity) => set(s => ({ activityFeed: [activity, ...s.activityFeed] })),
 }));
 
-// Re-export data for direct use in components
+// Still re-export static data for direct use where needed
 export {
-  stakeholders, scoreSnapshots, engagementRecords, evidenceRecords,
-  engagementPlans, watchlistSignals, activityFeed, users,
+  scoreSnapshots, engagementPlans,
   scoringWeights, objectives, countries, stakeholderObjectives, componentScores,
   getLatestSnapshot,
 };
 
+// Re-export original arrays as defaults for backward compat
+export { stakeholders, engagementRecords, evidenceRecords, watchlistSignals, users, activityFeed } from './data';
+
 // ---------------------------------------------------------------------------
-// Derived-data hooks (memoised on `snapshots` / `filters` to avoid new refs)
+// Derived-data hooks (memoised on store state to avoid new refs)
 // ---------------------------------------------------------------------------
 
-function computeStakeholdersWithScores(snaps: ScoreSnapshot[]): StakeholderWithScore[] {
-  return stakeholders.map(s => {
+function computeStakeholdersWithScores(stakeholdersList: Stakeholder[], snaps: ScoreSnapshot[], engagementsList: EngagementRecord[]): StakeholderWithScore[] {
+  return stakeholdersList.map(s => {
     const stakeholderSnaps = snaps
       .filter(snap => snap.stakeholder_id === s.id)
       .sort((a, b) => new Date(b.scored_at).getTime() - new Date(a.scored_at).getTime());
     const latest = stakeholderSnaps[0] ?? null;
-    const stakeEngagements = engagementRecords.filter(e => e.stakeholder_id === s.id);
+    const stakeEngagements = engagementsList.filter(e => e.stakeholder_id === s.id);
     const lastEngDate = stakeEngagements.length > 0
       ? [...stakeEngagements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].date
       : null;
-    const flags = detectRedFlags(s, latest, engagementRecords);
+    const flags = detectRedFlags(s, latest, engagementsList);
     return {
       ...s,
       latestSnapshot: latest,
@@ -146,15 +240,19 @@ function computeStakeholdersWithScores(snaps: ScoreSnapshot[]): StakeholderWithS
 
 export function useStakeholdersWithScores(): StakeholderWithScore[] {
   const snapshots = useAppStore(s => s.snapshots);
-  return useMemo(() => computeStakeholdersWithScores(snapshots), [snapshots]);
+  const storeStakeholders = useAppStore(s => s.storeStakeholders);
+  const engagements = useAppStore(s => s.engagements);
+  return useMemo(() => computeStakeholdersWithScores(storeStakeholders, snapshots, engagements), [storeStakeholders, snapshots, engagements]);
 }
 
 export function useFilteredStakeholders(): StakeholderWithScore[] {
   const snapshots = useAppStore(s => s.snapshots);
+  const storeStakeholders = useAppStore(s => s.storeStakeholders);
+  const engagements = useAppStore(s => s.engagements);
   const filters = useAppStore(s => s.filters);
 
   return useMemo(() => {
-    let filtered = computeStakeholdersWithScores(snapshots);
+    let filtered = computeStakeholdersWithScores(storeStakeholders, snapshots, engagements);
 
     if (filters.search) {
       const q = filters.search.toLowerCase();
@@ -201,5 +299,5 @@ export function useFilteredStakeholders(): StakeholderWithScore[] {
     }
 
     return filtered;
-  }, [snapshots, filters]);
+  }, [storeStakeholders, snapshots, engagements, filters]);
 }

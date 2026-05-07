@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { MessageSquare, Phone, Mail, Calendar, Users } from 'lucide-react';
-import { useAppStore, engagementRecords, stakeholders } from '../lib/store';
+import { useAppStore } from '../lib/store';
 import { NOW } from '../lib/constants';
 import { Card, EngagementTypeBadge, OutcomeBadge, EmptyState } from '../components/ui/Badges';
 import { formatDate } from '../lib/formatters';
@@ -9,44 +9,48 @@ type FilterType = '' | 'meeting' | 'phone_call' | 'email' | 'event' | 'social' |
 type FilterOutcome = '' | 'positive' | 'neutral' | 'negative' | 'pending';
 
 export default function Engagements() {
+  const engagements = useAppStore(s => s.engagements);
+  const storeStakeholders = useAppStore(s => s.storeStakeholders);
+  const openEngagementDetail = useAppStore(s => s.openEngagementDetail);
+  const openLogEngagement = useAppStore(s => s.openLogEngagement);
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const [typeFilter, setTypeFilter] = useState<FilterType>('');
   const [outcomeFilter, setOutcomeFilter] = useState<FilterOutcome>('');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filtered = useMemo(() => {
-    let result = [...engagementRecords];
+    let result = [...engagements];
     if (typeFilter) result = result.filter(e => e.engagement_type === typeFilter);
     if (outcomeFilter) result = result.filter(e => e.outcome === outcomeFilter);
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(e => {
-        const s = stakeholders.find(st => st.id === e.stakeholder_id);
+        const s = storeStakeholders.find(st => st.id === e.stakeholder_id);
         return s?.full_name.toLowerCase().includes(q) || e.description.toLowerCase().includes(q);
       });
     }
     return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [typeFilter, outcomeFilter, searchQuery]);
+  }, [typeFilter, outcomeFilter, searchQuery, engagements, storeStakeholders]);
 
   const stats = useMemo(() => {
-    const thisMonth = engagementRecords.filter(e => {
+    const thisMonth = engagements.filter(e => {
       const d = new Date(e.date);
       return d.getMonth() === NOW.getMonth() && d.getFullYear() === NOW.getFullYear();
     });
-    const pendingFollowups = engagementRecords.filter(e => e.follow_up_required && e.follow_up_date);
-    const positiveRate = engagementRecords.length > 0
-      ? Math.round((engagementRecords.filter(e => e.outcome === 'positive').length / engagementRecords.length) * 100)
+    const pendingFollowups = engagements.filter(e => e.follow_up_required && e.follow_up_date);
+    const positiveRate = engagements.length > 0
+      ? Math.round((engagements.filter(e => e.outcome === 'positive').length / engagements.length) * 100)
       : 0;
     return {
-      total: engagementRecords.length,
+      total: engagements.length,
       thisMonth: thisMonth.length,
       pendingFollowups: pendingFollowups.length,
       positiveRate,
     };
-  }, []);
+  }, [engagements]);
 
-  const getStakeholderName = (id: string) => stakeholders.find(s => s.id === id)?.full_name ?? 'Unknown';
-  const getStakeholderOrg = (id: string) => stakeholders.find(s => s.id === id)?.organization ?? '';
+  const getStakeholderName = (id: string) => storeStakeholders.find(s => s.id === id)?.full_name ?? 'Unknown';
+  const getStakeholderOrg = (id: string) => storeStakeholders.find(s => s.id === id)?.organization ?? '';
 
   const typeIcon = (type: string) => {
     switch (type) {
@@ -60,11 +64,22 @@ export default function Engagements() {
 
   return (
     <div className="page-enter space-y-5">
-      <div>
-        <h1 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Engagements</h1>
-        <p className="text-body-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          Track and manage all stakeholder interactions
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Engagements</h1>
+          <p className="text-body-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            Track and manage all stakeholder interactions
+          </p>
+        </div>
+        <button
+          onClick={() => openLogEngagement()}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          style={{ background: 'var(--text-primary)', color: 'white' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-primary)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--text-primary)'; }}
+        >
+          <MessageSquare size={14} /> Log Engagement
+        </button>
       </div>
 
       {/* Stats */}
@@ -138,21 +153,26 @@ export default function Engagements() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((e, i) => (
+              {filtered.map((e) => (
                 <tr
                   key={e.id}
-                  className="transition-colors cursor-pointer"
-                  style={{ borderBottom: '1px solid var(--border-subtle)', background: i % 2 === 1 ? 'var(--bg-primary)' : 'transparent' }}
-                  onClick={() => setSelectedStakeholder(e.stakeholder_id)}
-                  onMouseEnter={(ev) => { ev.currentTarget.style.background = 'var(--bg-secondary)'; }}
-                  onMouseLeave={(ev) => { ev.currentTarget.style.background = i % 2 === 1 ? 'var(--bg-primary)' : 'transparent'; }}
+                  className="transition-colors cursor-pointer stagger-item row-hover"
+                  style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                  onClick={() => openEngagementDetail(e.id)}
                 >
                   <td className="px-4 py-3 font-mono text-xs whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
                     {formatDate(e.date)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{getStakeholderName(e.stakeholder_id)}</div>
-                    <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{getStakeholderOrg(e.stakeholder_id)}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{getStakeholderOrg(e.stakeholder_id)}</span>
+                      <button
+                        onClick={(ev) => { ev.stopPropagation(); setSelectedStakeholder(e.stakeholder_id); }}
+                        className="text-body-sm transition-colors"
+                        style={{ color: 'var(--accent-primary)', fontSize: '0.6875rem' }}
+                      >View</button>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>

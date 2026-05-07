@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  LayoutDashboard, Users, Target, MessageSquare, ClipboardList,
+  LayoutDashboard, Users, UserPlus, Target, MessageSquare, ClipboardList,
   AlertTriangle, Settings, ChevronLeft, ChevronRight, UserCog,
 } from 'lucide-react';
 import { useAppStore, type Page } from '../../lib/store';
@@ -23,6 +23,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { id: 'stakeholders', label: 'Stakeholders', icon: Users },
+      { id: 'add-stakeholder', label: 'Add Stakeholder', icon: UserPlus },
       { id: 'quadrant-map', label: 'Quadrant Map', icon: Target },
     ],
   },

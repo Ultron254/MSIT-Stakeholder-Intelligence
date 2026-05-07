@@ -37,6 +37,7 @@ export interface Stakeholder {
   proximity_layer: ProximityLayer;
   sensitivity_flag: boolean;
   status: 'active' | 'inactive' | 'archived';
+  gender: 'female' | 'male';
   created_at: string;
 }
 

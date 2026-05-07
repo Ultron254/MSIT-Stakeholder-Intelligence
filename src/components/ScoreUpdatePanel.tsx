@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { X, AlertTriangle } from 'lucide-react';
+import { X, AlertTriangle, Paperclip, FileText } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { NOW } from '../lib/constants';
@@ -41,6 +41,9 @@ export default function ScoreUpdatePanel() {
   const [rationales, setRationales] = useState<Record<Component, string>>({
     influence: '', relationship: '', risk: '', sentiment: '', alignment: '', impact: '',
   });
+  const [uploadedFiles, setUploadedFiles] = useState<Record<Component, File[]>>({
+    influence: [], relationship: [], risk: [], sentiment: [], alignment: [], impact: [],
+  });
 
   // Initialize from current scores
   useEffect(() => {
@@ -73,6 +76,21 @@ export default function ScoreUpdatePanel() {
   const sisDelta = result.sis_score - previousSIS;
   const quadrantChanged = currentSnap ? result.quadrant !== currentSnap.quadrant : false;
 
+  const handleFileUpload = (comp: Component, files: FileList | null) => {
+    if (!files) return;
+    setUploadedFiles(prev => ({
+      ...prev,
+      [comp]: [...prev[comp], ...Array.from(files)],
+    }));
+  };
+
+  const removeFile = (comp: Component, index: number) => {
+    setUploadedFiles(prev => ({
+      ...prev,
+      [comp]: prev[comp].filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSave = (status: 'draft' | 'submitted') => {
     if (!stakeholder) return;
     const existingSnapCount = snapshots.filter(s => s.stakeholder_id === stakeholder.id).length;
@@ -101,6 +119,10 @@ export default function ScoreUpdatePanel() {
     };
     addSnapshot(newSnapshot);
     addToast(status === 'draft' ? 'Score saved as draft' : 'Score submitted for review', 'success');
+    const totalFiles = Object.values(uploadedFiles).flat().length;
+    if (totalFiles > 0) {
+      addToast(`${totalFiles} evidence file(s) attached to score update`, 'info');
+    }
     closeScoreUpdate();
   };
 
@@ -258,6 +280,36 @@ export default function ScoreUpdatePanel() {
                   fontSize: '0.8125rem',
                 }}
               />
+              <div className="mt-2">
+                <label
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                  style={{
+                    background: 'var(--bg-inset)',
+                    border: '1px dashed var(--border-default)',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  <Paperclip size={14} />
+                  <span>Attach evidence file</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                    onChange={(e) => handleFileUpload(comp, e.target.files)}
+                  />
+                </label>
+                {uploadedFiles[comp]?.map((file, fileIdx) => (
+                  <div key={fileIdx} className="flex items-center gap-2 mt-1.5 px-2 py-1 rounded"
+                    style={{ background: 'var(--bg-secondary)', fontSize: '0.75rem' }}>
+                    <FileText size={12} style={{ color: 'var(--text-muted)' }} />
+                    <span className="truncate flex-1" style={{ color: 'var(--text-secondary)' }}>{file.name}</span>
+                    <button onClick={() => removeFile(comp, fileIdx)}>
+                      <X size={12} style={{ color: 'var(--text-muted)' }} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

@@ -1,6 +1,5 @@
 import { Search, Bell, X } from 'lucide-react';
-import { useAppStore, watchlistSignals } from '../../lib/store';
-import { useStakeholdersWithScores } from '../../lib/store';
+import { useAppStore, useStakeholdersWithScores } from '../../lib/store';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import type { Quadrant } from '../../lib/types';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../../lib/types';
@@ -18,22 +17,27 @@ const PAGE_TITLES: Record<string, string> = {
   watchlist: 'Watchlist',
   'scoring-config': 'Scoring Configuration',
   users: 'Users & Access',
+  'add-stakeholder': 'Add Stakeholder',
 };
 
 export default function Header() {
   const { currentPage, searchOpen, toggleSearch, setSelectedStakeholder } = useAppStore();
+  const watchlist = useAppStore(s => s.watchlist);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
-  const activeAlerts = watchlistSignals.filter(s => !s.is_resolved).length;
+  const activeAlerts = watchlist.filter(s => !s.is_resolved).length;
 
   const allWithScores = useStakeholdersWithScores();
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase();
-    return allWithScores
+    
+    const stakeholderMatches = allWithScores
       .filter(s => s.full_name.toLowerCase().includes(q) || s.organization.toLowerCase().includes(q) || s.title.toLowerCase().includes(q))
-      .slice(0, 8);
+      .slice(0, 6);
+    
+    return stakeholderMatches;
   }, [searchQuery, allWithScores]);
 
   useEffect(() => {
