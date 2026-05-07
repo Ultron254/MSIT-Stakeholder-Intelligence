@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Label } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine, ReferenceArea } from 'recharts';
 import { useAppStore } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge } from '../components/ui/Badges';
@@ -143,29 +143,23 @@ export default function QuadrantMap() {
       {/* Main Chart */}
       <Card className="!p-6">
         <div style={{ position: 'relative' }}>
-          {/* Quadrant corner labels */}
-          <div className="absolute top-2 left-14 text-label" style={{ color: QUADRANT_COLORS.power_gap.text, opacity: 0.5, fontSize: '0.6rem' }}>Power Gaps</div>
-          <div className="absolute top-2 right-4 text-label" style={{ color: QUADRANT_COLORS.strategic_ally.text, opacity: 0.5, fontSize: '0.6rem' }}>Strategic Allies</div>
-          <div className="absolute bottom-10 left-14 text-label" style={{ color: QUADRANT_COLORS.monitor_exit.text, opacity: 0.5, fontSize: '0.6rem' }}>Monitor / Exit</div>
-          <div className="absolute bottom-10 right-4 text-label" style={{ color: QUADRANT_COLORS.hidden_champion.text, opacity: 0.5, fontSize: '0.6rem' }}>Hidden Champions</div>
-
           <ResponsiveContainer width="100%" height={480}>
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
+            <ScatterChart margin={{ top: 30, right: 30, bottom: 40, left: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
               <XAxis
                 type="number" dataKey="x" name="Power" domain={[1, 5]}
                 tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={{ stroke: 'var(--border-default)' }}
-                tickLine={false}
-              >
-                <Label value="Power Axis" position="bottom" offset={0} style={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
-              </XAxis>
+                tickLine={false} label={{ value: 'Power Axis', position: 'insideBottom', offset: -10, style: { fontSize: 12, fill: 'var(--text-secondary)' } }}
+              />
               <YAxis
                 type="number" dataKey="y" name="Convertibility" domain={[1, 5]}
                 tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={{ stroke: 'var(--border-default)' }}
-                tickLine={false}
-              >
-                <Label value="Convertibility" angle={-90} position="insideLeft" offset={10} style={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
-              </YAxis>
+                tickLine={false} label={{ value: 'Convertibility', angle: -90, position: 'insideLeft', offset: -5, style: { fontSize: 12, fill: 'var(--text-secondary)' } }}
+              />
+              <ReferenceArea x1={1} x2={4} y1={4} y2={5} fill={QUADRANT_COLORS.power_gap.bg} fillOpacity={0.15} label={{ value: 'Power Gaps', position: 'insideTopLeft', style: { fontSize: 10, fill: QUADRANT_COLORS.power_gap.text, fontWeight: 600, opacity: 0.6 } }} />
+              <ReferenceArea x1={4} x2={5} y1={4} y2={5} fill={QUADRANT_COLORS.strategic_ally.bg} fillOpacity={0.15} label={{ value: 'Strategic Allies', position: 'insideTopRight', style: { fontSize: 10, fill: QUADRANT_COLORS.strategic_ally.text, fontWeight: 600, opacity: 0.6 } }} />
+              <ReferenceArea x1={1} x2={4} y1={1} y2={4} fill={QUADRANT_COLORS.monitor_exit.bg} fillOpacity={0.08} label={{ value: 'Monitor / Exit', position: 'insideBottomLeft', style: { fontSize: 10, fill: QUADRANT_COLORS.monitor_exit.text, fontWeight: 600, opacity: 0.6 } }} />
+              <ReferenceArea x1={4} x2={5} y1={1} y2={4} fill={QUADRANT_COLORS.hidden_champion.bg} fillOpacity={0.15} label={{ value: 'Hidden Champions', position: 'insideBottomRight', style: { fontSize: 10, fill: QUADRANT_COLORS.hidden_champion.text, fontWeight: 600, opacity: 0.6 } }} />
               <ReferenceLine x={4} stroke="var(--border-strong)" strokeDasharray="6 4" />
               <ReferenceLine y={4} stroke="var(--border-strong)" strokeDasharray="6 4" />
               <Tooltip content={<CustomTooltip />} />
@@ -187,7 +181,7 @@ export default function QuadrantMap() {
 
           {/* Floating labels */}
           {showLabels && (
-            <div className="absolute inset-0 pointer-events-none" style={{ left: 60, right: 20, top: 20, bottom: 40 }}>
+            <div className="absolute inset-0 pointer-events-none" style={{ left: 72, right: 30, top: 30, bottom: 56 }}>
               {scatterData.map(d => {
                 const xPct = ((d.x - 1) / 4) * 100;
                 const yPct = ((5 - d.y) / 4) * 100;
