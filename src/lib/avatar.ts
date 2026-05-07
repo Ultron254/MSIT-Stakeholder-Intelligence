@@ -1,9 +1,9 @@
 /**
  * Portrait system for MSIT stakeholders.
  *
- * Uses pravatar.cc for realistic, diverse portrait photos.
+ * Uses randomuser.me direct portrait URLs for realistic, diverse human photos.
  * Each name is hashed to a stable index so the same person always gets the same face.
- * Falls back to branded initials if the image fails to load.
+ * For uploaded custom images, the Stakeholder.portrait_url field takes priority.
  */
 
 export type Gender = 'female' | 'male' | undefined;
@@ -20,19 +20,16 @@ function hashName(name: string): number {
 
 /**
  * Returns a portrait photo URL for a stakeholder.
- *
- * Uses pravatar.cc which serves 70 pre-set real human photos at
- * https://i.pravatar.cc/200?img=N (N = 1–70). Photos are split into
- * female and male ID ranges for gender-consistent assignment.
+ * If a custom portrait_url is provided, that takes priority.
+ * Otherwise uses randomuser.me which has 100 female + 100 male real photos.
  */
-export function getPortraitUrl(name: string, gender: Gender): string {
+export function getPortraitUrl(name: string, gender: Gender, customUrl?: string | null): string {
+  if (customUrl) return customUrl;
   const hash = hashName(name);
   if (gender === 'female') {
-    const femaleIds = [1, 5, 9, 10, 16, 20, 21, 23, 24, 25, 26, 28, 29, 31, 32, 34, 36, 38, 39, 40, 41, 43, 44, 45, 47, 48, 49];
-    return `https://i.pravatar.cc/200?img=${femaleIds[hash % femaleIds.length]}`;
+    return `https://randomuser.me/api/portraits/women/${hash % 100}.jpg`;
   }
-  const maleIds = [3, 4, 6, 7, 8, 11, 12, 13, 14, 15, 17, 18, 19, 22, 27, 30, 33, 35, 37, 42, 46, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60];
-  return `https://i.pravatar.cc/200?img=${maleIds[hash % maleIds.length]}`;
+  return `https://randomuser.me/api/portraits/men/${hash % 100}.jpg`;
 }
 
 export function getAvatarUrl(name: string, gender: Gender): string {

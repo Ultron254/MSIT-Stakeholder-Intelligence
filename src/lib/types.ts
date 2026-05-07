@@ -38,6 +38,7 @@ export interface Stakeholder {
   sensitivity_flag: boolean;
   status: 'active' | 'inactive' | 'archived';
   gender: 'female' | 'male';
+  portrait_url: string | null;
   created_at: string;
 }
 
@@ -144,6 +145,7 @@ export interface User {
   is_active: boolean;
   gender?: 'female' | 'male';
   job_title?: string;
+  portrait_url?: string | null;
 }
 
 export interface ScoringWeights {

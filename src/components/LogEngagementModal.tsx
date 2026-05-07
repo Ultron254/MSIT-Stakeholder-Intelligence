@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, MessageSquare } from 'lucide-react';
 import { useAppStore } from '../lib/store';
+import Portrait from './ui/Portrait';
 import { NOW } from '../lib/constants';
 import { format } from 'date-fns';
 import type { EngagementRecord } from '../lib/types';
@@ -113,8 +114,9 @@ export default function LogEngagementModal() {
                 Stakeholder <span style={{ color: 'var(--accent-primary)' }}>*</span>
               </label>
               {selectedStakeholder ? (
-                <div className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-default)' }}>
-                  <div>
+                <div className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-default)' }}>
+                  <Portrait name={selectedStakeholder.full_name} gender={selectedStakeholder.gender} portraitUrl={selectedStakeholder.portrait_url} size={32} />
+                  <div className="flex-1">
                     <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{selectedStakeholder.full_name}</div>
                     <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{selectedStakeholder.organization}</div>
                   </div>
@@ -136,13 +138,16 @@ export default function LogEngagementModal() {
                         <button
                           key={s.id}
                           onClick={() => { setStakeholderId(s.id); setSearchQuery(''); }}
-                          className="w-full text-left px-3 py-2 text-body-sm transition-colors"
+                          className="w-full flex items-center gap-2.5 text-left px-3 py-2 text-body-sm transition-colors"
                           style={{ color: 'var(--text-primary)' }}
                           onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                         >
-                          <div className="text-heading-sm" style={{ fontSize: '0.8125rem' }}>{s.full_name}</div>
-                          <div style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{s.organization}</div>
+                          <Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={24} />
+                          <div>
+                            <div className="text-heading-sm" style={{ fontSize: '0.8125rem' }}>{s.full_name}</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{s.organization}</div>
+                          </div>
                         </button>
                       ))}
                     </div>

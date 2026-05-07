@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 import { useAppStore } from '../lib/store';
+import Portrait from './ui/Portrait';
 import { format } from 'date-fns';
 import { NOW } from '../lib/constants';
 import type { WatchlistSignal } from '../lib/types';
@@ -67,8 +68,11 @@ export default function AddWatchlistModal() {
 
           <div className="px-6 py-5 space-y-4">
             {stakeholder && (
-              <div className="text-body-sm" style={{ color: 'var(--text-secondary)' }}>
-                Creating signal for <strong style={{ color: 'var(--text-primary)' }}>{stakeholder.full_name}</strong>
+              <div className="flex items-center gap-2.5">
+                <Portrait name={stakeholder.full_name} gender={stakeholder.gender} portraitUrl={stakeholder.portrait_url} size={32} />
+                <div className="text-body-sm" style={{ color: 'var(--text-secondary)' }}>
+                  Creating signal for <strong style={{ color: 'var(--text-primary)' }}>{stakeholder.full_name}</strong>
+                </div>
               </div>
             )}
             <div>

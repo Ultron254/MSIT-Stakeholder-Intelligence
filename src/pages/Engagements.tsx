@@ -3,6 +3,7 @@ import { MessageSquare, Phone, Mail, Calendar, Users } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import { NOW } from '../lib/constants';
 import { Card, EngagementTypeBadge, OutcomeBadge, EmptyState } from '../components/ui/Badges';
+import Portrait from '../components/ui/Portrait';
 import { formatDate } from '../lib/formatters';
 
 type FilterType = '' | 'meeting' | 'phone_call' | 'email' | 'event' | 'social' | 'third_party_intro' | 'formal_submission';
@@ -164,14 +165,19 @@ export default function Engagements() {
                     {formatDate(e.date)}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{getStakeholderName(e.stakeholder_id)}</div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{getStakeholderOrg(e.stakeholder_id)}</span>
-                      <button
-                        onClick={(ev) => { ev.stopPropagation(); setSelectedStakeholder(e.stakeholder_id); }}
-                        className="text-body-sm transition-colors"
-                        style={{ color: 'var(--accent-primary)', fontSize: '0.6875rem' }}
-                      >View</button>
+                    <div className="flex items-center gap-2.5">
+                      {(() => { const st = storeStakeholders.find(s => s.id === e.stakeholder_id); return st ? <Portrait name={st.full_name} gender={st.gender} portraitUrl={st.portrait_url} size={28} /> : null; })()}
+                      <div>
+                        <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{getStakeholderName(e.stakeholder_id)}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{getStakeholderOrg(e.stakeholder_id)}</span>
+                          <button
+                            onClick={(ev) => { ev.stopPropagation(); setSelectedStakeholder(e.stakeholder_id); }}
+                            className="text-body-sm transition-colors"
+                            style={{ color: 'var(--accent-primary)', fontSize: '0.6875rem' }}
+                          >View</button>
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td className="px-4 py-3">

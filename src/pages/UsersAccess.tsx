@@ -1,5 +1,6 @@
 import { useAppStore } from '../lib/store';
 import { Card } from '../components/ui/Badges';
+import Portrait from '../components/ui/Portrait';
 import { Shield, Eye, Edit3, Settings, UserPlus } from 'lucide-react';
 
 export default function UsersAccess() {
@@ -97,12 +98,7 @@ export default function UsersAccess() {
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium"
-                        style={{ background: 'var(--bg-inset)', color: 'var(--text-secondary)' }}
-                      >
-                        {user.display_name.split(' ').map(w => w[0]).join('')}
-                      </div>
+                      <Portrait name={user.display_name} gender={user.gender} portraitUrl={user.portrait_url} size={32} />
                       <span className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{user.display_name}</span>
                     </div>
                   </td>

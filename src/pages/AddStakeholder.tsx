@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   UserPlus, FileText, Plus, Trash2,
-  Shield, CheckCircle,
+  Shield, CheckCircle, Camera,
 } from 'lucide-react';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -22,7 +22,6 @@ import { formatSIS, formatAxis } from '../lib/formatters';
 import { NOW } from '../lib/constants';
 import { format } from 'date-fns';
 import { getInitials } from '../lib/avatar';
-
 const components: Component[] = ['influence', 'relationship', 'risk', 'sentiment', 'alignment', 'impact'];
 const sectors: Sector[] = ['politics', 'civil_service', 'business', 'media', 'civil_society', 'international', 'judiciary', 'academia'];
 
@@ -58,6 +57,8 @@ export default function AddStakeholder() {
   const [layer, setLayer] = useState<ProximityLayer>(2);
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [sensitive, setSensitive] = useState(false);
+  const [, setPortraitFile] = useState<File | null>(null);
+  const [portraitPreview, setPortraitPreview] = useState<string | null>(null);
 
   // Section 2: Scoring
   const [scores, setScores] = useState<Record<Component, number>>({
@@ -120,6 +121,10 @@ export default function AddStakeholder() {
       addToast('Please fill in name and title', 'error');
       return;
     }
+    if (!portraitPreview) {
+      addToast('Please upload a portrait photo', 'error');
+      return;
+    }
 
     const stakeholderId = `s-new-${Date.now()}`;
     const snapshotId = `snap-new-${Date.now()}`;
@@ -136,6 +141,7 @@ export default function AddStakeholder() {
       sensitivity_flag: sensitive,
       status: 'active',
       gender,
+      portrait_url: portraitPreview,
       created_at: now,
     };
 
@@ -228,6 +234,8 @@ export default function AddStakeholder() {
                 setSector('politics'); setLayer(2); setSensitive(false);
                 setScores({ influence: 3, relationship: 3, risk: 3, sentiment: 3, alignment: 3, impact: 3 });
                 setEvidenceEntries([]);
+                setPortraitFile(null);
+                setPortraitPreview(null);
               }}
               className="px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
               style={{ border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
@@ -258,6 +266,63 @@ export default function AddStakeholder() {
             <div className="flex items-center gap-3 mb-5">
               <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--accent-primary)', color: 'white' }}>01</div>
               <h2 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Stakeholder Identity</h2>
+            </div>
+            {/* Portrait Upload */}
+            <div className="flex flex-col items-center mb-6">
+              <label className="cursor-pointer group" htmlFor="portrait-upload">
+                <div
+                  className="relative rounded-full overflow-hidden transition-all duration-200"
+                  style={{
+                    width: 120,
+                    height: 120,
+                    background: portraitPreview ? 'transparent' : 'var(--bg-inset)',
+                    border: portraitPreview ? '3px solid var(--brand-primary)' : '2px dashed var(--border-strong)',
+                  }}
+                >
+                  {portraitPreview ? (
+                    <img src={portraitPreview} alt="Portrait preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 group-hover:opacity-80 transition-opacity">
+                      <Camera size={28} style={{ color: 'var(--text-muted)' }} />
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.6875rem', fontWeight: 500 }}>Upload Photo</span>
+                    </div>
+                  )}
+                  {portraitPreview && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Camera size={24} style={{ color: 'white' }} />
+                    </div>
+                  )}
+                </div>
+              </label>
+              <input
+                id="portrait-upload"
+                type="file"
+                className="hidden"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setPortraitFile(file);
+                    const reader = new FileReader();
+                    reader.onload = (ev) => setPortraitPreview(ev.target?.result as string);
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              {!portraitPreview && (
+                <p style={{ color: 'var(--status-danger)', fontSize: '0.6875rem', marginTop: 6 }}>
+                  * Portrait photo is required
+                </p>
+              )}
+              {portraitPreview && (
+                <button
+                  onClick={() => { setPortraitFile(null); setPortraitPreview(null); }}
+                  className="mt-2 text-body-sm"
+                  style={{ color: 'var(--status-danger)', fontSize: '0.6875rem' }}
+                >
+                  Remove photo
+                </button>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
@@ -530,11 +595,15 @@ export default function AddStakeholder() {
               
               {/* Portrait placeholder */}
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold"
-                  style={{ background: 'var(--brand-primary-bg)', color: 'var(--brand-primary-dark)' }}
-                >
-                  {fullName ? getInitials(fullName) : '?'}
-                </div>
+                {portraitPreview ? (
+                  <img src={portraitPreview} alt="Preview" className="w-14 h-14 rounded-full object-cover" />
+                ) : (
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold"
+                    style={{ background: 'var(--brand-primary-bg)', color: 'var(--brand-primary-dark)' }}
+                  >
+                    {fullName ? getInitials(fullName) : '?'}
+                  </div>
+                )}
                 <div>
                   <div className="text-heading-md" style={{ color: fullName ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                     {fullName || 'Stakeholder Name'}

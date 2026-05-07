@@ -13,6 +13,7 @@ import { QUADRANT_COLORS, COMPONENT_DESCRIPTIONS } from '../lib/types';
 import type { Quadrant, Component } from '../lib/types';
 import { formatRelativeDate, formatDate, formatSIS, formatAxis, formatLayer } from '../lib/formatters';
 import { getSISColor } from '../lib/scoring-engine';
+import Portrait from '../components/ui/Portrait';
 
 type Tab = 'overview' | 'engagements' | 'evidence' | 'history' | 'plan';
 
@@ -100,21 +101,26 @@ export default function StakeholderDetail() {
 
       {/* Profile Header */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="flex-1">
-          <h1 className="text-display-md" style={{ color: 'var(--text-primary)' }}>{stakeholder.full_name}</h1>
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <span className="text-body" style={{ color: 'var(--text-secondary)' }}>{stakeholder.title}</span>
-            <span style={{ color: 'var(--text-muted)' }}>·</span>
-            <span className="text-body" style={{ color: 'var(--text-secondary)' }}>{stakeholder.organization}</span>
+        <div className="flex items-center gap-4 flex-1">
+          <div style={{ boxShadow: `0 0 0 3px ${qColor.dot}22, 0 0 0 1px ${qColor.dot}` }} className="rounded-full shrink-0">
+            <Portrait name={stakeholder.full_name} gender={stakeholder.gender} portraitUrl={stakeholder.portrait_url} size={64} />
           </div>
-          <div className="flex flex-wrap items-center gap-2 mt-3">
-            <SectorBadge sector={stakeholder.sector} />
-            <LayerIndicator layer={stakeholder.proximity_layer} />
-            {stakeholder.sensitivity_flag && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded" style={{ background: '#FEF3C7', color: '#92400E', fontSize: '0.6875rem', fontWeight: 500 }}>
-                <Shield size={11} /> Sensitive
-              </span>
-            )}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-display-md" style={{ color: 'var(--text-primary)' }}>{stakeholder.full_name}</h1>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className="text-body" style={{ color: 'var(--text-secondary)' }}>{stakeholder.title}</span>
+              <span style={{ color: 'var(--text-muted)' }}>·</span>
+              <span className="text-body" style={{ color: 'var(--text-secondary)' }}>{stakeholder.organization}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <SectorBadge sector={stakeholder.sector} />
+              <LayerIndicator layer={stakeholder.proximity_layer} />
+              {stakeholder.sensitivity_flag && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded" style={{ background: '#FEF3C7', color: '#92400E', fontSize: '0.6875rem', fontWeight: 500 }}>
+                  <Shield size={11} /> Sensitive
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -354,11 +360,12 @@ export default function StakeholderDetail() {
                       <button
                         key={s.id}
                         onClick={() => useAppStore.getState().setSelectedStakeholder(s.id)}
-                        className="w-full flex items-center justify-between py-1.5 px-2 rounded-md text-left transition-colors"
+                        className="w-full flex items-center gap-2.5 py-1.5 px-2 rounded-md text-left transition-colors"
                         onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                       >
-                        <div className="min-w-0">
+                        <Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={28} />
+                        <div className="min-w-0 flex-1">
                           <div className="text-body-sm truncate" style={{ color: 'var(--text-primary)' }}>{s.full_name}</div>
                           <div className="text-body-sm truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{s.organization}</div>
                         </div>

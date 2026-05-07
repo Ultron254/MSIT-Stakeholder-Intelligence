@@ -6,7 +6,7 @@ import { QuadrantBadge, SISBadge, ConfidenceBadge, SectorBadge, LayerIndicator, 
 import { QUADRANT_LABELS, SECTOR_LABELS } from '../lib/types';
 import type { Quadrant, Sector, StakeholderWithScore } from '../lib/types';
 import { formatRelativeDate } from '../lib/formatters';
-import { getPortraitUrl, getInitials } from '../lib/avatar';
+import Portrait from '../components/ui/Portrait';
 
 const ITEMS_PER_PAGE = 25;
 
@@ -194,22 +194,7 @@ export default function Stakeholders() {
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--bg-inset)' }}>
-                        <img
-                          src={getPortraitUrl(s.full_name, s.gender)}
-                          alt={s.full_name}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                          onError={e => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                        <div className="hidden absolute inset-0 flex items-center justify-center text-xs font-semibold"
-                          style={{ background: 'var(--brand-primary-bg)', color: 'var(--brand-primary-dark)' }}>
-                          {getInitials(s.full_name)}
-                        </div>
-                      </div>
+                      <Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={32} />
                       <div>
                         <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{s.full_name}</div>
                         <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{s.organization}</div>

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle, Clock, Shield } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import { Card, SeverityBadge, EmptyState } from '../components/ui/Badges';
+import Portrait from '../components/ui/Portrait';
 import { formatRelativeDate } from '../lib/formatters';
 
 export default function Watchlist() {
@@ -119,9 +120,10 @@ export default function Watchlist() {
                     </div>
                     <button
                       onClick={() => setSelectedStakeholder(signal.stakeholder_id)}
-                      className="text-body-sm transition-colors"
+                      className="flex items-center gap-1.5 text-body-sm transition-colors"
                       style={{ color: 'var(--accent-primary)', fontSize: '0.75rem' }}
                     >
+                      {(() => { const st = storeStakeholders.find(s => s.id === signal.stakeholder_id); return st ? <Portrait name={st.full_name} gender={st.gender} portraitUrl={st.portrait_url} size={20} /> : null; })()}
                       View {getStakeholderName(signal.stakeholder_id)}
                     </button>
                   </div>

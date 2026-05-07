@@ -4,7 +4,7 @@ import {
   Users as UsersIcon, Shield, Mail, Check,
 } from 'lucide-react';
 import { useAppStore, users } from '../../lib/store';
-import { getAvatarUrl } from '../../lib/avatar';
+import Portrait from '../ui/Portrait';
 
 const ROLE_LABEL: Record<string, string> = {
   analyst: 'Analyst',
@@ -52,8 +52,6 @@ export default function UserMenu() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
-  const avatarUrl = getAvatarUrl(user.display_name, user.gender);
-
   return (
     <div className="relative" ref={wrapRef}>
       <button
@@ -69,22 +67,10 @@ export default function UserMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <div
-          className="relative w-8 h-8 rounded-full overflow-hidden shrink-0"
-          style={{
-            background: 'var(--bg-inset)',
-            boxShadow: '0 0 0 2px rgba(45,166,126,0.25)',
-          }}
-        >
-          <img
-            src={avatarUrl}
-            alt={user.display_name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
-            }}
-          />
-          {/* online dot */}
+        <div className="relative">
+          <div style={{ boxShadow: '0 0 0 2px rgba(45,166,126,0.25)' }} className="rounded-full">
+            <Portrait name={user.display_name} gender={user.gender} portraitUrl={user.portrait_url} size={32} />
+          </div>
           <span
             className="absolute bottom-0 right-0 w-2 h-2 rounded-full"
             style={{
@@ -134,14 +120,8 @@ export default function UserMenu() {
             }}
           >
             <div className="flex items-center gap-3">
-              <div
-                className="relative w-12 h-12 rounded-full overflow-hidden shrink-0"
-                style={{
-                  background: 'white',
-                  boxShadow: '0 0 0 2px rgba(45,166,126,0.4), 0 4px 12px rgba(15,30,41,0.1)',
-                }}
-              >
-                <img src={avatarUrl} alt={user.display_name} className="w-full h-full object-cover" />
+              <div style={{ boxShadow: '0 0 0 2px rgba(45,166,126,0.4), 0 4px 12px rgba(15,30,41,0.1)' }} className="rounded-full shrink-0">
+                <Portrait name={user.display_name} gender={user.gender} portraitUrl={user.portrait_url} size={48} />
               </div>
               <div className="min-w-0 flex-1">
                 <div style={{ color: 'var(--text-primary)', fontSize: '0.9375rem', fontWeight: 700, lineHeight: 1.2 }}>
@@ -248,15 +228,8 @@ export default function UserMenu() {
                     onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                     onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <div
-                      className="w-8 h-8 rounded-full overflow-hidden shrink-0"
-                      style={{ background: 'var(--bg-inset)', boxShadow: isActive ? '0 0 0 2px #2DA67E' : 'none' }}
-                    >
-                      <img
-                        src={getAvatarUrl(u.display_name, u.gender)}
-                        alt={u.display_name}
-                        className="w-full h-full object-cover"
-                      />
+                    <div style={{ boxShadow: isActive ? '0 0 0 2px #2DA67E' : 'none' }} className="rounded-full shrink-0">
+                      <Portrait name={u.display_name} gender={u.gender} portraitUrl={u.portrait_url} size={32} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div style={{ color: 'var(--text-primary)', fontSize: '0.8125rem', fontWeight: 600, lineHeight: 1.2 }}>

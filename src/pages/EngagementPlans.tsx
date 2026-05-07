@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useAppStore, engagementPlans } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { QuadrantBadge, SISBadge } from '../components/ui/Badges';
+import Portrait from '../components/ui/Portrait';
 import { QUADRANT_COLORS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 
@@ -80,8 +81,9 @@ export default function EngagementPlans() {
                         e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
                       }}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-heading-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Portrait name={stakeholder.full_name} gender={stakeholder.gender} portraitUrl={stakeholder.portrait_url} size={28} />
+                        <span className="text-heading-sm truncate flex-1" style={{ color: 'var(--text-primary)' }}>
                           {stakeholder.full_name}
                         </span>
                         {stakeholder.latestSnapshot && (

@@ -16,6 +16,7 @@ import type { Quadrant } from '../lib/types';
 import { formatRelativeDate, formatDate, formatSIS, daysUntil } from '../lib/formatters';
 import AIInsightsPanel from '../components/AIInsightsPanel';
 import UITooltip from '../components/ui/Tooltip';
+import Portrait from '../components/ui/Portrait';
 
 const QUADRANT_TOOLTIPS: Record<Quadrant, string> = {
   strategic_ally: 'High influence + supportive stance. Protect, leverage and amplify these relationships.',
@@ -429,11 +430,12 @@ export default function Dashboard() {
                     <button
                       key={s.id}
                       onClick={(e) => { e.stopPropagation(); setSelectedStakeholder(s.id); }}
-                      className="w-full flex items-center justify-between text-left rounded-md px-2 py-1 transition-colors"
+                      className="w-full flex items-center gap-2 text-left rounded-md px-2 py-1 transition-colors"
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      <span className="text-body-sm truncate" style={{ color: 'var(--text-primary)' }}>{s.full_name}</span>
+                      <Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={24} />
+                      <span className="text-body-sm truncate flex-1" style={{ color: 'var(--text-primary)' }}>{s.full_name}</span>
                       <SISBadge score={s.latestSnapshot?.sis_score ?? 0} size="sm" />
                     </button>
                   ))}
@@ -551,6 +553,7 @@ export default function Dashboard() {
                 onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
+                <Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={36} />
                 <div className="flex-1 min-w-0">
                   <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{s.full_name}</div>
                   <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{s.organization}</div>

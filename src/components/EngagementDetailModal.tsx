@@ -2,7 +2,7 @@ import { X, Calendar, MessageSquare, Clock, ExternalLink } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import { OutcomeBadge, EngagementTypeBadge } from './ui/Badges';
 import { formatDate } from '../lib/formatters';
-import { getPortraitUrl, getInitials } from '../lib/avatar';
+import Portrait from './ui/Portrait';
 
 export default function EngagementDetailModal() {
   const engagementDetailId = useAppStore(s => s.engagementDetailId);
@@ -55,22 +55,7 @@ export default function EngagementDetailModal() {
             {/* Stakeholder */}
             {stakeholder && (
               <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden" style={{ background: 'var(--bg-inset)' }}>
-                  <img
-                    src={getPortraitUrl(stakeholder.full_name, stakeholder.gender)}
-                    alt={stakeholder.full_name}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                    onError={e => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                  <div className="hidden absolute inset-0 flex items-center justify-center text-xs font-semibold"
-                    style={{ background: 'var(--brand-primary-bg)', color: 'var(--brand-primary-dark)' }}>
-                    {getInitials(stakeholder.full_name)}
-                  </div>
-                </div>
+                <Portrait name={stakeholder.full_name} gender={stakeholder.gender} portraitUrl={stakeholder.portrait_url} size={40} />
                 <div>
                   <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{stakeholder.full_name}</div>
                   <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{stakeholder.organization}</div>

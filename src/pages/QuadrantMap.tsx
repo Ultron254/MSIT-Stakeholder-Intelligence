@@ -3,6 +3,7 @@ import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Responsive
 import { useAppStore } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge } from '../components/ui/Badges';
+import Portrait from '../components/ui/Portrait';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 import { formatSIS, formatAxis } from '../lib/formatters';
@@ -235,11 +236,12 @@ export default function QuadrantMap() {
                     <button
                       key={s.id}
                       onClick={() => setSelectedStakeholder(s.id)}
-                      className="w-full flex items-center justify-between px-2 py-1 rounded-md text-left transition-colors"
+                      className="w-full flex items-center gap-2 px-2 py-1 rounded-md text-left transition-colors"
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      <span className="text-body-sm truncate" style={{ color: 'var(--text-primary)' }}>{s.full_name}</span>
+                      <Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={24} />
+                      <span className="text-body-sm truncate flex-1" style={{ color: 'var(--text-primary)' }}>{s.full_name}</span>
                       <SISBadge score={s.latestSnapshot?.sis_score ?? 0} size="sm" />
                     </button>
                   ))}
@@ -264,7 +266,10 @@ export default function QuadrantMap() {
                   onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
-                  <div className="text-heading-sm mb-1" style={{ color: 'var(--text-primary)' }}>{m.name}</div>
+                  <div className="flex items-center gap-2 mb-1">
+                    {(() => { const st = all.find(s => s.id === m.stakeholderId); return st ? <Portrait name={st.full_name} gender={st.gender} portraitUrl={st.portrait_url} size={24} /> : null; })()}
+                    <span className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{m.name}</span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <QuadrantBadge quadrant={m.from} size="sm" />
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>&rarr;</span>

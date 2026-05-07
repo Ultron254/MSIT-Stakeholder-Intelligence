@@ -5,6 +5,7 @@ import { useStakeholdersWithScores } from '../lib/store';
 import { NOW } from '../lib/constants';
 import { calculateFullScore, getSISColor } from '../lib/scoring-engine';
 import { QuadrantBadge } from './ui/Badges';
+import Portrait from './ui/Portrait';
 import { COMPONENT_LABELS, COMPONENT_DESCRIPTIONS } from '../lib/types';
 import type { Component, Confidence, ScoringInput } from '../lib/types';
 import { formatSIS, formatAxis } from '../lib/formatters';
@@ -160,9 +161,12 @@ export default function ScoreUpdatePanel() {
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b"
           style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-default)' }}
         >
-          <div>
-            <h2 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Update Scores</h2>
-            <p className="text-body-sm" style={{ color: 'var(--text-muted)' }}>{stakeholder.full_name}</p>
+          <div className="flex items-center gap-3">
+            <Portrait name={stakeholder.full_name} gender={stakeholder.gender} portraitUrl={stakeholder.portrait_url} size={36} />
+            <div>
+              <h2 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Update Scores</h2>
+              <p className="text-body-sm" style={{ color: 'var(--text-muted)' }}>{stakeholder.full_name}</p>
+            </div>
           </div>
           <button onClick={closeScoreUpdate} className="p-2 rounded-lg transition-colors"
             style={{ color: 'var(--text-muted)' }}
