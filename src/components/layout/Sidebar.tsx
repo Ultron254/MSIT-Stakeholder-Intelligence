@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard, Users, UserPlus, Target, MessageSquare, ClipboardList,
-  AlertTriangle, Settings, ChevronLeft, ChevronRight, UserCog,
+  AlertTriangle, Settings, ChevronLeft, ChevronRight, UserCog, Radio,
 } from 'lucide-react';
 import { useAppStore, type Page } from '../../lib/store';
 import Tooltip from '../ui/Tooltip';
@@ -38,6 +38,7 @@ const navGroups: NavGroup[] = [
     label: 'Monitoring',
     items: [
       { id: 'watchlist', label: 'Watchlist', icon: AlertTriangle },
+      { id: 'data-streams', label: 'Data Streams', icon: Radio },
     ],
   },
   {

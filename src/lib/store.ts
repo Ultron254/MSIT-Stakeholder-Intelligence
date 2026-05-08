@@ -10,7 +10,7 @@ import {
 } from './data';
 import { detectRedFlags } from './scoring-engine';
 
-export type Page = 'dashboard' | 'stakeholders' | 'stakeholder-detail' | 'quadrant-map' | 'engagements' | 'engagement-plans' | 'watchlist' | 'scoring-config' | 'users' | 'add-stakeholder';
+export type Page = 'dashboard' | 'stakeholders' | 'stakeholder-detail' | 'quadrant-map' | 'engagements' | 'engagement-plans' | 'watchlist' | 'scoring-config' | 'users' | 'add-stakeholder' | 'data-streams';
 
 interface Filters {
   search: string;

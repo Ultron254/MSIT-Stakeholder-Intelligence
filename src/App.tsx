@@ -11,6 +11,7 @@ import Watchlist from './pages/Watchlist';
 import ScoringConfig from './pages/ScoringConfig';
 import UsersAccess from './pages/UsersAccess';
 import AddStakeholder from './pages/AddStakeholder';
+import DataStreams from './pages/DataStreams';
 import ScoreUpdatePanel from './components/ScoreUpdatePanel';
 import EngagementDetailModal from './components/EngagementDetailModal';
 import LogEngagementModal from './components/LogEngagementModal';
@@ -33,6 +34,7 @@ function App() {
       case 'scoring-config': return <ScoringConfig />;
       case 'users': return <UsersAccess />;
       case 'add-stakeholder': return <AddStakeholder />;
+      case 'data-streams': return <DataStreams />;
       default: return <Dashboard />;
     }
   };

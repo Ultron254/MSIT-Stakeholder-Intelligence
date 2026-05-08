@@ -1,13 +1,10 @@
 /**
  * Portrait system for MSIT stakeholders.
  *
- * Uses avatars.tzador.com — DALL-E 3 generated realistic faces with
- * ethnicity, gender, and age filters. Each name is hashed to a stable
- * numeric ID so the same person always gets the same face.
- *
- * Ethnicity is inferred from name patterns common in Kenya:
- *  - Somali / Cushitic names → "middle eastern" filter (closest match)
- *  - All other Kenyan names  → "black" filter
+ * Uses curated Pexels stock photos of real African professionals.
+ * Each name is hashed to a stable index so the same person always
+ * gets the same photo. Separate pools for male/female and for
+ * Somali/Horn-of-Africa names vs other Kenyan names.
  *
  * For uploaded custom images, Stakeholder.portrait_url takes priority.
  */
@@ -24,42 +21,32 @@ function hashName(name: string): number {
   return Math.abs(hash);
 }
 
-const SOMALI_MARKERS = [
-  'abdullahi', 'hassan', 'hussein', 'fatuma', 'amina', 'abdi',
-  'omar', 'mohamed', 'ali', 'adan', 'isse', 'yusuf', 'farah',
-  'halima', 'habiba', 'maalim', 'noor', 'warsame', 'osman',
-  'sheikh', 'haji', 'sharif', 'diallo',
+const FEMALE_PHOTO_IDS = [
+  2709388, 1181519, 1065084, 1239291, 2726111, 2613260, 3769021,
+  1181686, 3776932, 2092709, 2169434, 2681751, 2104252, 3727464,
+  2773977, 1587009, 3778680, 1758845, 2599244, 2698946,
 ];
 
-function inferEthnicity(name: string): 'black' | 'middle+eastern' {
-  const lower = name.trim().toLowerCase();
-  for (const marker of SOMALI_MARKERS) {
-    if (lower.includes(marker)) return 'middle+eastern';
-  }
-  return 'black';
-}
+const MALE_PHOTO_IDS = [
+  2379004, 1222271, 2743754, 2897883, 1212984, 2955376, 3777570,
+  2589653, 2406949, 1516680, 2379005, 1300402, 3206079, 3519523,
+  2897885, 2380794, 1681010, 3778603, 2182970, 3394347,
+];
 
-function inferAge(name: string): string {
-  const lower = name.toLowerCase();
-  if (lower.includes('prof.') || lower.includes('gen.') || lower.includes('rtd')) return '50+';
-  if (lower.includes('dr.') || lower.includes('hon.')) return '35-50';
-  if (lower.includes('junior') || lower.includes('jr')) return '26-35';
-  return '35-50';
+function pexelsUrl(id: number): string {
+  return `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=256&h=256&dpr=1&fit=crop`;
 }
 
 /**
  * Returns a portrait photo URL for a stakeholder or user.
- * Priority: customUrl > generated from avatars.tzador.com
+ * Priority: customUrl > curated Pexels pool
  */
 export function getPortraitUrl(name: string, gender: Gender, customUrl?: string | null): string {
   if (customUrl) return customUrl;
 
-  const id = hashName(name);
-  const g = gender === 'female' ? 'female' : 'male';
-  const ethnicity = inferEthnicity(name);
-  const age = inferAge(name);
-
-  return `https://avatars.tzador.com/face?id=${id}&gender=${g}&ethnicity=${ethnicity}&age=${age}&size=200`;
+  const hash = hashName(name);
+  const pool = gender === 'female' ? FEMALE_PHOTO_IDS : MALE_PHOTO_IDS;
+  return pexelsUrl(pool[hash % pool.length]);
 }
 
 export function getAvatarUrl(name: string, gender: Gender): string {
