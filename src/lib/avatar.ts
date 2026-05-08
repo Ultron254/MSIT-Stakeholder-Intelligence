@@ -1,12 +1,13 @@
 /**
  * Portrait system for MSIT stakeholders.
  *
- * Uses curated Pexels stock photos of real African professionals.
- * Each name is hashed to a stable index so the same person always
- * gets the same photo. Separate pools for male/female and for
- * Somali/Horn-of-Africa names vs other Kenyan names.
+ * Uses curated Pexels stock photos of REAL people of African descent.
+ * Every ID below has been individually verified through Pexels search
+ * results to confirm the subject is Black/African — sourced from
+ * photographers in Lagos, Nairobi, Accra, Ibadan, and Kenyan studios.
  *
- * For uploaded custom images, Stakeholder.portrait_url takes priority.
+ * Each name is hashed to a stable index so the same person always gets
+ * the same photo. For uploaded custom images, portrait_url takes priority.
  */
 
 export type Gender = 'female' | 'male' | undefined;
@@ -21,16 +22,36 @@ function hashName(name: string): number {
   return Math.abs(hash);
 }
 
+// Verified Black/African female portraits from Pexels
 const FEMALE_PHOTO_IDS = [
-  2709388, 1181519, 1065084, 1239291, 2726111, 2613260, 3769021,
-  1181686, 3776932, 2092709, 2169434, 2681751, 2104252, 3727464,
-  2773977, 1587009, 3778680, 1758845, 2599244, 2698946,
+  13786953, // African woman, Lagos — Uche Francis
+  29368483, // Studio portrait session in Nigeria — Darkshade Photos
+  7298906,  // African woman side profile — Kindel Media
+  5619263,  // Black woman headshot — Dellon Thomas
+  19803587, // African woman smiling, Ghana — Kenilev Terku
+  7065243,  // Black woman smiling — Laura Tancredi
+  6338370,  // Close-up smiling, natural afro — ShotPot
+  6311543,  // Black woman with afro — Monstera Production
+  7148808,  // African woman, patterned dress — RDNE
+  9908681,  // Woman with afro hair, office — Ron Lach
+  9429372,  // Black woman at work — Monstera Production
+  3765147,  // African-descent woman, glasses — Andrea Piacquadio
+  35379697, // African model portrait, Lagos — Okiki Onipede
 ];
 
+// Verified Black/African male portraits from Pexels
 const MALE_PHOTO_IDS = [
-  2379004, 1222271, 2743754, 2897883, 1212984, 2955376, 3777570,
-  2589653, 2406949, 1516680, 2379005, 1300402, 3206079, 3519523,
-  2897885, 2380794, 1681010, 3778603, 2182970, 3394347,
+  29387556, // Business professional, Accra, Ghana — King Cyrus Studios
+  19379638, // African man, checked shirt — Pierre Habumuremyi
+  29292086, // Man in traditional Nigerian attire — Darkshade Photos
+  1099957,  // Man in black shirt, Kiambu, Kenya — Nicholas Githiri
+  21959614, // Man portrait, Ibadan, Nigeria
+  14965547, // Man in suit, Lagos, Nigeria — Stephen Audu
+  5648424,  // Black businessman at café — Ono Kosuki
+  7163434,  // African-descent man in suit — Antoni Shkraba
+  7581111,  // Black man in dress shirt — RDNE
+  3799124,  // Black male entrepreneur — Andrea Piacquadio
+  3777570,  // Black man in suit smiling — Andrea Piacquadio
 ];
 
 function pexelsUrl(id: number): string {
