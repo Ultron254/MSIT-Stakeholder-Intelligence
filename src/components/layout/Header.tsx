@@ -44,7 +44,7 @@ export default function Header() {
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
 
-  // Cmd+K keyboard shortcut
+  // Cmd/Ctrl+K opens search; Escape closes it
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {

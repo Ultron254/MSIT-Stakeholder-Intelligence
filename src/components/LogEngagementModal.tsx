@@ -30,7 +30,6 @@ export default function LogEngagementModal() {
   const [followUpDate, setFollowUpDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Reset when opening
   useState(() => {
     if (logEngagementOpen) {
       setStakeholderId(logEngagementStakeholderId || '');

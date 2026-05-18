@@ -4,7 +4,7 @@ import { getSISColor } from '../../lib/scoring-engine';
 import { X } from 'lucide-react';
 import { useAppStore } from '../../lib/store';
 
-// ---- Quadrant Badge ----
+// Quadrant Badge
 export function QuadrantBadge({ quadrant, size = 'md' }: { quadrant: Quadrant; size?: 'sm' | 'md' }) {
   const colors = QUADRANT_COLORS[quadrant];
   const label = QUADRANT_LABELS[quadrant];
@@ -28,7 +28,7 @@ export function QuadrantBadge({ quadrant, size = 'md' }: { quadrant: Quadrant; s
   );
 }
 
-// ---- SIS Badge ----
+// SIS Badge
 export function SISBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 'md' | 'lg' }) {
   const color = getSISColor(score);
   const fontSize = size === 'lg' ? '1.5rem' : size === 'md' ? '1rem' : '0.875rem';
@@ -42,7 +42,7 @@ export function SISBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 
   );
 }
 
-// ---- Confidence Badge ----
+// Confidence Badge
 export function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   const styles: Record<Confidence, { bg: string; color: string }> = {
     A: { bg: 'var(--quadrant-ally-bg)', color: 'var(--quadrant-ally-text)' },
@@ -60,7 +60,7 @@ export function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   );
 }
 
-// ---- Status Badge ----
+// Workflow status badge
 export function WorkflowBadge({ status }: { status: WorkflowStatus }) {
   const styles: Record<WorkflowStatus, { bg: string; color: string }> = {
     draft: { bg: 'var(--bg-secondary)', color: 'var(--text-muted)' },
@@ -79,7 +79,7 @@ export function WorkflowBadge({ status }: { status: WorkflowStatus }) {
   );
 }
 
-// ---- Sector Badge ----
+// Sector Badge
 export function SectorBadge({ sector }: { sector: Sector }) {
   return (
     <span
@@ -96,7 +96,7 @@ export function SectorBadge({ sector }: { sector: Sector }) {
   );
 }
 
-// ---- Severity Badge ----
+// Severity Badge
 export function SeverityBadge({ severity }: { severity: 'critical' | 'high' | 'medium' | 'low' }) {
   const styles = {
     critical: { bg: '#FEE2E2', color: '#991B1B' },
@@ -115,7 +115,7 @@ export function SeverityBadge({ severity }: { severity: 'critical' | 'high' | 'm
   );
 }
 
-// ---- Layer Indicator ----
+// Layer Indicator
 export function LayerIndicator({ layer }: { layer: 1 | 2 | 3 }) {
   const labels = { 1: 'Core', 2: 'Inner', 3: 'Outer' };
   const opacities = { 1: 1, 2: 0.6, 3: 0.3 };
@@ -130,7 +130,7 @@ export function LayerIndicator({ layer }: { layer: 1 | 2 | 3 }) {
   );
 }
 
-// ---- Engagement Type Badge ----
+// Engagement Type Badge
 export function EngagementTypeBadge({ type }: { type: string }) {
   return (
     <span
@@ -147,7 +147,7 @@ export function EngagementTypeBadge({ type }: { type: string }) {
   );
 }
 
-// ---- Outcome Badge ----
+// Outcome Badge
 export function OutcomeBadge({ outcome }: { outcome: string }) {
   const styles: Record<string, { bg: string; color: string }> = {
     positive: { bg: 'var(--quadrant-ally-bg)', color: 'var(--quadrant-ally-text)' },
@@ -166,7 +166,7 @@ export function OutcomeBadge({ outcome }: { outcome: string }) {
   );
 }
 
-// ---- Card ----
+// Card
 export function Card({ children, className = '', onClick, hover = false }: {
   children: React.ReactNode; className?: string; onClick?: () => void; hover?: boolean;
 }) {
@@ -200,7 +200,7 @@ export function Card({ children, className = '', onClick, hover = false }: {
   );
 }
 
-// ---- Toast Container ----
+// Toast Container
 export function ToastContainer() {
   const { toasts, removeToast } = useAppStore();
   if (toasts.length === 0) return null;
@@ -227,7 +227,7 @@ export function ToastContainer() {
   );
 }
 
-// ---- Empty State ----
+// Empty State
 export function EmptyState({ title, description }: { title: string; description: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -237,7 +237,7 @@ export function EmptyState({ title, description }: { title: string; description:
   );
 }
 
-// ---- Score Bar ----
+// Score Bar
 export function ScoreBar({ value, max = 5, color }: { value: number; max?: number; color?: string }) {
   const pct = (value / max) * 100;
   return (

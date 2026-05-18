@@ -52,7 +52,6 @@ export default function StakeholderDetail() {
   const plan = engagementPlans.find(p => p.stakeholder_id === stakeholder.id);
   const qColor = snap ? QUADRANT_COLORS[snap.quadrant] : QUADRANT_COLORS.monitor_exit;
 
-  // Radar data
   const radarData = snap ? [
     { component: 'Influence', value: snap.influence_score, fullMark: 5 },
     { component: 'Relationship', value: snap.relationship_score, fullMark: 5 },
@@ -62,7 +61,6 @@ export default function StakeholderDetail() {
     { component: 'Impact', value: snap.impact_score, fullMark: 5 },
   ] : [];
 
-  // Score components for breakdown
   const scoreComponents: { key: Component; label: string; value: number; description: string }[] = snap ? [
     { key: 'influence', label: 'Influence', value: snap.influence_score, description: COMPONENT_DESCRIPTIONS.influence },
     { key: 'relationship', label: 'Relationship', value: snap.relationship_score, description: COMPONENT_DESCRIPTIONS.relationship },
@@ -72,7 +70,6 @@ export default function StakeholderDetail() {
     { key: 'impact', label: 'Impact', value: snap.impact_score, description: COMPONENT_DESCRIPTIONS.impact },
   ] : [];
 
-  // SIS history line data
   const historyData = stakeSnapshots.map(s => ({
     date: formatDate(s.scored_at),
     sis: s.sis_score,

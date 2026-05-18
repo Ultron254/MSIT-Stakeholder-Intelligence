@@ -1,5 +1,2 @@
-// ============================================================
-// Reference date: April 15 2026
-// All date calculations use this as "today" for the demo dataset
-// ============================================================
+// Demo reference date -- all date calculations use this as "today"
 export const NOW = new Date('2026-04-15');

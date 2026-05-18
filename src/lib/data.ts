@@ -6,23 +6,16 @@ import type {
 } from './types';
 import { calculateFullScore } from './scoring-engine';
 
-// ============================================================
-// Reference date: April 15 2026
-// ============================================================
 export { NOW } from './constants';
 import { NOW } from './constants';
 const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
 
-// ============================================================
 // Countries
-// ============================================================
 export const countries: Country[] = [
   { id: 'c-001', code: 'KEN', name: 'Kenya', region: 'East Africa', is_active: true },
 ];
 
-// ============================================================
 // Objectives
-// ============================================================
 export const objectives: Objective[] = [
   {
     id: 'o-001', country_id: 'c-001',
@@ -32,9 +25,7 @@ export const objectives: Objective[] = [
   },
 ];
 
-// ============================================================
 // Users
-// ============================================================
 export const users: User[] = [
   { id: 'u-001', email: 'sarah.wanjiku@momentum.africa', display_name: 'Sarah Wanjiku', role: 'analyst', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Senior Intelligence Analyst', portrait_url: null },
   { id: 'u-002', email: 'james.ochieng@momentum.africa', display_name: 'James Ochieng', role: 'country_lead', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Kenya Country Lead', portrait_url: null },
@@ -43,9 +34,7 @@ export const users: User[] = [
   { id: 'u-005', email: 'admin@momentum.africa', display_name: 'System Admin', role: 'admin', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Platform Administrator', portrait_url: null },
 ];
 
-// ============================================================
-// Scoring Weights
-// ============================================================
+// Scoring weights (current published version)
 export const scoringWeights: ScoringWeights = {
   id: 'sw-001', version: 1,
   influence_weight: 0.30, relationship_weight: 0.20, risk_weight: 0.15,
@@ -54,9 +43,7 @@ export const scoringWeights: ScoringWeights = {
   missing_data_rule: 'rescale', is_current: true,
 };
 
-// ============================================================
-// Stakeholder raw definitions
-// ============================================================
+// Stakeholder raw definitions -- expanded into Stakeholder records below
 interface StakeholderDef {
   id: string; name: string; title: string; org: string; sector: Sector;
   layer: 1|2|3; sensitive: boolean; gender: 'female' | 'male';
@@ -64,7 +51,7 @@ interface StakeholderDef {
 }
 
 const stakeholderDefs: StakeholderDef[] = [
-  // ---- STRATEGIC ALLIES (12) ----
+  // Strategic Allies (12)
   { id:'s-001', name:'Dr. Sarah Wanjiku', title:'Principal Secretary, Energy', org:'Ministry of Energy', sector:'civil_service', layer:1, sensitive:false, gender:'female', I:5,R:4,K:1,S:5,A:5,M:4 },
   { id:'s-002', name:'Grace Akinyi', title:'Director, Climate Policy', org:'Ministry of Environment', sector:'civil_service', layer:2, sensitive:false, gender:'female', I:4,R:5,K:2,S:5,A:4,M:4 },
   { id:'s-003', name:'Hon. Fatuma Hassan', title:'Chair, Energy Committee', org:'National Assembly', sector:'politics', layer:1, sensitive:false, gender:'female', I:5,R:4,K:2,S:4,A:5,M:5 },
@@ -78,7 +65,7 @@ const stakeholderDefs: StakeholderDef[] = [
   { id:'s-011', name:'Anne Njeri', title:'Director, Green Energy', org:'KenGen', sector:'business', layer:2, sensitive:false, gender:'female', I:4,R:4,K:1,S:5,A:5,M:4 },
   { id:'s-012', name:'Hassan Ali', title:'Country Director', org:'GIZ Kenya', sector:'international', layer:2, sensitive:false, gender:'male', I:4,R:4,K:1,S:4,A:5,M:4 },
 
-  // ---- POWER GAPS (15) ----
+  // Power Gaps (15)
   { id:'s-013', name:'Hon. James Mwangi Kamau', title:'Deputy Speaker', org:'National Assembly', sector:'politics', layer:1, sensitive:true, gender:'male', I:5,R:3,K:3,S:3,A:2,M:5 },
   { id:'s-014', name:'Hon. Richard Koech', title:'Majority Whip', org:'National Assembly', sector:'politics', layer:1, sensitive:true, gender:'male', I:5,R:3,K:3,S:3,A:2,M:5 },
   { id:'s-015', name:'Gen. Peter Mburu (Rtd)', title:'CEO', org:'Kenya Pipeline', sector:'business', layer:2, sensitive:true, gender:'male', I:4,R:2,K:5,S:2,A:1,M:4 },
@@ -95,7 +82,7 @@ const stakeholderDefs: StakeholderDef[] = [
   { id:'s-026', name:'Prof. James Ogola', title:'Chair', org:'National Environment Management Authority', sector:'civil_service', layer:2, sensitive:false, gender:'male', I:4,R:2,K:3,S:3,A:3,M:4 },
   { id:'s-027', name:'Elizabeth Maina', title:'Head of Energy Practice', org:'PwC East Africa', sector:'business', layer:3, sensitive:false, gender:'female', I:4,R:2,K:2,S:3,A:3,M:4 },
 
-  // ---- HIDDEN CHAMPIONS (8) ----
+  // Hidden Champions (8)
   { id:'s-028', name:'Peter Kariuki', title:'CEO', org:'Kenya Power', sector:'business', layer:2, sensitive:false, gender:'male', I:3,R:4,K:2,S:4,A:4,M:3 },
   { id:'s-029', name:'Mary Njoroge', title:'MP, Nairobi County', org:'National Assembly', sector:'politics', layer:2, sensitive:false, gender:'female', I:3,R:5,K:2,S:5,A:4,M:3 },
   { id:'s-030', name:'Charles Ongwae', title:'Director, Energy Planning', org:'Ministry of Energy', sector:'civil_service', layer:3, sensitive:false, gender:'male', I:3,R:4,K:1,S:4,A:5,M:3 },
@@ -105,7 +92,7 @@ const stakeholderDefs: StakeholderDef[] = [
   { id:'s-034', name:'Kenneth Muturi', title:'Coordinator', org:'Youth Climate Action', sector:'civil_society', layer:3, sensitive:false, gender:'male', I:2,R:5,K:1,S:5,A:5,M:2 },
   { id:'s-035', name:'Rachel Atieno', title:'Energy Economist', org:'Kenya Institute for Public Policy Research', sector:'academia', layer:3, sensitive:false, gender:'female', I:3,R:4,K:1,S:5,A:5,M:3 },
 
-  // ---- MONITOR / EXIT (12) ----
+  // Monitor / Exit (12)
   { id:'s-036', name:'Thomas Kiprotich', title:'Junior Officer', org:'Ministry of Energy', sector:'civil_service', layer:3, sensitive:false, gender:'male', I:2,R:2,K:3,S:3,A:2,M:2 },
   { id:'s-037', name:'Jane Achieng', title:'Reporter', org:'Daily Nation', sector:'media', layer:3, sensitive:false, gender:'female', I:2,R:2,K:4,S:2,A:2,M:2 },
   { id:'s-038', name:'Samuel Otieno', title:'Backbencher MP', org:'National Assembly', sector:'politics', layer:3, sensitive:false, gender:'male', I:2,R:1,K:4,S:2,A:2,M:2 },
@@ -120,9 +107,6 @@ const stakeholderDefs: StakeholderDef[] = [
   { id:'s-047', name:'Mercy Wangui', title:'Administrative Officer', org:'EPRA', sector:'civil_service', layer:3, sensitive:false, gender:'female', I:2,R:2,K:3,S:3,A:2,M:2 },
 ];
 
-// ============================================================
-// Build stakeholder objects
-// ============================================================
 export const stakeholders: Stakeholder[] = stakeholderDefs.map((d, i) => ({
   id: d.id,
   country_id: 'c-001',
@@ -138,9 +122,7 @@ export const stakeholders: Stakeholder[] = stakeholderDefs.map((d, i) => ({
   created_at: fmt(subDays(NOW, 180 - i * 3)),
 }));
 
-// ============================================================
-// Stakeholder-Objective links
-// ============================================================
+// Stakeholder-objective links: position is derived from current quadrant
 export const stakeholderObjectives: StakeholderObjective[] = stakeholderDefs.map((d, i) => {
   const result = calculateFullScore({ influence: d.I, relationship: d.R, risk: d.K, sentiment: d.S, alignment: d.A, impact: d.M });
   let position: StakeholderObjective['position'] = 'neutral';
@@ -157,9 +139,7 @@ export const stakeholderObjectives: StakeholderObjective[] = stakeholderDefs.map
   };
 });
 
-// ============================================================
-// Score Snapshots (with historical versions for 15 stakeholders)
-// ============================================================
+// Score snapshots: latest for everyone + historical versions for 15 stakeholders
 function buildSnapshot(
   id: string, sid: string, version: number,
   I: number, R: number, K: number, S: number, A: number, M: number,
@@ -187,58 +167,41 @@ function buildSnapshot(
 const snapshotsArr: ScoreSnapshot[] = [];
 let snapIdx = 1;
 
-// Current (latest) snapshots for ALL stakeholders
+// Latest snapshot for every stakeholder; confidence overrides for a few key profiles
 stakeholderDefs.forEach((d) => {
   const snap = buildSnapshot(
     `snap-${String(snapIdx++).padStart(4,'0')}`, d.id, 1,
     d.I, d.R, d.K, d.S, d.A, d.M,
     subMonths(NOW, 1)
   );
-  // Set specific confidence per quadrant type
   if (d.id === 's-001' || d.id === 's-003' || d.id === 's-005') snap.overall_confidence = 'A';
   if (d.id === 's-036' || d.id === 's-043') snap.overall_confidence = 'C';
   snapshotsArr.push(snap);
 });
 
-// Historical snapshots for 15 key stakeholders (showing evolution)
-// s-001 Dr Sarah Wanjiku: was slightly lower, improved
+// Historical baselines for 15 stakeholders so trend/quadrant-change views have data
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-001',0, 4,3,2,4,4,3, subMonths(NOW,6)));
-// s-003 Hon Fatuma Hassan: was lower relationship
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-003',0, 5,2,3,3,4,4, subMonths(NOW,5)));
-// s-004 Michael Odhiambo: was in hidden champion, moved to strategic ally
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-004',0, 3,4,1,5,4,3, subMonths(NOW,5)));
-// s-007 Dr Rebecca Muthoni
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-007',0, 3,4,2,4,4,3, subMonths(NOW,4)));
-// s-009 Catherine Wambua
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-009',0, 3,4,2,4,4,3, subMonths(NOW,4)));
-// s-013 Hon James Mwangi Kamau: was in monitor, moved to power gap
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-013',0, 3,2,4,2,2,3, subMonths(NOW,6)));
-// s-015 Gen Peter Mburu
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-015',0, 4,1,5,1,1,3, subMonths(NOW,5)));
-// s-018 Dr Wilson Songa
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-018',0, 4,1,4,2,2,4, subMonths(NOW,4)));
-// s-020 Hon George Muchiri
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-020',0, 4,2,4,2,1,4, subMonths(NOW,5)));
-// s-025 Hon Patrick Makau
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-025',0, 4,2,4,2,1,3, subMonths(NOW,4)));
-// s-028 Peter Kariuki
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-028',0, 2,3,3,3,3,2, subMonths(NOW,5)));
-// s-029 Mary Njoroge: was monitor, improved to hidden champion
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-029',0, 2,3,3,3,3,2, subMonths(NOW,6)));
-// s-032 James Nyakundi
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-032',0, 2,4,2,4,4,2, subMonths(NOW,4)));
-// s-035 Rachel Atieno
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-035',0, 2,3,2,4,4,2, subMonths(NOW,3)));
-// s-042 Margaret Wanjiku
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-042',0, 3,3,2,3,4,2, subMonths(NOW,4)));
 
-// Add intermediate versions for s-004 and s-029 (quadrant changers)
+// Intermediate snapshots that recorded the actual quadrant migration for s-004 and s-029
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-004',0, 3,5,1,5,5,3, subMonths(NOW,3), 'approved','u-001','u-002'));
 snapshotsArr.push(buildSnapshot(`snap-${String(snapIdx++).padStart(4,'0')}`,'s-029',0, 3,4,2,4,3,3, subMonths(NOW,3), 'approved','u-001','u-002'));
 
 export const scoreSnapshots: ScoreSnapshot[] = snapshotsArr;
 
-// Helper to get latest snapshot for a stakeholder
 export function getLatestSnapshot(stakeholderId: string): ScoreSnapshot | null {
   const stakeholderSnaps = snapshotsArr
     .filter(s => s.stakeholder_id === stakeholderId)
@@ -246,9 +209,7 @@ export function getLatestSnapshot(stakeholderId: string): ScoreSnapshot | null {
   return stakeholderSnaps[0] ?? null;
 }
 
-// ============================================================
-// Component Scores linked to snapshots
-// ============================================================
+// Component scores linked to snapshots, with shared rationale templates per component
 const components: Component[] = ['influence','relationship','risk','sentiment','alignment','impact'];
 export const componentScores: ComponentScore[] = snapshotsArr.flatMap(snap => {
   const scores: Record<Component, number> = {
@@ -274,9 +235,7 @@ export const componentScores: ComponentScore[] = snapshotsArr.flatMap(snap => {
   }));
 });
 
-// ============================================================
-// Evidence Records (~200)
-// ============================================================
+// Evidence records (~200, weighted toward strategic allies and power gaps)
 const evidenceTypes: EvidenceRecord['evidence_type'][] = ['meeting_notes','media_report','social_media','official_document','third_party_intel','direct_observation'];
 const evidenceTitles: string[] = [
   'Energy Committee briefing notes','Policy position paper analysis','Media coverage review','Social media sentiment scan',
@@ -290,7 +249,6 @@ export const evidenceRecords: EvidenceRecord[] = [];
 let evIdx = 1;
 
 stakeholderDefs.forEach((d, si) => {
-  // Strategic allies and power gaps get more evidence
   const count = si < 12 ? 6 : si < 27 ? 5 : si < 35 ? 3 : 2;
   for (let j = 0; j < count; j++) {
     evidenceRecords.push({
@@ -310,9 +268,7 @@ stakeholderDefs.forEach((d, si) => {
   }
 });
 
-// ============================================================
-// Engagement Records (51)
-// ============================================================
+// Engagement records (51 total)
 const engagementTypes: EngagementRecord['engagement_type'][] = ['meeting','phone_call','email','event','social','third_party_intro','formal_submission'];
 const engagementDescriptions = [
   'Policy briefing on Bill provisions and implementation timeline',
@@ -335,7 +291,7 @@ const engagementDescriptions = [
 export const engagementRecords: EngagementRecord[] = [];
 let engIdx = 1;
 
-// Generate engagements — more for strategic allies and power gaps
+// Allies and power gaps get more engagements; the rest get a single touch point
 stakeholderDefs.slice(0, 35).forEach((d, si) => {
   const count = si < 12 ? 2 : si < 27 ? 1 : 1;
   for (let j = 0; j < count; j++) {
@@ -355,7 +311,7 @@ stakeholderDefs.slice(0, 35).forEach((d, si) => {
   }
 });
 
-// Add a few extra to reach 51
+// Top up to 51 total engagements
 for (let j = 0; j < 5; j++) {
   const si = j * 3;
   engagementRecords.push({
@@ -372,9 +328,7 @@ for (let j = 0; j < 5; j++) {
   });
 }
 
-// ============================================================
-// Engagement Plans (47 — one per stakeholder)
-// ============================================================
+// Engagement plans -- one per stakeholder, keyed off current quadrant
 const approaches: Record<string, string> = {
   strategic_ally: 'Deepen relationship, deploy as champion, protect from opposition targeting',
   power_gap: 'Convert through intermediaries, address concerns, build trust incrementally',
@@ -421,9 +375,7 @@ export const engagementPlans: EngagementPlan[] = stakeholderDefs.map((d, i) => {
   };
 });
 
-// ============================================================
-// Watchlist Signals (10: 6 active, 4 resolved)
-// ============================================================
+// Watchlist signals (10: 6 active, 4 resolved)
 export const watchlistSignals: WatchlistSignal[] = [
   { id:'ws-001', stakeholder_id:'s-016', signal_type:'red_flag_triggered', severity:'critical', description:'Stephen Letoo (Kenya Petroleum Refineries) — High influence with no relationship access and zero engagements logged. Immediate outreach required.', is_resolved:false, triggered_at:fmt(subDays(NOW,3)), resolved_at:null },
   { id:'ws-002', stakeholder_id:'s-015', signal_type:'sis_drop', severity:'critical', description:'Gen. Peter Mburu — SIS dropped from 46 to 34 following hostile media statements against renewable energy subsidies.', is_resolved:false, triggered_at:fmt(subDays(NOW,7)), resolved_at:null },
@@ -437,9 +389,7 @@ export const watchlistSignals: WatchlistSignal[] = [
   { id:'ws-010', stakeholder_id:'s-008', signal_type:'stale_assessment', severity:'low', description:'Prof. David Ngugi assessment approaching 90-day threshold. Schedule routine update.', is_resolved:true, triggered_at:fmt(subDays(NOW,20)), resolved_at:fmt(subDays(NOW,10)) },
 ];
 
-// ============================================================
-// Audit / Activity Feed
-// ============================================================
+// Audit / activity feed
 export interface ActivityItem {
   id: string;
   type: 'score_update' | 'engagement_logged' | 'approval' | 'watchlist_alert' | 'plan_created' | 'evidence_added';

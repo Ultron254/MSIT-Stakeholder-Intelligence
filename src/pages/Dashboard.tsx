@@ -44,7 +44,6 @@ export default function Dashboard() {
   const daysLeft = daysUntil(objective.target_date);
   const aiPanelCollapsed = useAppStore(s => s.aiPanelCollapsed);
 
-  // Portfolio stats
   const stats = useMemo(() => {
     const scored = all.filter(s => s.latestSnapshot);
     const avgSIS = scored.length > 0 ? scored.reduce((sum, s) => sum + (s.latestSnapshot?.sis_score ?? 0), 0) / scored.length : 0;
@@ -55,7 +54,6 @@ export default function Dashboard() {
     return { total: all.length, avgSIS, quadrantCounts, activeAlerts: alerts.length, totalFlags };
   }, [all, watchlist]);
 
-  // Quadrant distribution data
   const quadrantData = useMemo(() => {
     const order: Quadrant[] = ['strategic_ally', 'power_gap', 'hidden_champion', 'monitor_exit'];
     return order.map(q => ({
@@ -67,7 +65,7 @@ export default function Dashboard() {
     }));
   }, [stats]);
 
-  // Top priority stakeholders (strategic allies + power gaps by SIS desc)
+  // Top priority stakeholders: allies and power gaps, ranked by SIS
   const priorityStakeholders = useMemo(() => {
     return all
       .filter(s => s.latestSnapshot && ['strategic_ally', 'power_gap'].includes(s.latestSnapshot.quadrant))
@@ -75,7 +73,6 @@ export default function Dashboard() {
       .slice(0, 6);
   }, [all]);
 
-  // Priority actions
   const priorityActions = useMemo(() => {
     const actions: Array<{ type: string; label: string; stakeholder: string; stakeholderId: string; time: string; severity: 'critical'|'high'|'medium' }> = [];
     watchlist.filter(w => !w.is_resolved).forEach(w => {
@@ -92,7 +89,7 @@ export default function Dashboard() {
     return actions.slice(0, 6);
   }, [all, watchlist]);
 
-  // SIS trend (simulated monthly data)
+  // Synthetic SIS trend so the dashboard chart has 6 months of data to render
   const sisTrend = useMemo(() => {
     const months = ['Nov 2025', 'Dec 2025', 'Jan 2026', 'Feb 2026', 'Mar 2026', 'Apr 2026'];
     const base = stats.avgSIS;
@@ -102,7 +99,6 @@ export default function Dashboard() {
     }));
   }, [stats.avgSIS]);
 
-  // Activity icons
   const activityIcon = (type: string) => {
     switch (type) {
       case 'score_update': return <TrendingUp size={14} />;

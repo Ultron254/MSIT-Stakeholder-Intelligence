@@ -1,6 +1,4 @@
-// ============================================================
-// MSIT Core Type Definitions
-// ============================================================
+// MSIT core type definitions
 
 export interface Country {
   id: string;

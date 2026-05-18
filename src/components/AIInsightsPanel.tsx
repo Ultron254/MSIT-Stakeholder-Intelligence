@@ -6,7 +6,6 @@ import {
 import {
   useAppStore, useStakeholdersWithScores, objectives,
 } from '../lib/store';
-import { QUADRANT_LABELS } from '../lib/types';
 import { formatSIS, daysUntil } from '../lib/formatters';
 import { getAvatarUrl } from '../lib/avatar';
 import { users } from '../lib/store';
@@ -39,7 +38,6 @@ export default function AIInsightsPanel() {
   const objective = objectives[0];
   const daysLeft = daysUntil(objective.target_date);
 
-  // Computed insights from real data
   const insights = useMemo(() => {
     const scored = all.filter(s => s.latestSnapshot);
     const allies = scored.filter(s => s.latestSnapshot!.quadrant === 'strategic_ally');
@@ -69,7 +67,7 @@ export default function AIInsightsPanel() {
     }
   }, [messages, isThinking]);
 
-  // Cmd/Ctrl+\ to toggle AI panel
+  // Cmd/Ctrl+\ toggles the panel
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
@@ -81,7 +79,6 @@ export default function AIInsightsPanel() {
     return () => window.removeEventListener('keydown', onKey);
   }, [toggleCollapse]);
 
-  // Generate response from real data — no API needed
   function generateResponse(query: string): { content: string; cards?: ChatMessage['insightCards'] } {
     const q = query.toLowerCase();
 
@@ -169,7 +166,6 @@ export default function AIInsightsPanel() {
       };
     }
 
-    // Default: smart fallback summary
     return {
       content: `I scanned the portfolio for "${query}". Here's the current snapshot — try one of the quick prompts below for a deeper read, or ask about a specific quadrant, sector, or stakeholder.`,
       cards: [
@@ -181,9 +177,7 @@ export default function AIInsightsPanel() {
   }
 
   function send(text: string) {
-    // Sanitize: trim, cap length to prevent XSS-via-render edge cases and
-    // runaway message bubbles. React already escapes by default, but we cap
-    // input to a reasonable size for chat UX.
+    // Cap input length so chat bubbles don't run away; React already escapes content.
     const trimmed = text.trim().slice(0, 500);
     if (!trimmed) return;
     const userMsg: ChatMessage = {
@@ -196,7 +190,6 @@ export default function AIInsightsPanel() {
     setInput('');
     setIsThinking(true);
 
-    // Simulate thinking delay
     setTimeout(() => {
       const { content, cards } = generateResponse(trimmed);
       const assistantMsg: ChatMessage = {
@@ -711,5 +704,3 @@ function ThinkingIndicator() {
   );
 }
 
-// Avoid unused-import warnings (QUADRANT_LABELS reserved for future use)
-void QUADRANT_LABELS;

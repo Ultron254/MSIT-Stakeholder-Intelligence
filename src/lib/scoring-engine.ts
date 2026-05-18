@@ -24,10 +24,7 @@ const DEFAULT_WEIGHTS: Pick<ScoringWeights, 'influence_weight' | 'relationship_w
   convertibility_threshold: 4.0,
 };
 
-/**
- * Invert the risk score.
- * Higher raw risk = more dangerous, so we invert for positive contribution.
- */
+// Higher raw risk = more dangerous, so invert it before contribution
 export function invertRisk(risk: number): number {
   return 6 - risk;
 }
@@ -55,18 +52,12 @@ export function calculateSIS(
   return Math.round(weightedSum * 20 * 100) / 100;
 }
 
-/**
- * Calculate the Power axis value.
- * Power = 0.75 * Influence + 0.25 * Impact
- */
+// Power = 0.75 * Influence + 0.25 * Impact
 export function calculatePowerAxis(influence: number, impact: number): number {
   return Math.round((0.75 * influence + 0.25 * impact) * 1000) / 1000;
 }
 
-/**
- * Calculate the Convertibility axis value.
- * Convertibility = 0.444 * Relationship + 0.222 * Alignment + 0.333 * RiskAdj
- */
+// Convertibility = 0.444 * Relationship + 0.222 * Alignment + 0.333 * RiskAdj
 export function calculateConvertibilityAxis(
   relationship: number,
   alignment: number,
@@ -75,9 +66,6 @@ export function calculateConvertibilityAxis(
   return Math.round((0.444 * relationship + 0.222 * alignment + 0.333 * riskAdj) * 1000) / 1000;
 }
 
-/**
- * Classify into a quadrant based on power and convertibility axes.
- */
 export function classifyQuadrant(
   power: number,
   convertibility: number,
@@ -93,9 +81,6 @@ export function classifyQuadrant(
   return 'monitor_exit';
 }
 
-/**
- * Full scoring calculation: takes raw inputs and returns all derived values.
- */
 export function calculateFullScore(
   input: ScoringInput,
   weights = DEFAULT_WEIGHTS
@@ -115,9 +100,6 @@ export function calculateFullScore(
   };
 }
 
-/**
- * Detect red flags for a stakeholder based on their scores and engagement history.
- */
 export function detectRedFlags(
   stakeholder: Stakeholder,
   snapshot: ScoreSnapshot | null,
@@ -128,7 +110,6 @@ export function detectRedFlags(
 
   const flags: RedFlag[] = [];
 
-  // Flag 1: Layer 1 stakeholder with Influence < 3
   if (stakeholder.proximity_layer === 1 && snapshot.influence_score < 3) {
     flags.push({
       type: 'layer_influence_mismatch',
@@ -137,7 +118,6 @@ export function detectRedFlags(
     });
   }
 
-  // Flag 2: High influence but no relationship and no engagement logged
   if (snapshot.influence_score >= 4 && snapshot.relationship_score === 1) {
     const hasEngagement = engagements.some(e => e.stakeholder_id === stakeholder.id);
     if (!hasEngagement) {
@@ -149,7 +129,6 @@ export function detectRedFlags(
     }
   }
 
-  // Flag 3: Risk >= 4 and Sentiment >= 4 simultaneously
   if (snapshot.risk_score >= 4 && snapshot.sentiment_score >= 4) {
     flags.push({
       type: 'risk_sentiment_contradiction',
@@ -158,7 +137,6 @@ export function detectRedFlags(
     });
   }
 
-  // Flag 4: Stale assessment (>90 days)
   const scoredDate = new Date(snapshot.scored_at);
   const daysSinceScored = Math.floor((now.getTime() - scoredDate.getTime()) / (1000 * 60 * 60 * 24));
   if (daysSinceScored > 90) {
@@ -172,18 +150,12 @@ export function detectRedFlags(
   return flags;
 }
 
-/**
- * Get the SIS score tier for color coding.
- */
 export function getSISTier(sis: number): 'high' | 'medium' | 'low' {
   if (sis >= 80) return 'high';
   if (sis >= 60) return 'medium';
   return 'low';
 }
 
-/**
- * Get color for a SIS score tier.
- */
 export function getSISColor(sis: number): string {
   const tier = getSISTier(sis);
   switch (tier) {

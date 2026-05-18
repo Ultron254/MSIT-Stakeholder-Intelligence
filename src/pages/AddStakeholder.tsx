@@ -80,11 +80,9 @@ export default function AddStakeholder() {
   const [plan60, setPlan60] = useState('');
   const [plan90, setPlan90] = useState('');
 
-  // Success state
   const [submitted, setSubmitted] = useState(false);
   const [submittedId, setSubmittedId] = useState('');
 
-  // Live calculation
   const result = useMemo(() => {
     const input: ScoringInput = { ...scores };
     return calculateFullScore(input);

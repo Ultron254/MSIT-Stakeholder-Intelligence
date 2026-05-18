@@ -19,16 +19,9 @@ interface TooltipProps {
 }
 
 /**
- * Lightweight, accessible, brand-styled tooltip.
- *
- * Wraps a single child element and renders a positioned tooltip on hover or
- * keyboard focus. Auto-flips to stay within the viewport. Pure portal-free
- * implementation (uses fixed positioning) — safe with overflow:hidden parents.
- *
- * Usage:
- *   <Tooltip content="Search stakeholders" shortcut="⌘K">
- *     <button>...</button>
- *   </Tooltip>
+ * Accessible tooltip that wraps a single child element.
+ * Auto-flips to stay within the viewport; uses fixed positioning so it works
+ * inside overflow:hidden parents without a portal.
  */
 export default function Tooltip({
   content,
@@ -62,7 +55,6 @@ export default function Tooltip({
     setOpen(false);
   };
 
-  // Compute position once tooltip is rendered
   useEffect(() => {
     if (!open || !triggerRef.current || !tipRef.current) return;
     const tr = triggerRef.current.getBoundingClientRect();
@@ -94,13 +86,11 @@ export default function Tooltip({
     }
 
     let { top, left } = positions[placement];
-    // Clamp to viewport with 4px padding
     left = Math.max(4, Math.min(vw - tw - 4, left));
     top = Math.max(4, Math.min(vh - th - 4, top));
     setCoords({ top, left, placement });
   }, [open, side]);
 
-  // Hide on scroll/resize
   useEffect(() => {
     if (!open) return;
     const onChange = () => setOpen(false);
@@ -116,7 +106,6 @@ export default function Tooltip({
 
   if (!isValidElement(children)) return children as unknown as ReactElement;
 
-  // Augment child with our event handlers + ref
   const childProps = (children.props ?? {}) as {
     onMouseEnter?: (e: React.MouseEvent) => void;
     onMouseLeave?: (e: React.MouseEvent) => void;

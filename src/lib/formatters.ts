@@ -47,10 +47,6 @@ export function formatWorkflowStatus(s: WorkflowStatus): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-export function getInitials(name: string): string {
-  return name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
-}
-
 export function formatLayer(l: 1|2|3): string {
   switch (l) {
     case 1: return 'Core';

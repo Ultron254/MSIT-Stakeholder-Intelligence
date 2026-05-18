@@ -46,7 +46,6 @@ export default function ScoreUpdatePanel() {
     influence: [], relationship: [], risk: [], sentiment: [], alignment: [], impact: [],
   });
 
-  // Initialize from current scores
   useEffect(() => {
     if (currentSnap) {
       setScores({
@@ -60,7 +59,6 @@ export default function ScoreUpdatePanel() {
     }
   }, [currentSnap]);
 
-  // Live calculation
   const result = useMemo(() => {
     const input: ScoringInput = {
       influence: scores.influence,

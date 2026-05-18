@@ -22,33 +22,25 @@ interface Filters {
 }
 
 interface AppState {
-  // Navigation
   currentPage: Page;
   selectedStakeholderId: string | null;
   sidebarCollapsed: boolean;
 
-  // Filters
   filters: Filters;
 
-  // Score update panel
   scoreUpdateOpen: boolean;
   scoreUpdateStakeholderId: string | null;
 
-  // Toast
   toasts: Array<{ id: string; message: string; type: 'success' | 'error' | 'info' }>;
 
-  // Search
   searchOpen: boolean;
 
-  // Current user (for profile / personalization)
   currentUserId: string;
   setCurrentUser: (userId: string) => void;
 
-  // AI Insights panel
   aiPanelCollapsed: boolean;
   toggleAIPanel: () => void;
 
-  // Actions
   setPage: (page: Page) => void;
   setSelectedStakeholder: (id: string | null) => void;
   toggleSidebar: () => void;
@@ -60,11 +52,10 @@ interface AppState {
   removeToast: (id: string) => void;
   toggleSearch: () => void;
 
-  // Score snapshots (mutable for new submissions)
+  // Append-only: new submissions are pushed here, never overwritten
   snapshots: ScoreSnapshot[];
   addSnapshot: (snapshot: ScoreSnapshot) => void;
 
-  // Mutable data collections
   engagements: EngagementRecord[];
   addEngagement: (record: EngagementRecord) => void;
 
@@ -82,30 +73,25 @@ interface AppState {
   storeStakeholders: Stakeholder[];
   addStakeholder: (stakeholder: Stakeholder) => void;
 
-  // Engagement detail
   engagementDetailId: string | null;
   openEngagementDetail: (id: string) => void;
   closeEngagementDetail: () => void;
 
-  // Log engagement modal
   logEngagementOpen: boolean;
   logEngagementStakeholderId: string | null;
   openLogEngagement: (stakeholderId?: string) => void;
   closeLogEngagement: () => void;
 
-  // Edit user modal
   editUserModalOpen: boolean;
   editUserModalId: string | null;
   openEditUser: (userId: string | null) => void;
   closeEditUser: () => void;
 
-  // Add watchlist modal
   addWatchlistModalOpen: boolean;
   addWatchlistStakeholderId: string | null;
   openAddWatchlist: (stakeholderId: string) => void;
   closeAddWatchlist: () => void;
 
-  // Activity feed
   activityFeed: ActivityItem[];
   addActivity: (activity: ActivityItem) => void;
 }
@@ -131,7 +117,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUserId: 'u-001',
   snapshots: [...scoreSnapshots],
 
-  // Mutable data collections
   engagements: [...engagementRecords],
   watchlist: [...watchlistSignals],
   storeUsers: [...users],
@@ -139,24 +124,20 @@ export const useAppStore = create<AppState>((set, get) => ({
   storeStakeholders: [...stakeholders],
   activityFeed: [...activityFeed],
 
-  // Engagement detail
   engagementDetailId: null,
   openEngagementDetail: (id) => set({ engagementDetailId: id }),
   closeEngagementDetail: () => set({ engagementDetailId: null }),
 
-  // Log engagement modal
   logEngagementOpen: false,
   logEngagementStakeholderId: null,
   openLogEngagement: (stakeholderId) => set({ logEngagementOpen: true, logEngagementStakeholderId: stakeholderId ?? null }),
   closeLogEngagement: () => set({ logEngagementOpen: false, logEngagementStakeholderId: null }),
 
-  // Edit user modal
   editUserModalOpen: false,
   editUserModalId: null,
   openEditUser: (userId) => set({ editUserModalOpen: true, editUserModalId: userId }),
   closeEditUser: () => set({ editUserModalOpen: false, editUserModalId: null }),
 
-  // Add watchlist modal
   addWatchlistModalOpen: false,
   addWatchlistStakeholderId: null,
   openAddWatchlist: (stakeholderId) => set({ addWatchlistModalOpen: true, addWatchlistStakeholderId: stakeholderId }),
@@ -203,19 +184,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   addActivity: (activity) => set(s => ({ activityFeed: [activity, ...s.activityFeed] })),
 }));
 
-// Still re-export static data for direct use where needed
 export {
   scoreSnapshots, engagementPlans,
   scoringWeights, objectives, countries, stakeholderObjectives, componentScores,
   getLatestSnapshot,
 };
 
-// Re-export original arrays as defaults for backward compat
 export { stakeholders, engagementRecords, evidenceRecords, watchlistSignals, users, activityFeed } from './data';
 
-// ---------------------------------------------------------------------------
-// Derived-data hooks (memoised on store state to avoid new refs)
-// ---------------------------------------------------------------------------
+// Derived-data hooks, memoised on store state so consumers get stable refs.
 
 function computeStakeholdersWithScores(stakeholdersList: Stakeholder[], snaps: ScoreSnapshot[], engagementsList: EngagementRecord[]): StakeholderWithScore[] {
   return stakeholdersList.map(s => {

@@ -95,7 +95,7 @@ const GRADIENTS = [
 function buildStreamData(): StreamItem[] {
   const items: StreamItem[] = [];
 
-  // ── TV ITEMS ──
+  // TV items
   const tvData: Array<{ src: string; title: string; excerpt: string; sentiment: Sentiment; sIds: string[]; tags: string[]; dur: string; lbl: string; ago: Date }> = [
     { src: 'citizen-tv', title: 'Energy Committee Approves Renewable Energy Bill for Second Reading', excerpt: 'The National Assembly\'s Energy Committee, chaired by Hon. Fatuma Hassan, has unanimously approved the Renewable Energy Amendment Bill 2026. The committee cited overwhelming evidence for Kenya\'s clean energy transition.', sentiment: 'positive', sIds: ['s-003', 's-013'], tags: ['Energy Bill', 'Parliament'], dur: '4:32', lbl: 'LIVE REPORT', ago: subMinutes(NOW, 45) },
     { src: 'ntv', title: 'Kenya Pipeline CEO Warns of Job Losses from Energy Transition', excerpt: 'Gen. Peter Mburu (Rtd) stated during a press conference that rapid transition could result in 15,000 petroleum sector job losses. He called for a more gradual timeline.', sentiment: 'negative', sIds: ['s-015'], tags: ['Opposition', 'Employment'], dur: '6:18', lbl: 'EXCLUSIVE INTERVIEW', ago: subHours(NOW, 3) },
@@ -111,7 +111,7 @@ function buildStreamData(): StreamItem[] {
     duration: d.dur, thumbnailGradient: GRADIENTS[i % GRADIENTS.length], videoLabel: d.lbl,
   }));
 
-  // ── RADIO ITEMS ──
+  // Radio items
   const radioData: Array<{ src: string; title: string; excerpt: string; sentiment: Sentiment; sIds: string[]; tags: string[]; dur: string; ago: Date }> = [
     { src: 'capital-fm', title: 'Capital FM Debate: Can Kenya Hit 100% Renewables by 2030?', excerpt: 'Live panel debate with energy experts and policymakers on the feasibility of Kenya\'s renewable energy target. Panelists agreed on the goal but differed on timeline.', sentiment: 'mixed', sIds: ['s-001', 's-004'], tags: ['Debate', 'Energy Policy'], dur: '42:15', ago: subHours(NOW, 2) },
     { src: 'radio-citizen', title: 'Morning Show: Dr. Sarah Wanjiku on Energy Summit Outcomes', excerpt: 'Exclusive interview with the Principal Secretary on East African Energy Summit outcomes and Kenya\'s roadmap to 100% renewables.', sentiment: 'positive', sIds: ['s-001'], tags: ['Interview', 'Energy Summit'], dur: '18:30', ago: subHours(NOW, 8) },
@@ -127,7 +127,7 @@ function buildStreamData(): StreamItem[] {
     duration: d.dur, audioProgress: Math.random() * 0.35,
   }));
 
-  // ── PRINT ITEMS ──
+  // Print items
   const printData: Array<{ src: string; title: string; excerpt: string; sentiment: Sentiment; sIds: string[]; tags: string[]; author: string; pdf: string; ago: Date }> = [
     { src: 'nation', title: 'Inside the Political Horse-Trading on the Energy Bill', excerpt: 'Joseph Kipchoge reports on behind-the-scenes parliamentary negotiations. Key swing votes are being targeted by both proponents and opponents of the Bill, with the Majority Whip coordinating support.', sentiment: 'neutral', sIds: ['s-006', 's-014'], tags: ['Investigation', 'Parliament'], author: 'Joseph Kipchoge', pdf: 'Nation_Energy_Bill_Analysis.pdf', ago: subHours(NOW, 4) },
     { src: 'business-daily', title: 'Cost-Benefit Analysis: Kenya\'s Energy Transition Economics', excerpt: 'Short-term costs may increase 12% but long-term savings from reduced fossil fuel imports could reach KES 450B annually by 2032. Full economic modeling and sector projections inside.', sentiment: 'neutral', sIds: [], tags: ['Economics', 'Analysis'], author: 'Business Daily Research', pdf: 'BD_Cost_Benefit_Renewables.pdf', ago: subDays(NOW, 1) },
@@ -144,7 +144,7 @@ function buildStreamData(): StreamItem[] {
     imageGradient: GRADIENTS[i % GRADIENTS.length], pdfLabel: d.pdf, author: d.author,
   }));
 
-  // ── SOCIAL ITEMS ──
+  // Social items
   const socialData: Array<{ src: string; plat: SocialPlatform; handle: string; title: string; excerpt: string; sentiment: Sentiment; sIds: string[]; tags: string[]; likes: number; reposts: number; comments: number; verified: boolean; ago: Date }> = [
     { src: 'twitter', plat: 'twitter', handle: '@EnergyBillKE', title: '#EnergyBillKE Trends Nationwide', excerpt: 'BREAKING: The Energy Committee has unanimously approved the Renewable Energy Amendment Bill for second reading. This is a historic moment for Kenya\'s clean energy future. 🇰🇪⚡ #EnergyBillKE #CleanEnergyKenya', sentiment: 'positive', sIds: ['s-003'], tags: ['Trending', 'Breaking'], likes: 12400, reposts: 3200, comments: 890, verified: true, ago: subMinutes(NOW, 20) },
     { src: 'twitter', plat: 'twitter', handle: '@KenyaPipeline', title: 'Kenya Pipeline Response', excerpt: 'We urge caution on the aggressive timeline. 15,000 jobs are at stake. A transition that leaves workers behind is not a just transition. We call for dialogue. #EnergyTransition', sentiment: 'negative', sIds: ['s-015'], tags: ['Corporate', 'Opposition'], likes: 3100, reposts: 1500, comments: 2100, verified: true, ago: subHours(NOW, 2) },
@@ -182,7 +182,7 @@ function SentimentBadge({ sentiment }: { sentiment: Sentiment }) {
   return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: c.bg, color: c.color }}><Icon size={11} />{c.label}</span>;
 }
 
-// ── TV Card: Video thumbnail with play button ──
+// TV card: video thumbnail with play button
 function TVCard({ item }: { item: TVItem }) {
   const source = SOURCES.find(s => s.id === item.sourceId)!;
   return (
@@ -213,7 +213,7 @@ function TVCard({ item }: { item: TVItem }) {
   );
 }
 
-// ── Radio Card: Audio waveform player ──
+// Radio card: audio waveform player
 function RadioCard({ item }: { item: RadioItem }) {
   const source = SOURCES.find(s => s.id === item.sourceId)!;
   const [playing, setPlaying] = useState(false);
@@ -262,7 +262,7 @@ function RadioCard({ item }: { item: RadioItem }) {
   );
 }
 
-// ── Print Card: Article with image and PDF download ──
+// Print card: article with image and PDF download
 function PrintCard({ item }: { item: PrintItem }) {
   const source = SOURCES.find(s => s.id === item.sourceId)!;
   return (
@@ -297,7 +297,7 @@ function PrintCard({ item }: { item: PrintItem }) {
   );
 }
 
-// ── Social Card: Platform-specific post mockup ──
+// Social card: platform-specific post mockup
 function SocialCard({ item }: { item: SocialItem }) {
   const source = SOURCES.find(s => s.id === item.sourceId)!;
   const platformStyles: Record<SocialPlatform, { bg: string; border: string; handleColor: string }> = {
@@ -474,7 +474,7 @@ export default function DataStreams() {
       ) : (
         <div className="space-y-3">
           {activeCategory === 'tv' || (activeCategory === 'all' && filtered.some(i => i.kind === 'tv')) ? (
-            activeCategory === 'tv' ? null : <h2 className="text-heading-md pt-2" style={{ color: 'var(--text-primary)' }}>📺 Television</h2>
+            activeCategory === 'tv' ? null : <h2 className="text-heading-md pt-2" style={{ color: 'var(--text-primary)' }}>Television</h2>
           ) : null}
           {activeCategory === 'tv' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
