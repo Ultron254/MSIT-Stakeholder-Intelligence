@@ -4,9 +4,8 @@ import { useAppStore, users } from '../lib/store';
 import { ROLE_LABELS } from '../lib/types';
 import Portrait from '../components/ui/Portrait';
 
-// HD imagery of African / Black professionals (Christina Morillo's
-// "Women of Color in Tech" series on Pexels) — on-brand for Momentum's
-// people-centred, Africa-focused stakeholder work.
+// HD imagery of African / Black professionals (women and men) in modern
+// workplaces — on-brand for Momentum's people-centred, Africa-focused work.
 const SLIDES = [
   {
     image: 'https://images.pexels.com/photos/1181605/pexels-photo-1181605.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
@@ -14,7 +13,7 @@ const SLIDES = [
     subtitle: 'Score, classify and engage the stakeholders shaping Africa\'s agenda.',
   },
   {
-    image: 'https://images.pexels.com/photos/1181715/pexels-photo-1181715.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
+    image: 'https://images.pexels.com/photos/7581111/pexels-photo-7581111.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
     title: 'Turn intelligence into influence',
     subtitle: 'Data-driven decisions for smarter advocacy and partnerships.',
   },

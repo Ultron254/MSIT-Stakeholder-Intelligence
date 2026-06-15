@@ -16,11 +16,12 @@ function hashName(name: string): number {
   return Math.abs(hash);
 }
 
-// Pexels IDs: verified portraits of African women in professional settings
+// Pexels IDs: verified professional portraits of African women.
+// Every entry has been confirmed as appropriate, fully-clothed business imagery.
 const FEMALE_PHOTO_IDS = [
   13786953, 29368483, 7298906, 5619263, 19803587,
   7065243, 6338370, 6311543, 7148808, 9908681,
-  9429372, 3765147, 35379697,
+  9429372, 3765147, 1181686,
 ];
 
 // Pexels IDs: verified portraits of African men in professional settings
