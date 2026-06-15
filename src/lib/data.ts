@@ -27,12 +27,12 @@ export const objectives: Objective[] = [
 
 // Users. Passwords are mocked for the POC -- there is no auth backend yet.
 export const users: User[] = [
-  { id: 'u-001', email: 'sheila.wanjiku@momentum.africa', display_name: 'Sheila Wanjiku', role: 'analyst', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Senior Intelligence Analyst', portrait_url: null, password: 'momentum', reports_to: 'u-002', last_login: fmt(subDays(NOW, 0)) },
+  { id: 'u-001', email: 'sheila.wanjiku@momentum.africa', display_name: 'Sheila Wanjiku', role: 'analyst', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Senior Intelligence Analyst', portrait_url: 'https://images.pexels.com/photos/9908681/pexels-photo-9908681.jpeg?auto=compress&cs=tinysrgb&w=256&h=256&dpr=1&fit=crop', password: 'momentum', reports_to: 'u-002', last_login: fmt(subDays(NOW, 0)) },
   { id: 'u-002', email: 'charles.mwangi@momentum.africa', display_name: 'Charles Mwangi', role: 'lead', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Engagement Lead', portrait_url: null, password: 'momentum', reports_to: 'u-003', last_login: fmt(subDays(NOW, 0)) },
   { id: 'u-003', email: 'ronny.saoke@momentum.africa', display_name: 'Ronny Saoke', role: 'partner', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Managing Partner', portrait_url: null, password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 1)) },
   { id: 'u-004', email: 'peter.maina@momentum.africa', display_name: 'Peter Maina', role: 'viewer', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Policy Researcher', portrait_url: null, password: 'momentum', reports_to: 'u-002', last_login: fmt(subDays(NOW, 4)) },
   { id: 'u-005', email: 'admin@momentum.africa', display_name: 'System Admin', role: 'admin', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Platform Administrator', portrait_url: null, password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 2)) },
-  { id: 'u-006', email: 'grace.kimani@greenfuture.org', display_name: 'Grace Kimani', role: 'client', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Director, Green Future Foundation', portrait_url: null, password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 3)) },
+  { id: 'u-006', email: 'grace.kimani@greenfuture.org', display_name: 'Grace Kimani', role: 'client', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Director, Green Future Foundation', portrait_url: 'https://images.pexels.com/photos/9429372/pexels-photo-9429372.jpeg?auto=compress&cs=tinysrgb&w=256&h=256&dpr=1&fit=crop', password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 3)) },
 ];
 
 // Scoring weights (current published version)

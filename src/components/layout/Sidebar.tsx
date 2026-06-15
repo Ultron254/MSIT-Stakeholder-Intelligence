@@ -111,12 +111,14 @@ export default function Sidebar() {
           </Tooltip>
         ) : (
           <>
-            <img
-              src="/momentum-logo-light.svg"
-              alt="Momentum Africa Partners"
-              className="h-11 w-auto"
-              style={{ maxWidth: 168 }}
-            />
+            <div className="rounded-lg px-3 py-2 flex items-center" style={{ background: '#FFFFFF', boxShadow: '0 2px 10px rgba(0,0,0,0.18)' }}>
+              <img
+                src="/momentum-logo.png"
+                alt="Momentum Africa Partners"
+                className="h-7 w-auto object-contain block"
+                style={{ maxWidth: 150 }}
+              />
+            </div>
             <Tooltip content="Collapse menu" side="right">
               <button
                 onClick={toggleSidebar}

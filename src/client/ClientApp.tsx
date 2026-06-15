@@ -84,11 +84,9 @@ export default function ClientApp() {
       {/* Top bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-6" style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-default)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--gradient-brand)' }}>
-            <span style={{ color: 'white', fontWeight: 800, fontSize: '0.8125rem' }}>M</span>
-          </div>
-          <div className="leading-tight">
-            <div style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.875rem' }}>Momentum Intel · Client Portal</div>
+          <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-8 w-auto object-contain" />
+          <div className="leading-tight pl-3" style={{ borderLeft: '1px solid var(--border-default)' }}>
+            <div style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.875rem' }}>Client Portal</div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>Curated stakeholder intelligence</div>
           </div>
         </div>

@@ -4,11 +4,12 @@ import { useAppStore, users } from '../lib/store';
 import { ROLE_LABELS } from '../lib/types';
 import Portrait from '../components/ui/Portrait';
 
-// HD imagery of African / Black professionals (women and men) in modern
-// workplaces — on-brand for Momentum's people-centred, Africa-focused work.
+// HD imagery of African professionals (women and men) in real African
+// workplaces — Lagos, modern offices — on-brand for Momentum's
+// people-centred, Africa-focused work.
 const SLIDES = [
   {
-    image: 'https://images.pexels.com/photos/1181605/pexels-photo-1181605.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
+    image: 'https://images.pexels.com/photos/30688590/pexels-photo-30688590.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
     title: 'Map the people who move policy',
     subtitle: 'Score, classify and engage the stakeholders shaping Africa\'s agenda.',
   },
@@ -18,7 +19,7 @@ const SLIDES = [
     subtitle: 'Data-driven decisions for smarter advocacy and partnerships.',
   },
   {
-    image: 'https://images.pexels.com/photos/1181472/pexels-photo-1181472.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
+    image: 'https://images.pexels.com/photos/9908681/pexels-photo-9908681.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
     title: 'See the whole board, in real time',
     subtitle: 'Track quadrants, risks and engagement gaps as every campaign moves.',
   },
@@ -89,8 +90,10 @@ export default function Login() {
       />
 
       {/* Top-left brand label */}
-      <div className="absolute top-7 left-8 z-10 flex items-center gap-2.5">
-        <img src="/momentum-mark.svg" alt="Momentum" className="w-7 h-7 object-contain" />
+      <div className="absolute top-7 left-8 z-10 flex items-center gap-3">
+        <div className="rounded-lg px-3 py-2 flex items-center" style={{ background: 'rgba(255,255,255,0.96)', boxShadow: '0 4px 16px rgba(0,0,0,0.18)' }}>
+          <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-6 w-auto object-contain block" />
+        </div>
         <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.22em' }}>
           STAKEHOLDER INTELLIGENCE TOOL
         </span>
@@ -143,12 +146,12 @@ export default function Login() {
           {/* Org header */}
           <div className="flex items-center justify-between px-4 pt-3 pb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--gradient-brand)' }}>
-                <span style={{ color: 'white', fontWeight: 800, fontSize: '0.8125rem', letterSpacing: '0.02em' }}>M</span>
+              <div className="rounded-lg px-2.5 py-1.5 flex items-center" style={{ background: 'rgba(255,255,255,0.96)' }}>
+                <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-5 w-auto object-contain block" />
               </div>
               <div className="leading-tight">
-                <div style={{ color: 'white', fontWeight: 700, fontSize: '0.875rem' }}>Momentum Intel</div>
-                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.6875rem' }}>Stakeholder Intelligence</div>
+                <div style={{ color: 'white', fontWeight: 700, fontSize: '0.875rem' }}>Stakeholder Intelligence</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.6875rem' }}>Secure sign in</div>
               </div>
             </div>
             <div
