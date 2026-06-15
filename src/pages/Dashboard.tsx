@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { differenceInDays, parseISO } from 'date-fns';
 import {
   XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid,
@@ -6,17 +7,25 @@ import {
 import {
   AlertTriangle, TrendingUp, ArrowRight,
   FileText, MessageSquare, Shield, CheckCircle,
-  Zap, MapPin, Calendar,
+  Zap, MapPin, Calendar, Clock, HeartPulse, PhoneCall,
 } from 'lucide-react';
-import { useAppStore, objectives } from '../lib/store';
+import { useAppStore, useCurrentCampaign } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge, SeverityBadge } from '../components/ui/Badges';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
+import { NOW } from '../lib/constants';
 import { formatRelativeDate, formatDate, formatSIS, daysUntil } from '../lib/formatters';
 import AIInsightsPanel from '../components/AIInsightsPanel';
 import UITooltip from '../components/ui/Tooltip';
 import Portrait from '../components/ui/Portrait';
+import CampaignSwitcher from '../components/CampaignSwitcher';
+
+const ENGAGEMENT_GAP_DAYS = 45;
+function daysSince(date: string | null): number | null {
+  if (!date) return null;
+  return differenceInDays(NOW, parseISO(date));
+}
 
 const QUADRANT_TOOLTIPS: Record<Quadrant, string> = {
   strategic_ally: 'High influence + supportive stance. Protect, leverage and amplify these relationships.',
@@ -33,6 +42,8 @@ export default function Dashboard() {
   const clearFilters = useAppStore(s => s.clearFilters);
   const watchlist = useAppStore(s => s.watchlist);
   const activityFeedData = useAppStore(s => s.activityFeed);
+  const openLogEngagement = useAppStore(s => s.openLogEngagement);
+  const campaign = useCurrentCampaign();
 
   const goToQuadrant = (q: Quadrant) => {
     clearFilters();
@@ -40,9 +51,41 @@ export default function Dashboard() {
     setPage('stakeholders');
   };
 
-  const objective = objectives[0];
-  const daysLeft = daysUntil(objective.target_date);
+  const objective = campaign;
+  const daysLeft = objective ? daysUntil(objective.target_date) : 0;
   const aiPanelCollapsed = useAppStore(s => s.aiPanelCollapsed);
+
+  // Engagement gap: scored stakeholders not contacted recently (or ever).
+  const engagementGap = useMemo(() => {
+    return all
+      .filter(s => s.latestSnapshot)
+      .map(s => ({ s, days: daysSince(s.lastEngagementDate) }))
+      .filter(x => x.days === null || x.days >= ENGAGEMENT_GAP_DAYS)
+      .sort((a, b) => {
+        const sisDiff = (b.s.latestSnapshot?.sis_score ?? 0) - (a.s.latestSnapshot?.sis_score ?? 0);
+        return sisDiff;
+      })
+      .slice(0, 5);
+  }, [all]);
+
+  // At-risk allies: strategic allies with a red flag, an open signal, or a stale touch-point.
+  const atRiskAllies = useMemo(() => {
+    const openSignals = new Set(watchlist.filter(w => !w.is_resolved).map(w => w.stakeholder_id));
+    return all
+      .filter(s => s.latestSnapshot?.quadrant === 'strategic_ally')
+      .map(s => {
+        const days = daysSince(s.lastEngagementDate);
+        const reasons: string[] = [];
+        if (s.redFlags.length > 0) reasons.push(s.redFlags.length === 1 ? '1 red flag' : `${s.redFlags.length} red flags`);
+        if (openSignals.has(s.id)) reasons.push('active alert');
+        if (days === null) reasons.push('never engaged');
+        else if (days >= 30) reasons.push(`${days}d since contact`);
+        return { s, reasons, days };
+      })
+      .filter(x => x.reasons.length > 0)
+      .sort((a, b) => (b.s.latestSnapshot?.sis_score ?? 0) - (a.s.latestSnapshot?.sis_score ?? 0))
+      .slice(0, 5);
+  }, [all, watchlist]);
 
   const stats = useMemo(() => {
     const scored = all.filter(s => s.latestSnapshot);
@@ -122,8 +165,18 @@ export default function Dashboard() {
     }
   };
 
+  if (!objective) return null;
+
   return (
     <div className="page-enter">
+      {/* Campaign context bar */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <div className="text-label" style={{ fontSize: '0.625rem' }}>Viewing campaign</div>
+          <div className="text-heading-md mt-0.5" style={{ color: 'var(--text-primary)' }}>{objective.short_name}</div>
+        </div>
+        <CampaignSwitcher variant="compact" />
+      </div>
       <div
         className="grid grid-cols-1 gap-6 items-start transition-[grid-template-columns] duration-300 ease-in-out"
         style={{
@@ -215,7 +268,7 @@ export default function Dashboard() {
               <div className="hero-fade-in flex flex-wrap items-center gap-4 mt-5" style={{ animationDelay: '0.35s' }}>
                 <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
                   <MapPin size={14} style={{ color: 'var(--brand-accent)' }} />
-                  <span className="text-body-sm" style={{ fontWeight: 500 }}>Kenya</span>
+                  <span className="text-body-sm" style={{ fontWeight: 500 }}>{objective.region}</span>
                 </div>
                 <span style={{ color: 'rgba(255,255,255,0.25)' }}>·</span>
                 <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
@@ -373,6 +426,88 @@ export default function Dashboard() {
           <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>need conversion</div>
         </Card></button>
         </UITooltip>
+      </div>
+
+      {/* Action widgets: Engagement Gap + At-Risk Allies */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <Card>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(217,119,6,0.12)', color: '#B45309' }}>
+                <Clock size={16} />
+              </div>
+              <div>
+                <h2 className="text-heading-md" style={{ color: 'var(--text-primary)' }}>Engagement Gap</h2>
+                <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>No contact in {ENGAGEMENT_GAP_DAYS}+ days — re-engage soon</div>
+              </div>
+            </div>
+            <span className="font-display" style={{ fontSize: '1.5rem', color: '#B45309' }}>{engagementGap.length}</span>
+          </div>
+          <div className="space-y-1">
+            {engagementGap.length === 0 && (
+              <div className="text-body-sm py-6 text-center" style={{ color: 'var(--text-muted)' }}>Everyone has been engaged recently.</div>
+            )}
+            {engagementGap.map(({ s, days }) => (
+              <div key={s.id} className="flex items-center gap-3 p-2 rounded-lg" onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
+                <button onClick={() => setSelectedStakeholder(s.id)} className="shrink-0"><Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={34} /></button>
+                <button onClick={() => setSelectedStakeholder(s.id)} className="flex-1 min-w-0 text-left">
+                  <div className="text-body-sm truncate" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{s.full_name}</div>
+                  <div className="text-body-sm truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>
+                    {days === null ? 'Never engaged' : `${days} days since last contact`} · {s.organization}
+                  </div>
+                </button>
+                <SISBadge score={s.latestSnapshot?.sis_score ?? 0} size="sm" />
+                <button
+                  onClick={() => openLogEngagement(s.id)}
+                  className="flex items-center gap-1 rounded-lg btn-press shrink-0"
+                  style={{ padding: '5px 10px', background: 'rgba(45,166,126,0.1)', color: 'var(--brand-primary)', fontSize: '0.6875rem', fontWeight: 600 }}
+                >
+                  <MessageSquare size={12} /> Log
+                </button>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626' }}>
+                <HeartPulse size={16} />
+              </div>
+              <div>
+                <h2 className="text-heading-md" style={{ color: 'var(--text-primary)' }}>At-Risk Allies</h2>
+                <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>Strategic allies that need immediate attention</div>
+              </div>
+            </div>
+            <span className="font-display" style={{ fontSize: '1.5rem', color: '#DC2626' }}>{atRiskAllies.length}</span>
+          </div>
+          <div className="space-y-1">
+            {atRiskAllies.length === 0 && (
+              <div className="text-body-sm py-6 text-center" style={{ color: 'var(--text-muted)' }}>All allies are healthy. Nice work.</div>
+            )}
+            {atRiskAllies.map(({ s, reasons }) => (
+              <div key={s.id} className="flex items-center gap-3 p-2 rounded-lg" onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
+                <button onClick={() => setSelectedStakeholder(s.id)} className="shrink-0"><Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={34} /></button>
+                <button onClick={() => setSelectedStakeholder(s.id)} className="flex-1 min-w-0 text-left">
+                  <div className="text-body-sm truncate" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{s.full_name}</div>
+                  <div className="flex items-center gap-1 flex-wrap mt-0.5">
+                    {reasons.map((r, i) => (
+                      <span key={i} className="px-1.5 py-0.5 rounded" style={{ background: 'rgba(220,38,38,0.08)', color: '#B91C1C', fontSize: '0.625rem', fontWeight: 600 }}>{r}</span>
+                    ))}
+                  </div>
+                </button>
+                <button
+                  onClick={() => openLogEngagement(s.id)}
+                  className="flex items-center gap-1 rounded-lg btn-press shrink-0"
+                  style={{ padding: '5px 10px', background: 'var(--gradient-brand)', color: 'white', fontSize: '0.6875rem', fontWeight: 600 }}
+                >
+                  <PhoneCall size={12} /> Contact
+                </button>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
 
       {/* Quadrant Breakdown Cards */}

@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { useMemo } from 'react';
-import type { Quadrant, Sector, Confidence, ScoreSnapshot, Stakeholder, EngagementRecord, WatchlistSignal, User, EvidenceRecord, StakeholderWithScore } from './types';
+import type {
+  Quadrant, Sector, Confidence, ScoreSnapshot, Stakeholder, EngagementRecord,
+  WatchlistSignal, User, EvidenceRecord, StakeholderWithScore, Campaign, Client,
+  PartnerInvite, UserRole,
+} from './types';
 import type { ActivityItem } from './data';
 import {
   stakeholders, scoreSnapshots, engagementRecords, evidenceRecords,
@@ -8,9 +12,17 @@ import {
   scoringWeights, objectives, countries, stakeholderObjectives, componentScores,
   getLatestSnapshot,
 } from './data';
+import {
+  campaigns as campaignSeed, extraStakeholders, extraSnapshots, extraComponentScores,
+  extraPlans, extraEngagements, extraEvidence, extraWatchlist, extraActivity,
+} from './campaigns';
 import { detectRedFlags } from './scoring-engine';
 
-export type Page = 'dashboard' | 'stakeholders' | 'stakeholder-detail' | 'quadrant-map' | 'engagements' | 'engagement-plans' | 'watchlist' | 'scoring-config' | 'users' | 'add-stakeholder' | 'data-streams';
+export type Page =
+  | 'dashboard' | 'stakeholders' | 'stakeholder-detail' | 'quadrant-map'
+  | 'engagements' | 'engagement-plans' | 'watchlist' | 'scoring-config'
+  | 'users' | 'add-stakeholder' | 'data-streams' | 'campaigns'
+  | 'approvals' | 'clients' | 'team-activity' | 'partners';
 
 interface Filters {
   search: string;
@@ -21,10 +33,47 @@ interface Filters {
   sortBy: 'sis_desc' | 'sis_asc' | 'name_asc' | 'last_updated';
 }
 
+// Seed clients. One approved client powers the POC client view; one pending
+// client gives the partner something to approve.
+const seedClients: Client[] = [
+  {
+    id: 'cl-001', name: 'Grace Kimani', client_type: 'organization', organization: 'Green Future Foundation',
+    email: 'grace.kimani@greenfuture.org', campaign_id: 'o-001',
+    curated_stakeholder_ids: ['s-001', 's-003', 's-005', 's-007', 's-009', 's-013', 's-028', 's-029', 's-032'],
+    brief: 'Philanthropic funder seeking aligned champions and convertible legislators to support the renewable energy transition.',
+    access_level: 'detailed', status: 'approved', created_by: 'u-002', approved_by: 'u-003',
+    created_at: '2026-03-20', gender: 'female', portrait_url: null,
+  },
+  {
+    id: 'cl-002', name: 'Halisi Renewables Ltd', client_type: 'organization', organization: 'Halisi Renewables Ltd',
+    email: 'partnerships@halisi.co.ke', campaign_id: 'o-001',
+    curated_stakeholder_ids: ['s-001', 's-004', 's-011', 's-028'],
+    brief: 'Private developer evaluating which regulators and legislators to prioritise for project approvals.',
+    access_level: 'overview', status: 'pending_approval', created_by: 'u-002', approved_by: null,
+    created_at: '2026-04-10', gender: 'male', portrait_url: null,
+  },
+];
+
+const seedInvites: PartnerInvite[] = [
+  { id: 'pi-001', email: 'amara.diallo@momentum.africa', display_name: 'Amara Diallo', invited_by: 'u-003', status: 'sent', sent_at: '2026-04-08' },
+];
+
 interface AppState {
+  // Auth
+  authedUserId: string | null;
+  login: (email: string, password: string) => boolean;
+  loginAs: (userId: string) => void;
+  logout: () => void;
+
   currentPage: Page;
   selectedStakeholderId: string | null;
   sidebarCollapsed: boolean;
+
+  // Active campaign -- switching this swaps the whole stakeholder landscape.
+  campaigns: Campaign[];
+  currentCampaignId: string;
+  setCampaign: (id: string) => void;
+  addCampaign: (campaign: Campaign) => void;
 
   filters: Filters;
 
@@ -55,6 +104,8 @@ interface AppState {
   // Append-only: new submissions are pushed here, never overwritten
   snapshots: ScoreSnapshot[];
   addSnapshot: (snapshot: ScoreSnapshot) => void;
+  approveSnapshot: (id: string, approverId: string) => void;
+  rejectSnapshot: (id: string) => void;
 
   engagements: EngagementRecord[];
   addEngagement: (record: EngagementRecord) => void;
@@ -72,6 +123,19 @@ interface AppState {
 
   storeStakeholders: Stakeholder[];
   addStakeholder: (stakeholder: Stakeholder) => void;
+  toggleVipSensitive: (stakeholderId: string, ownerId: string) => void;
+
+  // Clients (curated end-user accounts)
+  clients: Client[];
+  addClient: (client: Client) => void;
+  approveClient: (id: string, approverId: string) => void;
+  rejectClient: (id: string) => void;
+  updateClient: (id: string, updates: Partial<Client>) => void;
+
+  // Partner invitations
+  partnerInvites: PartnerInvite[];
+  addPartnerInvite: (invite: PartnerInvite) => void;
+  revokePartnerInvite: (id: string) => void;
 
   engagementDetailId: string | null;
   openEngagementDetail: (id: string) => void;
@@ -106,23 +170,59 @@ const defaultFilters: Filters = {
 };
 
 export const useAppStore = create<AppState>((set, get) => ({
+  authedUserId: null,
+  login: (email, password) => {
+    const u = get().storeUsers.find(
+      x => x.email.toLowerCase() === email.trim().toLowerCase() && x.password === password && x.is_active
+    );
+    if (!u) return false;
+    set({ authedUserId: u.id, currentUserId: u.id, currentPage: 'dashboard', selectedStakeholderId: null });
+    return true;
+  },
+  loginAs: (userId) => set({ authedUserId: userId, currentUserId: userId, currentPage: 'dashboard', selectedStakeholderId: null }),
+  logout: () => set({ authedUserId: null, currentPage: 'dashboard', selectedStakeholderId: null }),
+
   currentPage: 'dashboard',
   selectedStakeholderId: null,
   sidebarCollapsed: false,
+
+  campaigns: [...campaignSeed],
+  currentCampaignId: 'o-001',
+  setCampaign: (id) => set({ currentCampaignId: id, selectedStakeholderId: null, filters: { ...defaultFilters } }),
+  addCampaign: (campaign) => set(s => ({ campaigns: [...s.campaigns, campaign] })),
+
   filters: { ...defaultFilters },
   scoreUpdateOpen: false,
   scoreUpdateStakeholderId: null,
   toasts: [],
   searchOpen: false,
   currentUserId: 'u-001',
-  snapshots: [...scoreSnapshots],
+  snapshots: [...scoreSnapshots, ...extraSnapshots],
 
-  engagements: [...engagementRecords],
-  watchlist: [...watchlistSignals],
+  engagements: [...engagementRecords, ...extraEngagements],
+  watchlist: [...watchlistSignals, ...extraWatchlist],
   storeUsers: [...users],
-  evidence: [...evidenceRecords],
-  storeStakeholders: [...stakeholders],
-  activityFeed: [...activityFeed],
+  evidence: [...evidenceRecords, ...extraEvidence],
+  storeStakeholders: [...stakeholders, ...extraStakeholders],
+  activityFeed: [...activityFeed, ...extraActivity],
+
+  clients: [...seedClients],
+  addClient: (client) => set(s => ({ clients: [...s.clients, client] })),
+  approveClient: (id, approverId) => set(s => ({
+    clients: s.clients.map(c => c.id === id ? { ...c, status: 'approved', approved_by: approverId } : c),
+  })),
+  rejectClient: (id) => set(s => ({
+    clients: s.clients.map(c => c.id === id ? { ...c, status: 'rejected' } : c),
+  })),
+  updateClient: (id, updates) => set(s => ({
+    clients: s.clients.map(c => c.id === id ? { ...c, ...updates } : c),
+  })),
+
+  partnerInvites: [...seedInvites],
+  addPartnerInvite: (invite) => set(s => ({ partnerInvites: [...s.partnerInvites, invite] })),
+  revokePartnerInvite: (id) => set(s => ({
+    partnerInvites: s.partnerInvites.map(p => p.id === id ? { ...p, status: 'revoked' } : p),
+  })),
 
   engagementDetailId: null,
   openEngagementDetail: (id) => set({ engagementDetailId: id }),
@@ -149,7 +249,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleAIPanel: () => set(s => ({ aiPanelCollapsed: !s.aiPanelCollapsed })),
 
   setPage: (page) => set({ currentPage: page, selectedStakeholderId: null }),
-  setSelectedStakeholder: (id) => set({ selectedStakeholderId: id, currentPage: 'stakeholder-detail' }),
+  setSelectedStakeholder: (id) => {
+    // Opening a stakeholder also activates their campaign so the detail page
+    // (and its scoped lists) resolve correctly across campaigns.
+    const st = id ? get().storeStakeholders.find(s => s.id === id) : null;
+    set({
+      selectedStakeholderId: id,
+      currentPage: 'stakeholder-detail',
+      ...(st ? { currentCampaignId: st.campaign_id } : {}),
+    });
+  },
   toggleSidebar: () => set(s => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   setFilter: (key, value) => set(s => ({ filters: { ...s.filters, [key]: value } })),
   clearFilters: () => set({ filters: { ...defaultFilters } }),
@@ -164,6 +273,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleSearch: () => set(s => ({ searchOpen: !s.searchOpen })),
 
   addSnapshot: (snapshot) => set(s => ({ snapshots: [...s.snapshots, snapshot] })),
+  approveSnapshot: (id, approverId) => set(s => ({
+    snapshots: s.snapshots.map(sn => sn.id === id
+      ? { ...sn, workflow_status: 'approved', approved_by: approverId, approved_at: new Date().toISOString().slice(0, 10) }
+      : sn),
+  })),
+  rejectSnapshot: (id) => set(s => ({
+    snapshots: s.snapshots.map(sn => sn.id === id ? { ...sn, workflow_status: 'rejected' } : sn),
+  })),
 
   addEngagement: (record) => set(s => ({ engagements: [...s.engagements, record] })),
 
@@ -180,6 +297,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   addEvidence: (record) => set(s => ({ evidence: [...s.evidence, record] })),
 
   addStakeholder: (stakeholder) => set(s => ({ storeStakeholders: [...s.storeStakeholders, stakeholder] })),
+  toggleVipSensitive: (stakeholderId, ownerId) => set(s => ({
+    storeStakeholders: s.storeStakeholders.map(st => st.id === stakeholderId
+      ? { ...st, vip_owner_id: st.vip_owner_id ? null : ownerId }
+      : st),
+  })),
 
   addActivity: (activity) => set(s => ({ activityFeed: [activity, ...s.activityFeed] })),
 }));
@@ -191,6 +313,29 @@ export {
 };
 
 export { stakeholders, engagementRecords, evidenceRecords, watchlistSignals, users, activityFeed } from './data';
+
+// Campaign-aware combined collections (seed + generated extra campaigns).
+export const allEngagementPlans = [...engagementPlans, ...extraPlans];
+export const allComponentScores = [...componentScores, ...extraComponentScores];
+
+// Convenience selectors -----------------------------------------------------
+
+export function useCurrentUser(): User | null {
+  const authedUserId = useAppStore(s => s.authedUserId);
+  const storeUsers = useAppStore(s => s.storeUsers);
+  return useMemo(() => storeUsers.find(u => u.id === authedUserId) ?? null, [authedUserId, storeUsers]);
+}
+
+export function useCurrentRole(): UserRole | null {
+  const user = useCurrentUser();
+  return user?.role ?? null;
+}
+
+export function useCurrentCampaign(): Campaign | null {
+  const campaigns = useAppStore(s => s.campaigns);
+  const currentCampaignId = useAppStore(s => s.currentCampaignId);
+  return useMemo(() => campaigns.find(c => c.id === currentCampaignId) ?? campaigns[0] ?? null, [campaigns, currentCampaignId]);
+}
 
 // Derived-data hooks, memoised on store state so consumers get stable refs.
 
@@ -215,11 +360,37 @@ function computeStakeholdersWithScores(stakeholdersList: Stakeholder[], snaps: S
   });
 }
 
+// Visibility: scope to the active campaign and hide partner-restricted VIPs
+// from everyone except their owner.
+function visibleFor(list: Stakeholder[], campaignId: string, userId: string | null): Stakeholder[] {
+  return list.filter(s =>
+    s.campaign_id === campaignId &&
+    (!s.vip_owner_id || s.vip_owner_id === userId)
+  );
+}
+
 export function useStakeholdersWithScores(): StakeholderWithScore[] {
   const snapshots = useAppStore(s => s.snapshots);
   const storeStakeholders = useAppStore(s => s.storeStakeholders);
   const engagements = useAppStore(s => s.engagements);
-  return useMemo(() => computeStakeholdersWithScores(storeStakeholders, snapshots, engagements), [storeStakeholders, snapshots, engagements]);
+  const currentCampaignId = useAppStore(s => s.currentCampaignId);
+  const currentUserId = useAppStore(s => s.currentUserId);
+  return useMemo(() => {
+    const visible = visibleFor(storeStakeholders, currentCampaignId, currentUserId);
+    return computeStakeholdersWithScores(visible, snapshots, engagements);
+  }, [storeStakeholders, snapshots, engagements, currentCampaignId, currentUserId]);
+}
+
+// Cross-campaign view (partners/leads who want the whole org at a glance).
+export function useAllStakeholdersWithScores(): StakeholderWithScore[] {
+  const snapshots = useAppStore(s => s.snapshots);
+  const storeStakeholders = useAppStore(s => s.storeStakeholders);
+  const engagements = useAppStore(s => s.engagements);
+  const currentUserId = useAppStore(s => s.currentUserId);
+  return useMemo(() => {
+    const visible = storeStakeholders.filter(s => !s.vip_owner_id || s.vip_owner_id === currentUserId);
+    return computeStakeholdersWithScores(visible, snapshots, engagements);
+  }, [storeStakeholders, snapshots, engagements, currentUserId]);
 }
 
 export function useFilteredStakeholders(): StakeholderWithScore[] {
@@ -227,9 +398,12 @@ export function useFilteredStakeholders(): StakeholderWithScore[] {
   const storeStakeholders = useAppStore(s => s.storeStakeholders);
   const engagements = useAppStore(s => s.engagements);
   const filters = useAppStore(s => s.filters);
+  const currentCampaignId = useAppStore(s => s.currentCampaignId);
+  const currentUserId = useAppStore(s => s.currentUserId);
 
   return useMemo(() => {
-    let filtered = computeStakeholdersWithScores(storeStakeholders, snapshots, engagements);
+    const visible = visibleFor(storeStakeholders, currentCampaignId, currentUserId);
+    let filtered = computeStakeholdersWithScores(visible, snapshots, engagements);
 
     if (filters.search) {
       const q = filters.search.toLowerCase();
@@ -276,5 +450,5 @@ export function useFilteredStakeholders(): StakeholderWithScore[] {
     }
 
     return filtered;
-  }, [storeStakeholders, snapshots, engagements, filters]);
+  }, [storeStakeholders, snapshots, engagements, filters, currentCampaignId, currentUserId]);
 }

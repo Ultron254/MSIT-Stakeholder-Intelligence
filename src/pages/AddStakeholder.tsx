@@ -48,6 +48,8 @@ export default function AddStakeholder() {
   const addSnapshot = useAppStore(s => s.addSnapshot);
   const addEvidence = useAppStore(s => s.addEvidence);
   const addActivity = useAppStore(s => s.addActivity);
+  const currentCampaignId = useAppStore(s => s.currentCampaignId);
+  const currentUserId = useAppStore(s => s.currentUserId);
 
   // Section 1: Identity
   const [fullName, setFullName] = useState('');
@@ -131,6 +133,7 @@ export default function AddStakeholder() {
     const stakeholder: Stakeholder = {
       id: stakeholderId,
       country_id: 'c-001',
+      campaign_id: currentCampaignId,
       full_name: fullName.trim(),
       title: title.trim(),
       organization: organization.trim(),
@@ -141,12 +144,14 @@ export default function AddStakeholder() {
       gender,
       portrait_url: portraitPreview,
       created_at: now,
+      vip_owner_id: null,
+      created_by: currentUserId,
     };
 
     const snapshot: ScoreSnapshot = {
       id: snapshotId,
       stakeholder_id: stakeholderId,
-      objective_id: 'o-001',
+      objective_id: currentCampaignId,
       version: 1,
       influence_score: scores.influence,
       relationship_score: scores.relationship,
@@ -161,7 +166,7 @@ export default function AddStakeholder() {
       quadrant: result.quadrant,
       overall_confidence: (Object.values(confidences).sort()[0] ?? 'B') as Confidence,
       workflow_status: 'submitted',
-      scored_by: 'u-001',
+      scored_by: currentUserId,
       approved_by: null,
       scored_at: now,
       approved_at: null,
@@ -183,7 +188,7 @@ export default function AddStakeholder() {
           source_url: ev.source_url.trim() || null,
           sensitivity: ev.sensitivity,
           confidence_contribution: 'B',
-          recorded_by: 'u-001',
+          recorded_by: currentUserId ?? 'u-001',
           recorded_at: now,
         });
       }
@@ -194,7 +199,7 @@ export default function AddStakeholder() {
       type: 'score_update',
       description: `New stakeholder registered: ${fullName.trim()} — SIS ${formatSIS(result.sis_score)}`,
       stakeholder_id: stakeholderId,
-      user_id: 'u-001',
+      user_id: currentUserId ?? 'u-001',
       timestamp: now,
     });
 

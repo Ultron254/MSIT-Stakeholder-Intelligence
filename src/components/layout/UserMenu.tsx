@@ -3,32 +3,21 @@ import {
   ChevronDown, User as UserIcon, Settings, HelpCircle, LogOut,
   Users as UsersIcon, Shield, Mail, Check,
 } from 'lucide-react';
-import { useAppStore, users } from '../../lib/store';
+import { useAppStore } from '../../lib/store';
+import { ROLE_LABELS as ROLE_LABEL, ROLE_COLORS as ROLE_COLOR } from '../../lib/types';
 import Portrait from '../ui/Portrait';
-
-const ROLE_LABEL: Record<string, string> = {
-  analyst: 'Analyst',
-  country_lead: 'Country Lead',
-  approver: 'Approver',
-  viewer: 'Viewer',
-  admin: 'Administrator',
-};
-
-const ROLE_COLOR: Record<string, string> = {
-  analyst: '#2DA67E',
-  country_lead: '#1A2D3A',
-  approver: '#D97706',
-  viewer: '#6B7280',
-  admin: '#7C3AED',
-};
 
 export default function UserMenu() {
   const currentUserId = useAppStore(s => s.currentUserId);
-  const setCurrentUser = useAppStore(s => s.setCurrentUser);
+  const storeUsers = useAppStore(s => s.storeUsers);
+  const loginAs = useAppStore(s => s.loginAs);
+  const logout = useAppStore(s => s.logout);
   const setPage = useAppStore(s => s.setPage);
   const addToast = useAppStore(s => s.addToast);
 
+  const users = storeUsers;
   const user = users.find(u => u.id === currentUserId) ?? users[0];
+  const isMgmt = user.role === 'lead' || user.role === 'partner' || user.role === 'admin';
   const [open, setOpen] = useState(false);
   const [showSwitch, setShowSwitch] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -164,7 +153,7 @@ export default function UserMenu() {
                 icon={<UserIcon size={15} />}
                 label="My Profile"
                 hint="View your activity"
-                onClick={() => { setOpen(false); setPage('users'); }}
+                onClick={() => { setOpen(false); addToast('Profile coming soon', 'info'); }}
               />
               <MenuItem
                 icon={<Settings size={15} />}
@@ -179,12 +168,14 @@ export default function UserMenu() {
                 onClick={() => setShowSwitch(true)}
                 showChevron
               />
-              <MenuItem
-                icon={<Shield size={15} />}
-                label="Users & Access"
-                hint="Manage team"
-                onClick={() => { setOpen(false); setPage('users'); }}
-              />
+              {isMgmt && (
+                <MenuItem
+                  icon={<Shield size={15} />}
+                  label="Users & Access"
+                  hint="Manage team"
+                  onClick={() => { setOpen(false); setPage('users'); }}
+                />
+              )}
               <div className="my-1 mx-3" style={{ borderTop: '1px solid var(--border-subtle)' }} />
               <MenuItem
                 icon={<HelpCircle size={15} />}
@@ -194,7 +185,7 @@ export default function UserMenu() {
               <MenuItem
                 icon={<LogOut size={15} />}
                 label="Sign Out"
-                onClick={() => { setOpen(false); addToast('Signed out successfully', 'success'); }}
+                onClick={() => { setOpen(false); logout(); addToast('Signed out successfully', 'success'); }}
                 danger
               />
             </div>
@@ -218,7 +209,7 @@ export default function UserMenu() {
                   <button
                     key={u.id}
                     onClick={() => {
-                      setCurrentUser(u.id);
+                      loginAs(u.id);
                       addToast(`Switched to ${u.display_name}`, 'success');
                       setShowSwitch(false);
                       setOpen(false);

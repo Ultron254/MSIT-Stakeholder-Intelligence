@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import {
-  ArrowLeft, Edit3, MessageSquare, AlertTriangle, Shield, Clock,
+  ArrowLeft, Edit3, MessageSquare, AlertTriangle, Shield, Clock, EyeOff, Eye,
 } from 'lucide-react';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts';
-import { useAppStore, engagementPlans } from '../lib/store';
+import { useAppStore, allEngagementPlans, useCurrentUser } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge, ConfidenceBadge, SectorBadge, LayerIndicator, ScoreBar, WorkflowBadge, EngagementTypeBadge, OutcomeBadge, EmptyState } from '../components/ui/Badges';
 import { QUADRANT_COLORS, COMPONENT_DESCRIPTIONS } from '../lib/types';
@@ -25,6 +25,10 @@ export default function StakeholderDetail() {
   const evidence = useAppStore(s => s.evidence);
   const openLogEngagement = useAppStore(s => s.openLogEngagement);
   const openAddWatchlist = useAppStore(s => s.openAddWatchlist);
+  const storeUsers = useAppStore(s => s.storeUsers);
+  const toggleVipSensitive = useAppStore(s => s.toggleVipSensitive);
+  const addToast = useAppStore(s => s.addToast);
+  const me = useCurrentUser();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [expandedEngagement, setExpandedEngagement] = useState<string | null>(null);
 
@@ -49,7 +53,7 @@ export default function StakeholderDetail() {
   const stakeEvidence = evidence
     .filter(e => e.stakeholder_id === stakeholder.id)
     .sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime());
-  const plan = engagementPlans.find(p => p.stakeholder_id === stakeholder.id);
+  const plan = allEngagementPlans.find(p => p.stakeholder_id === stakeholder.id);
   const qColor = snap ? QUADRANT_COLORS[snap.quadrant] : QUADRANT_COLORS.monitor_exit;
 
   const radarData = snap ? [
@@ -170,12 +174,28 @@ export default function StakeholderDetail() {
           >
             <AlertTriangle size={14} /> Add to Watchlist
           </button>
+          {(me?.role === 'partner' || me?.role === 'admin') && (
+            <button
+              onClick={() => {
+                toggleVipSensitive(stakeholder.id, me.id);
+                addToast(stakeholder.vip_owner_id ? `${stakeholder.full_name} is no longer private` : `${stakeholder.full_name} tagged as private VIP — only you can see them`, stakeholder.vip_owner_id ? 'info' : 'success');
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              style={{
+                background: stakeholder.vip_owner_id ? 'rgba(124,58,237,0.12)' : 'transparent',
+                border: '1px solid', borderColor: stakeholder.vip_owner_id ? '#7C3AED' : 'var(--border-strong)',
+                color: stakeholder.vip_owner_id ? '#7C3AED' : 'var(--text-primary)',
+              }}
+            >
+              {stakeholder.vip_owner_id ? <><Eye size={14} /> Private VIP</> : <><EyeOff size={14} /> Tag as VIP</>}
+            </button>
+          )}
         </div>
       </div>
 
       {snap && (
         <div className="text-body-sm" style={{ color: 'var(--text-muted)' }}>
-          Last assessed {formatRelativeDate(snap.scored_at)} by {snap.scored_by === 'u-001' ? 'Sarah Wanjiku' : 'James Ochieng'}
+          Last assessed {formatRelativeDate(snap.scored_at)} by {storeUsers.find(u => u.id === snap.scored_by)?.display_name ?? 'the team'}
           {' · '}Power: {formatAxis(snap.power_axis)} · Convertibility: {formatAxis(snap.convertibility_axis)}
         </div>
       )}

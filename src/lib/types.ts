@@ -28,6 +28,7 @@ export type Component = 'influence' | 'relationship' | 'risk' | 'sentiment' | 'a
 export interface Stakeholder {
   id: string;
   country_id: string;
+  campaign_id: string;
   full_name: string;
   title: string;
   organization: string;
@@ -38,6 +39,10 @@ export interface Stakeholder {
   gender: 'female' | 'male';
   portrait_url: string | null;
   created_at: string;
+  // When set, this stakeholder is a partner-restricted VIP and is only
+  // visible to the user whose id matches. Used for sensitive contacts.
+  vip_owner_id?: string | null;
+  created_by?: string;
 }
 
 export interface StakeholderObjective {
@@ -134,16 +139,30 @@ export interface WatchlistSignal {
   resolved_at: string | null;
 }
 
+export type UserRole =
+  | 'analyst'
+  | 'lead'
+  | 'partner'
+  | 'client'
+  | 'country_lead'
+  | 'approver'
+  | 'viewer'
+  | 'admin';
+
 export interface User {
   id: string;
   email: string;
   display_name: string;
-  role: 'analyst' | 'country_lead' | 'approver' | 'viewer' | 'admin';
+  role: UserRole;
   country_access: string[];
   is_active: boolean;
   gender?: 'female' | 'male';
   job_title?: string;
   portrait_url?: string | null;
+  // Credentials are mocked for the POC (no real auth backend yet).
+  password?: string;
+  last_login?: string | null;
+  reports_to?: string | null;
 }
 
 export interface ScoringWeights {
@@ -233,4 +252,90 @@ export const COMPONENT_DESCRIPTIONS: Record<Component, string> = {
   sentiment: 'Current disposition towards the policy objective',
   alignment: 'Strategic interest alignment with campaign goals',
   impact: 'Potential magnitude of contribution to desired outcome',
+};
+
+// A campaign is a policy initiative the team is advocating for. Each campaign
+// has its own stakeholder portfolio, so switching campaigns swaps the whole
+// quadrant landscape. (Supersedes the older single-objective model.)
+export interface Campaign {
+  id: string;
+  country_id: string;
+  name: string;
+  short_name: string;
+  description: string;
+  policy_domain: string;
+  region: string;
+  target_date: string;
+  status: 'active' | 'completed' | 'archived' | 'draft';
+  created_at: string;
+  accent: string;
+  lead_user_id: string;
+}
+
+export const CAMPAIGN_STATUS_LABELS: Record<Campaign['status'], string> = {
+  active: 'Active',
+  completed: 'Completed',
+  archived: 'Archived',
+  draft: 'Draft',
+};
+
+// A client is the end user of MSIT -- a stakeholder (person or organization)
+// who is given a curated, read-only view of a single campaign. Clients are
+// created by a lead or partner and must be approved by a partner before the
+// account becomes available.
+export interface Client {
+  id: string;
+  name: string;
+  client_type: 'individual' | 'organization';
+  organization: string;
+  email: string;
+  campaign_id: string;
+  curated_stakeholder_ids: string[];
+  brief: string;
+  access_level: 'overview' | 'detailed';
+  status: 'pending_approval' | 'approved' | 'rejected' | 'suspended';
+  created_by: string;
+  approved_by: string | null;
+  created_at: string;
+  gender?: 'female' | 'male';
+  portrait_url?: string | null;
+}
+
+export const CLIENT_STATUS_LABELS: Record<Client['status'], string> = {
+  pending_approval: 'Pending Approval',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  suspended: 'Suspended',
+};
+
+// A partner invitation. Only partners can invite other partners.
+export interface PartnerInvite {
+  id: string;
+  email: string;
+  display_name: string;
+  invited_by: string;
+  status: 'sent' | 'accepted' | 'revoked';
+  sent_at: string;
+}
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  analyst: 'Analyst',
+  lead: 'Engagement Lead',
+  partner: 'Partner',
+  client: 'Client',
+  country_lead: 'Country Lead',
+  approver: 'Approver',
+  viewer: 'Viewer',
+  admin: 'Administrator',
+};
+
+export const ROLE_COLORS: Record<UserRole, string> = {
+  analyst: '#2DA67E',
+  lead: '#2563EB',
+  partner: '#7C3AED',
+  client: '#C4956A',
+  country_lead: '#1A2D3A',
+  approver: '#D97706',
+  viewer: '#6B7280',
+  admin: '#7C3AED',
 };

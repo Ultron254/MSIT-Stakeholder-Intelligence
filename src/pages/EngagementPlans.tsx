@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAppStore, engagementPlans } from '../lib/store';
+import { useAppStore, allEngagementPlans } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { QuadrantBadge, SISBadge } from '../components/ui/Badges';
 import Portrait from '../components/ui/Portrait';
@@ -9,6 +9,7 @@ import type { Quadrant } from '../lib/types';
 export default function EngagementPlans() {
   const all = useStakeholdersWithScores();
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
+  const currentCampaignId = useAppStore(s => s.currentCampaignId);
 
   const columns: { quadrant: Quadrant; label: string }[] = [
     { quadrant: 'strategic_ally', label: 'Strategic Allies' },
@@ -18,14 +19,19 @@ export default function EngagementPlans() {
   ];
 
   const plansByQuadrant = useMemo(() => {
-    const result: Record<Quadrant, typeof engagementPlans> = {
+    const result: Record<Quadrant, typeof allEngagementPlans> = {
       strategic_ally: [], power_gap: [], hidden_champion: [], monitor_exit: [],
     };
-    engagementPlans.forEach(p => {
-      result[p.current_quadrant as Quadrant]?.push(p);
-    });
+    // Only count/show plans for stakeholders the current user can actually see
+    // in this campaign (excludes hidden partner-restricted VIPs).
+    const visibleIds = new Set(all.map(s => s.id));
+    allEngagementPlans
+      .filter(p => p.objective_id === currentCampaignId && visibleIds.has(p.stakeholder_id))
+      .forEach(p => {
+        result[p.current_quadrant as Quadrant]?.push(p);
+      });
     return result;
-  }, []);
+  }, [currentCampaignId, all]);
 
   const getStakeholder = (id: string) => all.find(s => s.id === id);
 

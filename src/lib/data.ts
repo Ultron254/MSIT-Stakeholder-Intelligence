@@ -25,13 +25,14 @@ export const objectives: Objective[] = [
   },
 ];
 
-// Users
+// Users. Passwords are mocked for the POC -- there is no auth backend yet.
 export const users: User[] = [
-  { id: 'u-001', email: 'sarah.wanjiku@momentum.africa', display_name: 'Sarah Wanjiku', role: 'analyst', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Senior Intelligence Analyst', portrait_url: null },
-  { id: 'u-002', email: 'james.ochieng@momentum.africa', display_name: 'James Ochieng', role: 'country_lead', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Kenya Country Lead', portrait_url: null },
-  { id: 'u-003', email: 'amara.diallo@momentum.africa', display_name: 'Amara Diallo', role: 'approver', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Director of Engagement', portrait_url: null },
-  { id: 'u-004', email: 'peter.maina@momentum.africa', display_name: 'Peter Maina', role: 'viewer', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Policy Researcher', portrait_url: null },
-  { id: 'u-005', email: 'admin@momentum.africa', display_name: 'System Admin', role: 'admin', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Platform Administrator', portrait_url: null },
+  { id: 'u-001', email: 'sheila.wanjiku@momentum.africa', display_name: 'Sheila Wanjiku', role: 'analyst', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Senior Intelligence Analyst', portrait_url: null, password: 'momentum', reports_to: 'u-002', last_login: fmt(subDays(NOW, 0)) },
+  { id: 'u-002', email: 'charles.mwangi@momentum.africa', display_name: 'Charles Mwangi', role: 'lead', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Engagement Lead', portrait_url: null, password: 'momentum', reports_to: 'u-003', last_login: fmt(subDays(NOW, 0)) },
+  { id: 'u-003', email: 'ronny.saoke@momentum.africa', display_name: 'Ronny Saoke', role: 'partner', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Managing Partner', portrait_url: null, password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 1)) },
+  { id: 'u-004', email: 'peter.maina@momentum.africa', display_name: 'Peter Maina', role: 'viewer', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Policy Researcher', portrait_url: null, password: 'momentum', reports_to: 'u-002', last_login: fmt(subDays(NOW, 4)) },
+  { id: 'u-005', email: 'admin@momentum.africa', display_name: 'System Admin', role: 'admin', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Platform Administrator', portrait_url: null, password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 2)) },
+  { id: 'u-006', email: 'grace.kimani@greenfuture.org', display_name: 'Grace Kimani', role: 'client', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Director, Green Future Foundation', portrait_url: null, password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 3)) },
 ];
 
 // Scoring weights (current published version)
@@ -110,6 +111,7 @@ const stakeholderDefs: StakeholderDef[] = [
 export const stakeholders: Stakeholder[] = stakeholderDefs.map((d, i) => ({
   id: d.id,
   country_id: 'c-001',
+  campaign_id: 'o-001',
   full_name: d.name,
   title: d.title,
   organization: d.org,
@@ -120,6 +122,8 @@ export const stakeholders: Stakeholder[] = stakeholderDefs.map((d, i) => ({
   gender: d.gender,
   portrait_url: null,
   created_at: fmt(subDays(NOW, 180 - i * 3)),
+  vip_owner_id: null,
+  created_by: 'u-001',
 }));
 
 // Stakeholder-objective links: position is derived from current quadrant
@@ -167,12 +171,17 @@ function buildSnapshot(
 const snapshotsArr: ScoreSnapshot[] = [];
 let snapIdx = 1;
 
+// Snapshots awaiting the lead's sign-off (analyst submitted, not yet approved)
+const PENDING_APPROVAL_IDS = ['s-002', 's-013', 's-021', 's-029', 's-036'];
+
 // Latest snapshot for every stakeholder; confidence overrides for a few key profiles
 stakeholderDefs.forEach((d) => {
+  const pending = PENDING_APPROVAL_IDS.includes(d.id);
   const snap = buildSnapshot(
     `snap-${String(snapIdx++).padStart(4,'0')}`, d.id, 1,
     d.I, d.R, d.K, d.S, d.A, d.M,
-    subMonths(NOW, 1)
+    subMonths(NOW, 1),
+    pending ? 'submitted' : 'approved'
   );
   if (d.id === 's-001' || d.id === 's-003' || d.id === 's-005') snap.overall_confidence = 'A';
   if (d.id === 's-036' || d.id === 's-043') snap.overall_confidence = 'C';

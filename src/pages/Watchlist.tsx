@@ -8,10 +8,24 @@ import { formatRelativeDate } from '../lib/formatters';
 export default function Watchlist() {
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const addToast = useAppStore(s => s.addToast);
-  const watchlist = useAppStore(s => s.watchlist);
+  const allWatchlist = useAppStore(s => s.watchlist);
   const storeStakeholders = useAppStore(s => s.storeStakeholders);
+  const currentCampaignId = useAppStore(s => s.currentCampaignId);
+  const currentUserId = useAppStore(s => s.currentUserId);
   const resolveWatchlistSignal = useAppStore(s => s.resolveWatchlistSignal);
   const [showResolved, setShowResolved] = useState(false);
+
+  // Scope to the active campaign; keep portfolio-wide signals (no matching
+  // stakeholder); hide signals tied to VIPs the current user does not own.
+  const watchlist = useMemo(() => {
+    const byId = new Map(storeStakeholders.map(s => [s.id, s]));
+    return allWatchlist.filter(w => {
+      const st = byId.get(w.stakeholder_id);
+      if (!st) return true; // portfolio-wide signal
+      if (st.campaign_id !== currentCampaignId) return false;
+      return !st.vip_owner_id || st.vip_owner_id === currentUserId;
+    });
+  }, [allWatchlist, storeStakeholders, currentCampaignId, currentUserId]);
 
   const activeSignals = useMemo(() =>
     watchlist

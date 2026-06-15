@@ -1,6 +1,8 @@
-import { useAppStore } from './lib/store';
+import { useAppStore, useCurrentUser } from './lib/store';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
+import Login from './pages/Login';
+import ClientApp from './client/ClientApp';
 import Dashboard from './pages/Dashboard';
 import Stakeholders from './pages/Stakeholders';
 import StakeholderDetail from './pages/StakeholderDetail';
@@ -12,6 +14,11 @@ import ScoringConfig from './pages/ScoringConfig';
 import UsersAccess from './pages/UsersAccess';
 import AddStakeholder from './pages/AddStakeholder';
 import DataStreams from './pages/DataStreams';
+import Campaigns from './pages/Campaigns';
+import Approvals from './pages/Approvals';
+import Clients from './pages/Clients';
+import TeamActivity from './pages/TeamActivity';
+import Partners from './pages/Partners';
 import ScoreUpdatePanel from './components/ScoreUpdatePanel';
 import EngagementDetailModal from './components/EngagementDetailModal';
 import LogEngagementModal from './components/LogEngagementModal';
@@ -21,9 +28,39 @@ import { ToastContainer } from './components/ui/Badges';
 
 function App() {
   const { currentPage, sidebarCollapsed } = useAppStore();
+  const user = useCurrentUser();
+
+  // Not signed in -> show the login experience.
+  if (!user) {
+    return (
+      <>
+        <Login />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  // Clients get a dedicated curated workspace, not the staff console.
+  if (user.role === 'client') {
+    return (
+      <>
+        <ClientApp />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  const mgmtPages = ['approvals', 'team-activity', 'clients', 'scoring-config', 'users'];
+  const partnerPages = ['partners'];
+  const isMgmt = user.role === 'lead' || user.role === 'partner' || user.role === 'admin';
+  const isPartner = user.role === 'partner' || user.role === 'admin';
+  const page =
+    (mgmtPages.includes(currentPage) && !isMgmt) || (partnerPages.includes(currentPage) && !isPartner)
+      ? 'dashboard'
+      : currentPage;
 
   const renderPage = () => {
-    switch (currentPage) {
+    switch (page) {
       case 'dashboard': return <Dashboard />;
       case 'stakeholders': return <Stakeholders />;
       case 'stakeholder-detail': return <StakeholderDetail />;
@@ -35,6 +72,11 @@ function App() {
       case 'users': return <UsersAccess />;
       case 'add-stakeholder': return <AddStakeholder />;
       case 'data-streams': return <DataStreams />;
+      case 'campaigns': return <Campaigns />;
+      case 'approvals': return <Approvals />;
+      case 'clients': return <Clients />;
+      case 'team-activity': return <TeamActivity />;
+      case 'partners': return <Partners />;
       default: return <Dashboard />;
     }
   };
@@ -49,7 +91,7 @@ function App() {
         <Header />
         <main
           className="flex-1 px-6 py-5 w-full mx-auto"
-          style={{ maxWidth: currentPage === 'dashboard' ? 1680 : 1400 }}
+          style={{ maxWidth: page === 'dashboard' ? 1680 : 1400 }}
         >
           {renderPage()}
         </main>

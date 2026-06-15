@@ -440,6 +440,20 @@ input:focus, textarea:focus, select:focus {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+/* Shared form input used across modals and creation flows */
+.msit-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  outline: none;
+}
+.msit-input::placeholder { color: var(--text-muted); }
+
 /* Toast notification with slide + bounce */
 @keyframes toastSlideIn {
   0% { transform: translateX(100%) scale(0.95); opacity: 0; }

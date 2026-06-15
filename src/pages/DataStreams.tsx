@@ -4,8 +4,9 @@ import {
   Play, Pause, Volume2, Download, ExternalLink,
   FileText, Heart, MessageCircle, Repeat2,
   TrendingUp, TrendingDown, Minus, AlertCircle, Filter,
+  BarChart3, Users, Gauge, Activity, ArrowUpRight,
 } from 'lucide-react';
-import { useAppStore } from '../lib/store';
+import { useAppStore, useCurrentRole } from '../lib/store';
 import { Card } from '../components/ui/Badges';
 import Portrait from '../components/ui/Portrait';
 import { format, subDays, subHours, subMinutes } from 'date-fns';
@@ -382,7 +383,185 @@ function TagsAndStakeholders({ item }: { item: StreamItem }) {
   );
 }
 
+// Enhanced media-intelligence layer, shown only to leads and partners.
+function MediaIntelligence() {
+  const storeStakeholders = useAppStore(s => s.storeStakeholders);
+  const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
+
+  const a = useMemo(() => {
+    const total = STREAM_ITEMS.length;
+    const sent: Record<Sentiment, number> = { positive: 0, negative: 0, neutral: 0, mixed: 0 };
+    const byCat: Record<'tv' | 'radio' | 'print' | 'social', number> = { tv: 0, radio: 0, print: 0, social: 0 };
+    const bySource: Record<string, number> = {};
+    const byStakeholder: Record<string, number> = {};
+    const byTag: Record<string, number> = {};
+    const byDay: number[] = Array(7).fill(0);
+    STREAM_ITEMS.forEach(it => {
+      sent[it.sentiment]++;
+      byCat[it.kind]++;
+      bySource[it.sourceId] = (bySource[it.sourceId] ?? 0) + 1;
+      it.stakeholderIds.forEach(id => { byStakeholder[id] = (byStakeholder[id] ?? 0) + 1; });
+      it.tags.forEach(t => { byTag[t] = (byTag[t] ?? 0) + 1; });
+      const dayDiff = Math.floor((NOW.getTime() - it.publishedAt.getTime()) / 86400000);
+      if (dayDiff >= 0 && dayDiff < 7) byDay[6 - dayDiff]++;
+    });
+    const net = total ? Math.round(((sent.positive - sent.negative) / total) * 100) : 0;
+    const topSources = Object.entries(bySource).sort((x, y) => y[1] - x[1]).slice(0, 5);
+    const topVoices = Object.entries(byStakeholder).sort((x, y) => y[1] - x[1]).slice(0, 5);
+    const topTags = Object.entries(byTag).sort((x, y) => y[1] - x[1]).slice(0, 8);
+    return { total, sent, byCat, topSources, topVoices, topTags, net, byDay };
+  }, []);
+
+  const maxDay = Math.max(1, ...a.byDay);
+  const topVoiceName = a.topVoices[0] ? storeStakeholders.find(s => s.id === a.topVoices[0][0])?.full_name ?? '—' : '—';
+  const catColors: Record<string, string> = { tv: '#E53935', radio: '#283593', print: '#1B5E20', social: '#1877F2' };
+  const maxCat = Math.max(1, ...Object.values(a.byCat));
+
+  return (
+    <Card>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(37,99,235,0.12)', color: '#2563EB' }}>
+            <BarChart3 size={16} />
+          </div>
+          <div>
+            <h2 className="text-heading-md" style={{ color: 'var(--text-primary)' }}>Media Intelligence</h2>
+            <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>Aggregated analytics across all monitored streams</div>
+          </div>
+        </div>
+        <span className="px-2 py-0.5 rounded" style={{ background: 'rgba(37,99,235,0.1)', color: '#2563EB', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.04em' }}>LEAD & PARTNER VIEW</span>
+      </div>
+
+      {/* KPI tiles */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <IntelTile icon={<Activity size={15} />} label="Total mentions" value={String(a.total)} />
+        <IntelTile
+          icon={<Gauge size={15} />}
+          label="Net sentiment"
+          value={`${a.net > 0 ? '+' : ''}${a.net}`}
+          color={a.net > 0 ? '#1B7A43' : a.net < 0 ? '#C62828' : 'var(--text-primary)'}
+        />
+        <IntelTile icon={<Tv size={15} />} label="Sources active" value={String(a.topSources.length ? Object.keys(a.byCat).reduce((n, k) => n + (a.byCat[k as keyof typeof a.byCat] > 0 ? 1 : 0), 0) : 0) + ' channels'} />
+        <IntelTile icon={<Users size={15} />} label="Most-mentioned" value={topVoiceName} small />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Sentiment breakdown */}
+        <div>
+          <div className="text-label mb-2">Sentiment mix</div>
+          <div className="flex h-3 rounded-full overflow-hidden mb-2" style={{ background: 'var(--bg-inset)' }}>
+            {(['positive', 'neutral', 'mixed', 'negative'] as Sentiment[]).map(s => (
+              a.sent[s] > 0 ? <div key={s} style={{ width: `${(a.sent[s] / a.total) * 100}%`, background: SENTIMENT_CFG[s].color }} /> : null
+            ))}
+          </div>
+          <div className="space-y-1.5">
+            {(['positive', 'neutral', 'mixed', 'negative'] as Sentiment[]).map(s => (
+              <div key={s} className="flex items-center gap-2" style={{ fontSize: '0.75rem' }}>
+                <span className="w-2 h-2 rounded-full" style={{ background: SENTIMENT_CFG[s].color }} />
+                <span style={{ color: 'var(--text-secondary)' }}>{SENTIMENT_CFG[s].label}</span>
+                <span className="ml-auto font-mono" style={{ color: 'var(--text-muted)' }}>{a.sent[s]} · {Math.round((a.sent[s] / a.total) * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Volume by channel */}
+        <div>
+          <div className="text-label mb-2">Volume by channel</div>
+          <div className="space-y-2">
+            {(['tv', 'radio', 'print', 'social'] as const).map(k => (
+              <div key={k}>
+                <div className="flex items-center justify-between mb-1" style={{ fontSize: '0.75rem' }}>
+                  <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{k === 'social' ? 'Social' : k === 'tv' ? 'TV' : k === 'print' ? 'Print' : 'Radio'}</span>
+                  <span className="font-mono" style={{ color: 'var(--text-muted)' }}>{a.byCat[k]}</span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-inset)' }}>
+                  <div className="h-full rounded-full" style={{ width: `${(a.byCat[k] / maxCat) * 100}%`, background: catColors[k] }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 7-day volume trend */}
+        <div>
+          <div className="text-label mb-2">7-day coverage trend</div>
+          <div className="flex items-end gap-1.5" style={{ height: 96 }}>
+            {a.byDay.map((v, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+                <div className="w-full rounded-t" style={{ height: `${(v / maxDay) * 100}%`, minHeight: v > 0 ? 4 : 0, background: 'var(--gradient-brand)' }} title={`${v} items`} />
+                <span style={{ fontSize: '0.5625rem', color: 'var(--text-muted)', marginTop: 4 }}>{['6d', '5d', '4d', '3d', '2d', '1d', 'Now'][i]}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5 pt-5" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+        {/* Top voices */}
+        <div>
+          <div className="text-label mb-2">Most-mentioned stakeholders</div>
+          {a.topVoices.length === 0 ? (
+            <div className="text-body-sm" style={{ color: 'var(--text-muted)' }}>No stakeholder mentions yet.</div>
+          ) : (
+            <div className="space-y-1.5">
+              {a.topVoices.map(([id, count]) => {
+                const s = storeStakeholders.find(x => x.id === id);
+                if (!s) return null;
+                return (
+                  <button key={id} onClick={() => setSelectedStakeholder(id)} className="w-full flex items-center gap-2.5 p-1.5 rounded-lg transition-colors text-left"
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+                    <Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={28} />
+                    <span className="flex-1 truncate text-body-sm" style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{s.full_name}</span>
+                    <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{count} mention{count === 1 ? '' : 's'}</span>
+                    <ArrowUpRight size={13} style={{ color: 'var(--text-muted)' }} />
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Trending topics & sources */}
+        <div>
+          <div className="text-label mb-2">Trending topics</div>
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {a.topTags.map(([tag, count]) => (
+              <span key={tag} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-default)', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                <Tag size={10} style={{ color: 'var(--brand-primary)' }} />{tag}<span className="font-mono" style={{ color: 'var(--text-muted)' }}>{count}</span>
+              </span>
+            ))}
+          </div>
+          <div className="text-label mb-2">Top sources by volume</div>
+          <div className="flex flex-wrap gap-1.5">
+            {a.topSources.map(([id, count]) => {
+              const src = SOURCES.find(s => s.id === id);
+              return (
+                <span key={id} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: (src?.color ?? '#888') + '12', color: src?.color ?? 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600 }}>
+                  {src?.shortName ?? id}<span className="font-mono" style={{ opacity: 0.7 }}>{count}</span>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function IntelTile({ icon, label, value, color, small }: { icon: React.ReactNode; label: string; value: string; color?: string; small?: boolean }) {
+  return (
+    <div className="rounded-xl p-3" style={{ background: 'var(--bg-secondary)' }}>
+      <div className="flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>{icon}<span className="text-label" style={{ fontSize: '0.5625rem' }}>{label}</span></div>
+      <div className="font-display mt-1.5" style={{ fontSize: small ? '0.95rem' : '1.5rem', color: color ?? 'var(--text-primary)', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>
+    </div>
+  );
+}
+
 export default function DataStreams() {
+  const role = useCurrentRole();
+  const isMgmt = role === 'lead' || role === 'partner' || role === 'admin';
   const [activeCategory, setActiveCategory] = useState<StreamCategory>('all');
   const [search, setSearch] = useState('');
   const [sentimentFilter, setSentimentFilter] = useState<Sentiment | 'all'>('all');
@@ -419,6 +598,9 @@ export default function DataStreams() {
           <span className="text-xs font-medium pr-0.5" style={{ color: 'var(--text-muted)' }}>Live</span>
         </div>
       </div>
+
+      {/* Enhanced analytics layer for leads & partners */}
+      {isMgmt && <MediaIntelligence />}
 
       {/* Category Tabs */}
       <div className="flex gap-2 flex-wrap">

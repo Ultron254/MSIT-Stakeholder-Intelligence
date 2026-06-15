@@ -10,14 +10,27 @@ type FilterType = '' | 'meeting' | 'phone_call' | 'email' | 'event' | 'social' |
 type FilterOutcome = '' | 'positive' | 'neutral' | 'negative' | 'pending';
 
 export default function Engagements() {
-  const engagements = useAppStore(s => s.engagements);
+  const allEngagements = useAppStore(s => s.engagements);
   const storeStakeholders = useAppStore(s => s.storeStakeholders);
+  const currentCampaignId = useAppStore(s => s.currentCampaignId);
+  const currentUserId = useAppStore(s => s.currentUserId);
   const openEngagementDetail = useAppStore(s => s.openEngagementDetail);
   const openLogEngagement = useAppStore(s => s.openLogEngagement);
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const [typeFilter, setTypeFilter] = useState<FilterType>('');
   const [outcomeFilter, setOutcomeFilter] = useState<FilterOutcome>('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Scope to the active campaign and hide engagements tied to partner-restricted
+  // VIP stakeholders the current user does not own.
+  const engagements = useMemo(() => {
+    const visibleIds = new Set(
+      storeStakeholders
+        .filter(s => s.campaign_id === currentCampaignId && (!s.vip_owner_id || s.vip_owner_id === currentUserId))
+        .map(s => s.id)
+    );
+    return allEngagements.filter(e => visibleIds.has(e.stakeholder_id));
+  }, [allEngagements, storeStakeholders, currentCampaignId, currentUserId]);
 
   const filtered = useMemo(() => {
     let result = [...engagements];

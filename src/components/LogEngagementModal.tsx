@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, MessageSquare } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import Portrait from './ui/Portrait';
@@ -20,6 +20,8 @@ export default function LogEngagementModal() {
   const addToast = useAppStore(s => s.addToast);
   const storeStakeholders = useAppStore(s => s.storeStakeholders);
   const addActivity = useAppStore(s => s.addActivity);
+  const currentUserId = useAppStore(s => s.currentUserId);
+  const currentCampaignId = useAppStore(s => s.currentCampaignId);
 
   const [stakeholderId, setStakeholderId] = useState(logEngagementStakeholderId || '');
   const [type, setType] = useState<EngagementRecord['engagement_type']>('meeting');
@@ -30,7 +32,7 @@ export default function LogEngagementModal() {
   const [followUpDate, setFollowUpDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useState(() => {
+  useEffect(() => {
     if (logEngagementOpen) {
       setStakeholderId(logEngagementStakeholderId || '');
       setType('meeting');
@@ -39,14 +41,16 @@ export default function LogEngagementModal() {
       setOutcome('pending');
       setFollowUpRequired(false);
       setFollowUpDate('');
+      setSearchQuery('');
     }
-  });
+  }, [logEngagementOpen, logEngagementStakeholderId]);
 
   if (!logEngagementOpen) return null;
 
+  const selectable = storeStakeholders.filter(s => !s.vip_owner_id || s.vip_owner_id === currentUserId);
   const filteredStakeholders = searchQuery
-    ? storeStakeholders.filter(s => s.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || s.organization.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 8)
-    : storeStakeholders.slice(0, 10);
+    ? selectable.filter(s => s.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || s.organization.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 8)
+    : selectable.slice(0, 10);
 
   const selectedStakeholder = storeStakeholders.find(s => s.id === stakeholderId);
 
@@ -56,28 +60,29 @@ export default function LogEngagementModal() {
       return;
     }
 
+    const stakeholder = storeStakeholders.find(s => s.id === stakeholderId);
+
     const newEngagement: EngagementRecord = {
       id: `eng-new-${Date.now()}`,
       stakeholder_id: stakeholderId,
-      objective_id: 'o-001',
+      objective_id: stakeholder?.campaign_id ?? currentCampaignId,
       engagement_type: type,
       date,
       description: description.trim(),
       outcome,
       follow_up_required: followUpRequired,
       follow_up_date: followUpRequired && followUpDate ? followUpDate : null,
-      logged_by: 'u-001',
+      logged_by: currentUserId ?? 'u-001',
     };
 
     addEngagement(newEngagement);
-    
-    const stakeholder = storeStakeholders.find(s => s.id === stakeholderId);
+
     addActivity({
       id: `act-new-${Date.now()}`,
       type: 'engagement_logged',
       description: `${type.replace(/_/g, ' ')} logged with ${stakeholder?.full_name ?? 'Unknown'}`,
       stakeholder_id: stakeholderId,
-      user_id: 'u-001',
+      user_id: currentUserId ?? 'u-001',
       timestamp: format(NOW, 'yyyy-MM-dd'),
     });
     
