@@ -75,7 +75,7 @@ export default function Login() {
           key={s.image}
           className="absolute inset-0 transition-opacity duration-1000 ease-in-out pointer-events-none"
           style={{
-            opacity: i === slide ? 0.16 : 0,
+            opacity: i === slide ? 0.32 : 0,
             backgroundImage: `url(${s.image})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -85,7 +85,7 @@ export default function Login() {
       ))}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(110deg, rgba(10,32,27,0.96) 0%, rgba(10,32,27,0.86) 45%, rgba(10,32,27,0.55) 100%)' }}
+        style={{ background: 'linear-gradient(110deg, rgba(10,32,27,0.96) 0%, rgba(10,32,27,0.84) 45%, rgba(10,32,27,0.42) 100%)' }}
       />
 
       {/* Right: Africa showcase — fully framed in the right half with a margin */}
@@ -131,7 +131,7 @@ export default function Login() {
             </p>
           </div>
 
-          <h2 className="font-display" style={{ color: 'white', fontSize: '1.5rem' }}>Welcome back</h2>
+          <h2 className="font-display" style={{ color: 'white', fontSize: '1.5rem' }}>Welcome</h2>
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8125rem', marginTop: 4 }}>
             Sign in with your organization account to continue.
           </p>
