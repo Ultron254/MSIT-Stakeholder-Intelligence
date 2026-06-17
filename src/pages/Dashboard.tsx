@@ -167,6 +167,11 @@ export default function Dashboard() {
 
   if (!objective) return null;
 
+  // Hero tint is driven by the campaign's accent so each campaign (including
+  // newly created ones) carries its own colour through the dashboard.
+  const heroAccent = objective.accent || '#2DA67E';
+  const heroBg = `linear-gradient(135deg, color-mix(in srgb, ${heroAccent} 16%, #0A1722) 0%, color-mix(in srgb, ${heroAccent} 30%, #0A1722) 48%, color-mix(in srgb, ${heroAccent} 58%, #0A1722) 100%)`;
+
   return (
     <div className="page-enter">
       {/* Campaign context bar */}
@@ -190,18 +195,18 @@ export default function Dashboard() {
           <div
         className="relative overflow-hidden rounded-2xl"
         style={{
-          background: 'var(--gradient-brand-hero)',
+          background: heroBg,
           boxShadow: 'var(--shadow-lg)',
         }}
       >
-        {/* Animated gradient orbs */}
+        {/* Animated gradient orbs — tinted to the campaign accent */}
         <div
-          className="hero-orb-1 absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-30 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(45,166,126,0.7) 0%, transparent 70%)' }}
+          className="hero-orb-1 absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-40 pointer-events-none"
+          style={{ background: `radial-gradient(circle, color-mix(in srgb, ${heroAccent} 70%, transparent) 0%, transparent 70%)` }}
         />
         <div
-          className="hero-orb-2 absolute -bottom-32 -left-16 w-64 h-64 rounded-full opacity-15 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(91,192,157,0.6) 0%, transparent 70%)' }}
+          className="hero-orb-2 absolute -bottom-32 -left-16 w-64 h-64 rounded-full opacity-20 pointer-events-none"
+          style={{ background: `radial-gradient(circle, color-mix(in srgb, ${heroAccent} 50%, transparent) 0%, transparent 70%)` }}
         />
         {/* Subtle grid pattern */}
         <div
@@ -698,8 +703,9 @@ export default function Dashboard() {
       </div>
         </div>
 
-        {/* AI Insights Panel — sticky right column on xl+ */}
-        <div className="xl:block">
+        {/* AI Insights Panel — sticky right column. self-stretch lets the
+            column fill the row height so the sticky panel has scroll room. */}
+        <div className="xl:block self-stretch">
           <AIInsightsPanel />
         </div>
       </div>

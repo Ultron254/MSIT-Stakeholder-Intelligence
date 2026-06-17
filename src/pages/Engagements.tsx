@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { MessageSquare, Phone, Mail, Calendar, Users } from 'lucide-react';
-import { useAppStore } from '../lib/store';
+import { useAppStore, useActingRole } from '../lib/store';
 import { NOW } from '../lib/constants';
 import { Card, EngagementTypeBadge, OutcomeBadge, EmptyState } from '../components/ui/Badges';
 import Portrait from '../components/ui/Portrait';
@@ -17,20 +17,21 @@ export default function Engagements() {
   const openEngagementDetail = useAppStore(s => s.openEngagementDetail);
   const openLogEngagement = useAppStore(s => s.openLogEngagement);
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
+  const role = useActingRole();
   const [typeFilter, setTypeFilter] = useState<FilterType>('');
   const [outcomeFilter, setOutcomeFilter] = useState<FilterOutcome>('');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Scope to the active campaign and hide engagements tied to partner-restricted
-  // VIP stakeholders the current user does not own.
+  // VIP stakeholders the current user does not own (admins see all).
   const engagements = useMemo(() => {
     const visibleIds = new Set(
       storeStakeholders
-        .filter(s => s.campaign_id === currentCampaignId && (!s.vip_owner_id || s.vip_owner_id === currentUserId))
+        .filter(s => s.campaign_id === currentCampaignId && (!s.vip_owner_id || s.vip_owner_id === currentUserId || role === 'admin'))
         .map(s => s.id)
     );
     return allEngagements.filter(e => visibleIds.has(e.stakeholder_id));
-  }, [allEngagements, storeStakeholders, currentCampaignId, currentUserId]);
+  }, [allEngagements, storeStakeholders, currentCampaignId, currentUserId, role]);
 
   const filtered = useMemo(() => {
     let result = [...engagements];

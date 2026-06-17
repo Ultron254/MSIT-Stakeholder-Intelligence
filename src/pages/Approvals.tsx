@@ -32,10 +32,10 @@ export default function Approvals() {
   const visibleStakeholderIds = useMemo(() => {
     const ids = new Set<string>();
     storeStakeholders.forEach(s => {
-      if (!s.vip_owner_id || s.vip_owner_id === me?.id) ids.add(s.id);
+      if (!s.vip_owner_id || s.vip_owner_id === me?.id || me?.role === 'admin') ids.add(s.id);
     });
     return ids;
-  }, [storeStakeholders, me?.id]);
+  }, [storeStakeholders, me?.id, me?.role]);
 
   const pending = useMemo(
     () => snapshots.filter(s => s.workflow_status === 'submitted' && visibleStakeholderIds.has(s.stakeholder_id)),

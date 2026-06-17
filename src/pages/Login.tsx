@@ -1,31 +1,86 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, Lock, Mail, ShieldCheck, Loader2 } from 'lucide-react';
+import { ArrowRight, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAppStore, users } from '../lib/store';
 import { ROLE_LABELS } from '../lib/types';
 import Portrait from '../components/ui/Portrait';
+import { AFRICA_PATH, AFRICA_VIEWBOX } from '../lib/africaPath';
 
-// HD imagery of African professionals (women and men) in real African
-// workplaces — Lagos, modern offices — on-brand for Momentum's
-// people-centred, Africa-focused work.
+// HD imagery of African professionals at work — collaborative teams in
+// modern African workplaces — on-brand for Momentum's people-centred,
+// Africa-focused advocacy work.
 const SLIDES = [
   {
-    image: 'https://images.pexels.com/photos/30688590/pexels-photo-30688590.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
+    image: '/login-team.png',
     title: 'Map the people who move policy',
     subtitle: 'Score, classify and engage the stakeholders shaping Africa\'s agenda.',
   },
   {
-    image: 'https://images.pexels.com/photos/7581111/pexels-photo-7581111.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
+    image: '/login-pair.png',
     title: 'Turn intelligence into influence',
     subtitle: 'Data-driven decisions for smarter advocacy and partnerships.',
   },
   {
-    image: 'https://images.pexels.com/photos/9908681/pexels-photo-9908681.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop',
+    image: '/login-focus.png',
     title: 'See the whole board, in real time',
     subtitle: 'Track quadrants, risks and engagement gaps as every campaign moves.',
   },
 ];
 
-const DEMO_IDS = ['u-001', 'u-002', 'u-003', 'u-006'];
+// Sheila (analyst), Charles (lead), Ronny (partner), Ivy (admin), Grace (client).
+const DEMO_IDS = ['u-001', 'u-002', 'u-003', 'u-005', 'u-006'];
+
+// Concentric "signal" arcs that sweep across the continent, echoing the
+// stakeholder-intelligence radar motif in the brand mark.
+const ARCS = [150, 235, 320, 405, 490];
+
+function AfricaShowcase({ active }: { active: number }) {
+  return (
+    <svg
+      viewBox={AFRICA_VIEWBOX}
+      preserveAspectRatio="xMidYMid meet"
+      className="h-full w-full"
+      style={{ filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.45))' }}
+      aria-hidden
+    >
+      <defs>
+        <clipPath id="africaClip">
+          <path d={AFRICA_PATH} />
+        </clipPath>
+        <linearGradient id="africaTint" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#0B2A24" stopOpacity="0.45" />
+          <stop offset="0.55" stopColor="#114A3B" stopOpacity="0.35" />
+          <stop offset="1" stopColor="#2DA67E" stopOpacity="0.5" />
+        </linearGradient>
+      </defs>
+
+      <g clipPath="url(#africaClip)">
+        <rect x="0" y="0" width="542" height="560" fill="#0A241E" />
+        {SLIDES.map((s, i) => (
+          <image
+            key={s.image}
+            href={s.image}
+            x="0"
+            y="0"
+            width="542"
+            height="560"
+            preserveAspectRatio="xMidYMid slice"
+            style={{ opacity: i === active ? 0.9 : 0, transition: 'opacity 1.1s ease-in-out' }}
+          />
+        ))}
+        <rect x="0" y="0" width="542" height="560" fill="url(#africaTint)" />
+        {/* Sweeping signal arcs, centred off the upper-left */}
+        <g fill="none" stroke="#07201A" strokeWidth="11" opacity="0.5" strokeLinecap="round">
+          {ARCS.map(r => <circle key={r} cx="118" cy="128" r={r} />)}
+        </g>
+        <g fill="none" stroke="rgba(127,231,193,0.35)" strokeWidth="1.5">
+          {ARCS.map(r => <circle key={r} cx="118" cy="128" r={r - 3} />)}
+        </g>
+      </g>
+
+      <path d={AFRICA_PATH} fill="none" stroke="rgba(45,166,126,0.55)" strokeWidth="2" />
+    </svg>
+  );
+}
 
 export default function Login() {
   const login = useAppStore(s => s.login);
@@ -34,6 +89,7 @@ export default function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [slide, setSlide] = useState(0);
@@ -63,190 +119,171 @@ export default function Login() {
   const demoUsers = DEMO_IDS.map(id => users.find(u => u.id === id)).filter(Boolean) as typeof users;
 
   return (
-    <div className="fixed inset-0 flex overflow-hidden" style={{ background: 'var(--brand-navy-dark)' }}>
-      {/* Background slides */}
+    <div
+      className="fixed inset-0 flex overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #0A201B 0%, #0C2A22 55%, #0A1F1B 100%)' }}
+    >
+      {/* Faint full-bleed photo backdrop — the imagery also lives behind everything */}
       {SLIDES.map((s, i) => (
         <div
-          key={i}
-          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+          key={s.image}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out pointer-events-none"
           style={{
-            opacity: i === slide ? 1 : 0,
+            opacity: i === slide ? 0.16 : 0,
             backgroundImage: `url(${s.image})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+            filter: 'blur(2px)',
           }}
         />
       ))}
-      {/* Brand-tinted overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(115deg, rgba(15,30,41,0.92) 0%, rgba(15,30,41,0.72) 42%, rgba(15,30,41,0.45) 100%)',
-        }}
-      />
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(circle at 78% 38%, rgba(45,166,126,0.28), transparent 45%)' }}
+        style={{ background: 'linear-gradient(110deg, rgba(10,32,27,0.96) 0%, rgba(10,32,27,0.86) 45%, rgba(10,32,27,0.55) 100%)' }}
       />
 
-      {/* Top-left brand label */}
-      <div className="absolute top-7 left-8 z-10 flex items-center gap-3">
-        <div className="rounded-lg px-3 py-2 flex items-center" style={{ background: 'rgba(255,255,255,0.96)', boxShadow: '0 4px 16px rgba(0,0,0,0.18)' }}>
-          <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-6 w-auto object-contain block" />
-        </div>
-        <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.22em' }}>
-          STAKEHOLDER INTELLIGENCE TOOL
-        </span>
+      {/* Right: Africa showcase, partially bleeding off the edges */}
+      <div
+        className="absolute top-1/2 hidden md:block pointer-events-none"
+        style={{ right: '-3vw', transform: 'translateY(-50%)', height: '98vh', width: '58vw' }}
+      >
+        <AfricaShowcase active={slide} />
       </div>
 
-      {/* Left: rotating tagline */}
-      <div className="relative z-10 hidden md:flex flex-col justify-end flex-1 p-12 lg:p-16">
-        <div key={slide} className="hero-fade-in max-w-xl">
-          <h1
-            className="font-display"
-            style={{ color: 'white', fontSize: 'clamp(2rem, 3.4vw, 3rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
-          >
-            {SLIDES[slide].title}
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.78)', marginTop: 14, fontSize: '1rem', lineHeight: 1.6, maxWidth: 460 }}>
-            {SLIDES[slide].subtitle}
+      {/* Left: brand + sign-in */}
+      <div className="relative z-10 flex flex-col w-full md:w-[52%] lg:w-[48%] px-6 sm:px-12 lg:px-16 py-8 overflow-y-auto">
+        {/* Brand */}
+        <div className="flex items-center gap-3 mb-auto">
+          <div className="rounded-lg px-3 py-2 flex items-center" style={{ background: 'rgba(255,255,255,0.96)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }}>
+            <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-6 w-auto object-contain block" />
+          </div>
+          <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.22em' }}>
+            STAKEHOLDER INTELLIGENCE TOOL
+          </span>
+        </div>
+
+        <div className="py-8" style={{ maxWidth: 460 }}>
+          {/* Rotating headline */}
+          <div key={slide} className="hero-fade-in mb-7">
+            <h1
+              className="font-display"
+              style={{ color: 'white', fontSize: 'clamp(1.9rem, 3.4vw, 2.6rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
+            >
+              {SLIDES[slide].title}
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,0.72)', marginTop: 12, fontSize: '0.95rem', lineHeight: 1.55 }}>
+              {SLIDES[slide].subtitle}
+            </p>
+          </div>
+
+          <h2 className="font-display" style={{ color: 'white', fontSize: '1.5rem' }}>Welcome back</h2>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8125rem', marginTop: 4 }}>
+            Sign in with your organization account to continue.
+          </p>
+
+          <form onSubmit={submit} className="mt-5 space-y-3">
+            <div>
+              <label className="text-label" style={{ display: 'block', marginBottom: 6, color: 'rgba(255,255,255,0.55)' }}>Work email</label>
+              <div className="relative">
+                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.45)' }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@momentum.africa"
+                  className="w-full rounded-lg outline-none text-body-sm"
+                  style={{ padding: '11px 12px 11px 36px', border: '1px solid rgba(255,255,255,0.16)', background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-label" style={{ display: 'block', marginBottom: 6, color: 'rgba(255,255,255,0.55)' }}>Password</label>
+              <div className="relative">
+                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.45)' }} />
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-lg outline-none text-body-sm"
+                  style={{ padding: '11px 44px 11px 36px', border: '1px solid rgba(255,255,255,0.16)', background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1"
+                  style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.6875rem', fontWeight: 600 }}
+                  aria-label={showPw ? 'Hide password' : 'Show password'}
+                >
+                  {showPw ? <EyeOff size={13} /> : <Eye size={13} />} {showPw ? 'Hide' : 'Show'}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="text-body-sm rounded-lg px-3 py-2" style={{ background: 'rgba(248,113,113,0.12)', color: '#FCA5A5', fontSize: '0.75rem' }}>
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full flex items-center justify-center gap-2 rounded-lg btn-press transition-all"
+              style={{ padding: '12px 16px', background: 'var(--gradient-brand)', color: 'white', fontWeight: 600, fontSize: '0.875rem', boxShadow: 'var(--shadow-brand)', opacity: busy ? 0.8 : 1 }}
+            >
+              {busy ? <><Loader2 size={16} className="animate-spin" /> Signing in...</> : <>Sign in <ArrowRight size={16} /></>}
+            </button>
+          </form>
+
+          <div className="flex items-center gap-3 my-4">
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.14)' }} />
+            <span className="text-label" style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)' }}>Or use a demo account</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.14)' }} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {demoUsers.map(u => (
+              <button
+                key={u.id}
+                onClick={() => quick(u.id)}
+                className="flex items-center gap-2 rounded-lg text-left transition-colors"
+                style={{ padding: '8px 10px', border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.05)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+              >
+                <Portrait name={u.display_name} gender={u.gender} portraitUrl={u.portrait_url} size={28} />
+                <div className="min-w-0">
+                  <div className="truncate" style={{ color: 'white', fontSize: '0.75rem', fontWeight: 600 }}>{u.display_name.split(' ')[0]}</div>
+                  <div className="truncate" style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.625rem' }}>{ROLE_LABELS[u.role]}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <p className="text-center mt-4" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.625rem' }}>
+            Demo password for all accounts: <span style={{ fontWeight: 700, color: 'rgba(255,255,255,0.78)' }}>momentum</span>
           </p>
         </div>
-        <div className="flex items-center gap-2 mt-8">
-          {SLIDES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setSlide(i)}
-              aria-label={`Slide ${i + 1}`}
-              className="rounded-full transition-all duration-300"
-              style={{
-                width: i === slide ? 28 : 8, height: 8,
-                background: i === slide ? 'var(--brand-primary)' : 'rgba(255,255,255,0.4)',
-              }}
-            />
-          ))}
-        </div>
-      </div>
 
-      {/* Right: auth card */}
-      <div className="relative z-10 flex items-center justify-center w-full md:w-auto md:pr-12 lg:pr-16 px-5">
-        <div
-          className="w-full"
-          style={{
-            maxWidth: 420,
-            background: 'rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(20px) saturate(160%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-            border: '1px solid rgba(255,255,255,0.16)',
-            borderRadius: 24,
-            padding: 8,
-            boxShadow: '0 30px 80px rgba(0,0,0,0.45)',
-          }}
-        >
-          {/* Org header */}
-          <div className="flex items-center justify-between px-4 pt-3 pb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="rounded-lg px-2.5 py-1.5 flex items-center" style={{ background: 'rgba(255,255,255,0.96)' }}>
-                <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-5 w-auto object-contain block" />
-              </div>
-              <div className="leading-tight">
-                <div style={{ color: 'white', fontWeight: 700, fontSize: '0.875rem' }}>Stakeholder Intelligence</div>
-                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.6875rem' }}>Secure sign in</div>
-              </div>
-            </div>
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}
-            >
-              <ShieldCheck size={14} />
-            </div>
-          </div>
-
-          {/* White inner panel */}
-          <div style={{ background: 'var(--bg-elevated)', borderRadius: 18, padding: '24px 22px' }}>
-            <h2 className="text-display-md" style={{ color: 'var(--text-primary)', fontSize: '1.6rem' }}>Welcome back</h2>
-            <p className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-              Sign in with your organization account to continue.
-            </p>
-
-            <form onSubmit={submit} className="mt-5 space-y-3">
-              <div>
-                <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Work email</label>
-                <div className="relative">
-                  <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@momentum.africa"
-                    className="w-full rounded-lg outline-none text-body-sm"
-                    style={{ padding: '10px 12px 10px 36px', border: '1px solid var(--border-default)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Password</label>
-                <div className="relative">
-                  <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full rounded-lg outline-none text-body-sm"
-                    style={{ padding: '10px 12px 10px 36px', border: '1px solid var(--border-default)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <div className="text-body-sm rounded-lg px-3 py-2" style={{ background: 'rgba(220,38,38,0.08)', color: 'var(--status-danger)', fontSize: '0.75rem' }}>
-                  {error}
-                </div>
-              )}
-
+        {/* Footer + slide dots */}
+        <div className="mt-auto flex items-center justify-between gap-4 pt-4">
+          <div className="flex items-center gap-2">
+            {SLIDES.map((_, i) => (
               <button
-                type="submit"
-                disabled={busy}
-                className="w-full flex items-center justify-center gap-2 rounded-lg btn-press transition-all"
-                style={{ padding: '11px 16px', background: 'var(--gradient-brand)', color: 'white', fontWeight: 600, fontSize: '0.875rem', boxShadow: 'var(--shadow-brand)', opacity: busy ? 0.8 : 1 }}
-              >
-                {busy ? <><Loader2 size={16} className="animate-spin" /> Signing in...</> : <>Sign in <ArrowRight size={16} /></>}
-              </button>
-            </form>
-
-            <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
-              <span className="text-label" style={{ fontSize: '0.625rem' }}>Or use a demo account</span>
-              <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {demoUsers.map(u => (
-                <button
-                  key={u.id}
-                  onClick={() => quick(u.id)}
-                  className="flex items-center gap-2 rounded-lg text-left transition-colors"
-                  style={{ padding: '8px 10px', border: '1px solid var(--border-default)', background: 'var(--bg-secondary)' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-inset)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
-                >
-                  <Portrait name={u.display_name} gender={u.gender} portraitUrl={u.portrait_url} size={28} />
-                  <div className="min-w-0">
-                    <div className="truncate" style={{ color: 'var(--text-primary)', fontSize: '0.75rem', fontWeight: 600 }}>{u.display_name.split(' ')[0]}</div>
-                    <div className="truncate" style={{ color: 'var(--text-muted)', fontSize: '0.625rem' }}>{ROLE_LABELS[u.role]}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <p className="text-center mt-4" style={{ color: 'var(--text-muted)', fontSize: '0.625rem' }}>
-              Demo password for all accounts: <span style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>momentum</span>
-            </p>
+                key={i}
+                onClick={() => setSlide(i)}
+                aria-label={`Slide ${i + 1}`}
+                className="rounded-full transition-all duration-300"
+                style={{
+                  width: i === slide ? 26 : 8, height: 8,
+                  background: i === slide ? 'var(--brand-primary)' : 'rgba(255,255,255,0.3)',
+                }}
+              />
+            ))}
           </div>
-
-          <p className="text-center px-4 py-3" style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.625rem' }}>
-            Protected workspace. You will be routed to your role's view after sign-in.
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.625rem' }}>
+            Protected workspace · routed to your role's view after sign-in.
           </p>
         </div>
       </div>

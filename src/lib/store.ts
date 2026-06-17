@@ -360,13 +360,31 @@ function computeStakeholdersWithScores(stakeholdersList: Stakeholder[], snaps: S
   });
 }
 
+// A partner-restricted VIP is visible to its owner and to administrators
+// (platform superusers with full oversight); everyone else is excluded.
+export function canSeeVip(
+  s: { vip_owner_id?: string | null },
+  userId: string | null,
+  role: UserRole | null,
+): boolean {
+  return !s.vip_owner_id || s.vip_owner_id === userId || role === 'admin';
+}
+
+// The role of whoever is currently acting (the active user id). Kept as a
+// stable string selector so memoised hooks don't re-run unnecessarily.
+export function useActingRole(): UserRole | null {
+  return useAppStore(s => s.storeUsers.find(u => u.id === s.currentUserId)?.role ?? null);
+}
+
 // Visibility: scope to the active campaign and hide partner-restricted VIPs
-// from everyone except their owner.
-function visibleFor(list: Stakeholder[], campaignId: string, userId: string | null): Stakeholder[] {
-  return list.filter(s =>
-    s.campaign_id === campaignId &&
-    (!s.vip_owner_id || s.vip_owner_id === userId)
-  );
+// from everyone except their owner (and admins).
+function visibleFor(
+  list: Stakeholder[],
+  campaignId: string,
+  userId: string | null,
+  role: UserRole | null,
+): Stakeholder[] {
+  return list.filter(s => s.campaign_id === campaignId && canSeeVip(s, userId, role));
 }
 
 export function useStakeholdersWithScores(): StakeholderWithScore[] {
@@ -375,10 +393,11 @@ export function useStakeholdersWithScores(): StakeholderWithScore[] {
   const engagements = useAppStore(s => s.engagements);
   const currentCampaignId = useAppStore(s => s.currentCampaignId);
   const currentUserId = useAppStore(s => s.currentUserId);
+  const role = useActingRole();
   return useMemo(() => {
-    const visible = visibleFor(storeStakeholders, currentCampaignId, currentUserId);
+    const visible = visibleFor(storeStakeholders, currentCampaignId, currentUserId, role);
     return computeStakeholdersWithScores(visible, snapshots, engagements);
-  }, [storeStakeholders, snapshots, engagements, currentCampaignId, currentUserId]);
+  }, [storeStakeholders, snapshots, engagements, currentCampaignId, currentUserId, role]);
 }
 
 // Cross-campaign view (partners/leads who want the whole org at a glance).
@@ -387,10 +406,11 @@ export function useAllStakeholdersWithScores(): StakeholderWithScore[] {
   const storeStakeholders = useAppStore(s => s.storeStakeholders);
   const engagements = useAppStore(s => s.engagements);
   const currentUserId = useAppStore(s => s.currentUserId);
+  const role = useActingRole();
   return useMemo(() => {
-    const visible = storeStakeholders.filter(s => !s.vip_owner_id || s.vip_owner_id === currentUserId);
+    const visible = storeStakeholders.filter(s => canSeeVip(s, currentUserId, role));
     return computeStakeholdersWithScores(visible, snapshots, engagements);
-  }, [storeStakeholders, snapshots, engagements, currentUserId]);
+  }, [storeStakeholders, snapshots, engagements, currentUserId, role]);
 }
 
 export function useFilteredStakeholders(): StakeholderWithScore[] {
@@ -400,9 +420,10 @@ export function useFilteredStakeholders(): StakeholderWithScore[] {
   const filters = useAppStore(s => s.filters);
   const currentCampaignId = useAppStore(s => s.currentCampaignId);
   const currentUserId = useAppStore(s => s.currentUserId);
+  const role = useActingRole();
 
   return useMemo(() => {
-    const visible = visibleFor(storeStakeholders, currentCampaignId, currentUserId);
+    const visible = visibleFor(storeStakeholders, currentCampaignId, currentUserId, role);
     let filtered = computeStakeholdersWithScores(visible, snapshots, engagements);
 
     if (filters.search) {
@@ -450,5 +471,5 @@ export function useFilteredStakeholders(): StakeholderWithScore[] {
     }
 
     return filtered;
-  }, [storeStakeholders, snapshots, engagements, filters, currentCampaignId, currentUserId]);
+  }, [storeStakeholders, snapshots, engagements, filters, currentCampaignId, currentUserId, role]);
 }

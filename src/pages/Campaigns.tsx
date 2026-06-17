@@ -9,7 +9,7 @@ import { CAMPAIGN_STATUS_LABELS } from '../lib/types';
 import type { Campaign } from '../lib/types';
 import { formatDate, daysUntil } from '../lib/formatters';
 
-const ACCENTS = ['#2DA67E', '#2563EB', '#C4956A', '#7C3AED', '#0EA5E9', '#D97706', '#DB2777'];
+const ACCENTS = ['#2DA67E', '#2563EB', '#7C3AED', '#D97706', '#0D9488', '#15803D', '#DB2777'];
 const POLICY_DOMAINS = ['Energy & Climate', 'Health & Technology', 'Housing & Finance', 'Education', 'Environment & Water', 'Agriculture', 'Trade & Industry', 'Governance & Justice'];
 
 function statusColor(status: Campaign['status']): { bg: string; text: string } {
@@ -37,11 +37,11 @@ export default function Campaigns() {
   const counts = useMemo(() => {
     const map: Record<string, number> = {};
     for (const s of storeStakeholders) {
-      if (s.vip_owner_id && s.vip_owner_id !== currentUserId) continue;
+      if (s.vip_owner_id && s.vip_owner_id !== currentUserId && role !== 'admin') continue;
       map[s.campaign_id] = (map[s.campaign_id] ?? 0) + 1;
     }
     return map;
-  }, [storeStakeholders, currentUserId]);
+  }, [storeStakeholders, currentUserId, role]);
 
   const active = campaigns.filter(c => c.status === 'active' || c.status === 'draft');
   const past = campaigns.filter(c => c.status === 'completed' || c.status === 'archived');

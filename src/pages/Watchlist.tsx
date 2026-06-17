@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle, Clock, Shield } from 'lucide-react';
-import { useAppStore } from '../lib/store';
+import { useAppStore, useActingRole } from '../lib/store';
 import { Card, SeverityBadge, EmptyState } from '../components/ui/Badges';
 import Portrait from '../components/ui/Portrait';
 import { formatRelativeDate } from '../lib/formatters';
@@ -13,19 +13,21 @@ export default function Watchlist() {
   const currentCampaignId = useAppStore(s => s.currentCampaignId);
   const currentUserId = useAppStore(s => s.currentUserId);
   const resolveWatchlistSignal = useAppStore(s => s.resolveWatchlistSignal);
+  const role = useActingRole();
   const [showResolved, setShowResolved] = useState(false);
 
   // Scope to the active campaign; keep portfolio-wide signals (no matching
-  // stakeholder); hide signals tied to VIPs the current user does not own.
+  // stakeholder); hide signals tied to VIPs the current user does not own
+  // (admins see all).
   const watchlist = useMemo(() => {
     const byId = new Map(storeStakeholders.map(s => [s.id, s]));
     return allWatchlist.filter(w => {
       const st = byId.get(w.stakeholder_id);
       if (!st) return true; // portfolio-wide signal
       if (st.campaign_id !== currentCampaignId) return false;
-      return !st.vip_owner_id || st.vip_owner_id === currentUserId;
+      return !st.vip_owner_id || st.vip_owner_id === currentUserId || role === 'admin';
     });
-  }, [allWatchlist, storeStakeholders, currentCampaignId, currentUserId]);
+  }, [allWatchlist, storeStakeholders, currentCampaignId, currentUserId, role]);
 
   const activeSignals = useMemo(() =>
     watchlist

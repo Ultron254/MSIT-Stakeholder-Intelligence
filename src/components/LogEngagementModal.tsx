@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X, MessageSquare } from 'lucide-react';
-import { useAppStore } from '../lib/store';
+import { useAppStore, useActingRole } from '../lib/store';
 import Portrait from './ui/Portrait';
 import { NOW } from '../lib/constants';
 import { format } from 'date-fns';
@@ -22,6 +22,7 @@ export default function LogEngagementModal() {
   const addActivity = useAppStore(s => s.addActivity);
   const currentUserId = useAppStore(s => s.currentUserId);
   const currentCampaignId = useAppStore(s => s.currentCampaignId);
+  const role = useActingRole();
 
   const [stakeholderId, setStakeholderId] = useState(logEngagementStakeholderId || '');
   const [type, setType] = useState<EngagementRecord['engagement_type']>('meeting');
@@ -47,7 +48,7 @@ export default function LogEngagementModal() {
 
   if (!logEngagementOpen) return null;
 
-  const selectable = storeStakeholders.filter(s => !s.vip_owner_id || s.vip_owner_id === currentUserId);
+  const selectable = storeStakeholders.filter(s => !s.vip_owner_id || s.vip_owner_id === currentUserId || role === 'admin');
   const filteredStakeholders = searchQuery
     ? selectable.filter(s => s.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || s.organization.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 8)
     : selectable.slice(0, 10);

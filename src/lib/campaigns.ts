@@ -23,31 +23,31 @@ export const campaigns: Campaign[] = [
     id: 'o-002', country_id: 'c-001', name: 'Digital Health Data Protection Act 2026', short_name: 'Digital Health',
     description: 'Framework governing patient data, telemedicine and health-tech interoperability across the public and private health sector.',
     policy_domain: 'Health & Technology', region: 'Kenya', target_date: '2026-09-15', status: 'active',
-    created_at: fmt(subDays(NOW, 150)), accent: '#2563EB', lead_user_id: 'u-002',
+    created_at: fmt(subDays(NOW, 150)), accent: '#7C3AED', lead_user_id: 'u-002',
   },
   {
     id: 'o-003', country_id: 'c-001', name: 'Affordable Housing Finance Bill 2026', short_name: 'Housing Finance',
     description: 'Reform of mortgage finance, the housing levy and developer incentives to deliver one million affordable homes.',
     policy_domain: 'Housing & Finance', region: 'Kenya', target_date: '2026-08-01', status: 'active',
-    created_at: fmt(subDays(NOW, 120)), accent: '#C4956A', lead_user_id: 'u-002',
+    created_at: fmt(subDays(NOW, 120)), accent: '#D97706', lead_user_id: 'u-002',
   },
   {
     id: 'o-004', country_id: 'c-001', name: 'Universal Education Funding Framework 2026', short_name: 'Education Funding',
     description: 'Capitation reform and a sustainable financing model for free primary and secondary education.',
     policy_domain: 'Education', region: 'Kenya', target_date: '2026-11-30', status: 'active',
-    created_at: fmt(subDays(NOW, 95)), accent: '#7C3AED', lead_user_id: 'u-002',
+    created_at: fmt(subDays(NOW, 95)), accent: '#2563EB', lead_user_id: 'u-002',
   },
   {
     id: 'o-005', country_id: 'c-001', name: 'Water Resource Management Bill 2026', short_name: 'Water Resources',
     description: 'Catchment protection, water allocation rights and county-level utility governance reform.',
     policy_domain: 'Environment & Water', region: 'Kenya', target_date: '2026-10-15', status: 'active',
-    created_at: fmt(subDays(NOW, 70)), accent: '#0EA5E9', lead_user_id: 'u-002',
+    created_at: fmt(subDays(NOW, 70)), accent: '#0D9488', lead_user_id: 'u-002',
   },
   {
     id: 'o-006', country_id: 'c-001', name: 'Agricultural Subsidy Reform 2025', short_name: 'Agri Subsidy Reform',
     description: 'Restructuring of fertiliser subsidies and the e-voucher programme. Enacted in late 2025; retained for historical analysis.',
     policy_domain: 'Agriculture', region: 'Kenya', target_date: '2025-12-15', status: 'completed',
-    created_at: fmt(subDays(NOW, 400)), accent: '#D97706', lead_user_id: 'u-002',
+    created_at: fmt(subDays(NOW, 400)), accent: '#15803D', lead_user_id: 'u-002',
   },
 ];
 

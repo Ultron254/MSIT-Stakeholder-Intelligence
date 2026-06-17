@@ -43,7 +43,7 @@ export default function TeamActivity() {
   const [filterUser, setFilterUser] = useState<string | null>(null);
 
   const team = useMemo(
-    () => storeUsers.filter(u => ['analyst', 'lead', 'partner', 'viewer'].includes(u.role) && (me?.role === 'partner' || u.role !== 'partner')),
+    () => storeUsers.filter(u => ['analyst', 'lead', 'partner', 'viewer'].includes(u.role) && (me?.role === 'partner' || me?.role === 'admin' || u.role !== 'partner')),
     [storeUsers, me]
   );
 

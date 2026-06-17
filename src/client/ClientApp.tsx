@@ -104,8 +104,8 @@ export default function ClientApp() {
 
       <main className="px-6 py-6 mx-auto" style={{ maxWidth: 1180 }}>
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl mb-6" style={{ background: 'var(--gradient-brand-hero)', boxShadow: 'var(--shadow-lg)' }}>
-          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-25 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(45,166,126,0.7) 0%, transparent 70%)' }} />
+        <div className="relative overflow-hidden rounded-2xl mb-6" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${campaign.accent || '#2DA67E'} 16%, #0A1722) 0%, color-mix(in srgb, ${campaign.accent || '#2DA67E'} 30%, #0A1722) 48%, color-mix(in srgb, ${campaign.accent || '#2DA67E'} 58%, #0A1722) 100%)`, boxShadow: 'var(--shadow-lg)' }}>
+          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-30 pointer-events-none" style={{ background: `radial-gradient(circle, color-mix(in srgb, ${campaign.accent || '#2DA67E'} 70%, transparent) 0%, transparent 70%)` }} />
           <div className="relative p-7 md:p-9">
             <div className="flex items-center gap-2 mb-3">
               <span className="px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.12)', color: '#86EFAC', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.08em' }}>CURATED FOR YOU</span>
