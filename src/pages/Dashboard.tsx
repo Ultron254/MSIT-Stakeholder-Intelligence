@@ -134,7 +134,7 @@ export default function Dashboard() {
     if (engagementGap.length > 0) {
       parts.push(`${engagementGap.length} priority ${engagementGap.length === 1 ? 'action is' : 'actions are'} overdue — immediate attention needed.`);
     }
-    if (parts.length === 0) return 'Portfolio is steady — no critical score drops or overdue actions in this campaign right now.';
+    if (parts.length === 0) return 'Portfolio is steady — no critical score drops or overdue actions in this focal point right now.';
     return parts.join(' ');
   }, [all, snapshots, engagementGap]);
 
@@ -228,7 +228,7 @@ export default function Dashboard() {
       {/* Campaign context bar */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <div className="text-label" style={{ fontSize: '0.625rem' }}>Viewing campaign</div>
+          <div className="text-label" style={{ fontSize: '0.625rem' }}>Viewing focal point</div>
           <div className="text-heading-md mt-0.5" style={{ color: 'var(--text-primary)' }}>{objective.short_name}</div>
         </div>
         <CampaignSwitcher variant="compact" />
@@ -275,7 +275,7 @@ export default function Dashboard() {
           <>
             <button
               onClick={() => cycleCampaign(-1)}
-              aria-label="Previous campaign"
+              aria-label="Previous focal point"
               className="absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all btn-press"
               style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.28)', color: 'white' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
@@ -285,7 +285,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => cycleCampaign(1)}
-              aria-label="Next campaign"
+              aria-label="Next focal point"
               className="absolute right-2.5 md:right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all btn-press"
               style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.28)', color: 'white' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
@@ -316,7 +316,7 @@ export default function Dashboard() {
                     />
                   </span>
                   <span style={{ color: '#86EFAC', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em' }}>
-                    LIVE CAMPAIGN
+                    LIVE FOCAL POINT
                   </span>
                 </div>
                 <span
@@ -434,7 +434,7 @@ export default function Dashboard() {
                 className="text-label"
                 style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.625rem' }}
               >
-                Campaign Progress
+                Focal Point Progress
               </span>
               <span
                 style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.75rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}

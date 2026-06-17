@@ -42,7 +42,7 @@ export default function Clients() {
         <div>
           <h1 className="text-display-md" style={{ color: 'var(--text-primary)' }}>Clients</h1>
           <p className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-            External end users with a curated, read-only view of a campaign. Leads create clients; a partner approves them before access goes live.
+            External end users with a curated, read-only view of a focal point. Leads create clients; a partner approves them before access goes live.
           </p>
         </div>
         <button
@@ -58,7 +58,7 @@ export default function Clients() {
         <Card><div className="text-label mb-2">Total Clients</div><div className="text-metric-sm" style={{ color: 'var(--text-primary)' }}>{clients.length}</div></Card>
         <Card><div className="text-label mb-2">Approved</div><div className="text-metric-sm" style={{ color: 'var(--brand-primary)' }}>{approved}</div></Card>
         <Card><div className="text-label mb-2">Pending Approval</div><div className="text-metric-sm" style={{ color: pending > 0 ? 'var(--status-warning)' : 'var(--text-primary)' }}>{pending}</div></Card>
-        <Card><div className="text-label mb-2">Active Campaigns</div><div className="text-metric-sm" style={{ color: 'var(--text-primary)' }}>{new Set(clients.map(c => c.campaign_id)).size}</div></Card>
+        <Card><div className="text-label mb-2">Active Focal Points</div><div className="text-metric-sm" style={{ color: 'var(--text-primary)' }}>{new Set(clients.map(c => c.campaign_id)).size}</div></Card>
       </div>
 
       {isPartner && pending > 0 && (
@@ -71,7 +71,7 @@ export default function Clients() {
       )}
 
       {clients.length === 0 ? (
-        <Card><EmptyState title="No clients yet" description="Create a client to give an external stakeholder a curated view of a campaign." /></Card>
+        <Card><EmptyState title="No clients yet" description="Create a client to give an external stakeholder a curated view of a focal point." /></Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {clients.map(c => {
@@ -94,7 +94,7 @@ export default function Clients() {
                 <p className="text-body-sm mt-3" style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{c.brief}</p>
 
                 <div className="grid grid-cols-2 gap-3 mt-4">
-                  <Meta label="Campaign" value={campaignName(c.campaign_id)} />
+                  <Meta label="Focal Point" value={campaignName(c.campaign_id)} />
                   <Meta label="Curated stakeholders" value={`${c.curated_stakeholder_ids.length}`} />
                   <Meta label="Access level" value={c.access_level === 'detailed' ? 'Detailed' : 'Overview'} />
                   <Meta label="Created" value={formatDate(c.created_at)} />
@@ -207,7 +207,7 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
             <Field label="Email"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="client@example.com" className="msit-input" /></Field>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Campaign">
+            <Field label="Focal Point">
               <select value={campaignId} onChange={(e) => { setCampaignId(e.target.value); setCurated([]); }} className="msit-input">
                 {campaigns.map(c => <option key={c.id} value={c.id}>{c.short_name}</option>)}
               </select>

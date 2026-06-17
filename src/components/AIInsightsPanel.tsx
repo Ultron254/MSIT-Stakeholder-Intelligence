@@ -23,7 +23,7 @@ const QUICK_PROMPTS = [
   { icon: TrendingUp, label: 'Top SIS movers this week', prompt: 'Who are the top SIS movers this week?' },
   { icon: AlertTriangle, label: 'Highest-risk stakeholders', prompt: 'Show me the highest-risk stakeholders right now.' },
   { icon: Target, label: 'Power gaps to convert', prompt: 'Which power gaps should I prioritise converting?' },
-  { icon: Lightbulb, label: 'Suggest next action', prompt: 'What should I do next on the campaign?' },
+  { icon: Lightbulb, label: 'Suggest next action', prompt: 'What should I do next on the focal point?' },
 ];
 
 export default function AIInsightsPanel() {
@@ -138,7 +138,7 @@ export default function AIInsightsPanel() {
         recommended.push(`Schedule a 1:1 with ${insights.topPowerGap.full_name} (${insights.topPowerGap.organization}) — your highest-leverage power gap.`);
       }
       if (daysLeft < 90) {
-        recommended.push(`Campaign target is ${daysLeft} days away. Lock approval pipeline for tier-1 amendments this week.`);
+        recommended.push(`Focal point target is ${daysLeft} days away. Lock approval pipeline for tier-1 amendments this week.`);
       } else {
         recommended.push(`Lock weekly engagement plan for the next 14 days — focus on ${insights.allies.length} Strategic Allies.`);
       }
@@ -153,16 +153,16 @@ export default function AIInsightsPanel() {
       };
     }
 
-    if (q.includes('campaign') || q.includes('progress') || q.includes('day')) {
+    if (q.includes('campaign') || q.includes('focal') || q.includes('progress') || q.includes('day')) {
       const pct = Math.round(((365 - daysLeft) / 365) * 100);
       return {
-        content: `The ${objective.name} campaign is ${pct}% through its window with ${daysLeft} days remaining. Portfolio average SIS is ${formatSIS(insights.scored.reduce((sum, s) => sum + s.latestSnapshot!.sis_score, 0) / Math.max(1, insights.scored.length))}, with ${insights.allies.length} confirmed allies and ${insights.flagged.length} stakeholders showing risk indicators.`,
+        content: `The ${objective.name} focal point is ${pct}% through its window with ${daysLeft} days remaining. Portfolio average SIS is ${formatSIS(insights.scored.reduce((sum, s) => sum + s.latestSnapshot!.sis_score, 0) / Math.max(1, insights.scored.length))}, with ${insights.allies.length} confirmed allies and ${insights.flagged.length} stakeholders showing risk indicators.`,
       };
     }
 
     if (q.includes('hello') || q.includes('hi ') || q === 'hi' || q.includes('hey')) {
       return {
-        content: `Hi! I have full context on your ${insights.scored.length} scored stakeholders. Ask about top movers, risks, power gaps, the campaign timeline, or what you should do next.`,
+        content: `Hi! I have full context on your ${insights.scored.length} scored stakeholders. Ask about top movers, risks, power gaps, the focal point timeline, or what you should do next.`,
       };
     }
 
@@ -493,7 +493,7 @@ function CollapsedRail({
             </span>
           </div>
         </Tooltip>
-        <Tooltip content={`${daysLeft} days until campaign target`} side="left">
+        <Tooltip content={`${daysLeft} days until focal point target`} side="left">
           <div className="flex flex-col items-center cursor-help">
             <span style={{ fontSize: '0.875rem', fontWeight: 700, color: daysLeft < 90 ? '#FCD34D' : 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums' }}>
               {daysLeft}

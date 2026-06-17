@@ -3,7 +3,7 @@ import { ArrowRight, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAppStore, users } from '../lib/store';
 import { ROLE_LABELS } from '../lib/types';
 import Portrait from '../components/ui/Portrait';
-import { AFRICA_PATH, AFRICA_VIEWBOX } from '../lib/africaPath';
+import { AFRICA_PATHS, AFRICA_VIEWBOX } from '../lib/africaPath';
 
 // HD imagery of African professionals at work — collaborative teams in
 // modern African workplaces — on-brand for Momentum's people-centred,
@@ -22,7 +22,7 @@ const SLIDES = [
   {
     image: '/login-focus.png',
     title: 'See the whole board, in real time',
-    subtitle: 'Track quadrants, risks and engagement gaps as every campaign moves.',
+    subtitle: 'Track quadrants, risks and engagement gaps as every focal point moves.',
   },
 ];
 
@@ -30,10 +30,11 @@ const SLIDES = [
 const DEMO_IDS = ['u-001', 'u-002', 'u-003', 'u-005', 'u-006'];
 
 // Concentric "signal" arcs that sweep across the continent, echoing the
-// stakeholder-intelligence radar motif in the brand mark.
-const ARCS = [175, 285, 395];
-const ARC_CX = 430;
-const ARC_CY = 150;
+// stakeholder-intelligence radar motif in the brand mark. Sized to the
+// 307×325 continent viewBox.
+const ARCS = [98, 152, 212];
+const ARC_CX = 248;
+const ARC_CY = 88;
 
 function AfricaShowcase({ active }: { active: number }) {
   return (
@@ -41,12 +42,13 @@ function AfricaShowcase({ active }: { active: number }) {
       viewBox={AFRICA_VIEWBOX}
       preserveAspectRatio="xMidYMid meet"
       className="h-full w-full"
-      style={{ filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.45))' }}
+      style={{ filter: 'drop-shadow(0 24px 50px rgba(0,0,0,0.5))' }}
       aria-hidden
     >
       <defs>
+        {/* Union of the continent's country shapes → outer silhouette only */}
         <clipPath id="africaClip">
-          <path d={AFRICA_PATH} />
+          {AFRICA_PATHS.map((d, i) => <path key={i} d={d} />)}
         </clipPath>
         <linearGradient id="africaTint" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#0B2A24" stopOpacity="0.45" />
@@ -56,30 +58,28 @@ function AfricaShowcase({ active }: { active: number }) {
       </defs>
 
       <g clipPath="url(#africaClip)">
-        <rect x="0" y="0" width="542" height="560" fill="#0A241E" />
+        <rect x="0" y="0" width="307" height="325" fill="#0A241E" />
         {SLIDES.map((s, i) => (
           <image
             key={s.image}
             href={s.image}
             x="0"
             y="0"
-            width="542"
-            height="560"
+            width="307"
+            height="325"
             preserveAspectRatio="xMidYMid slice"
             style={{ opacity: i === active ? 0.9 : 0, transition: 'opacity 1.1s ease-in-out' }}
           />
         ))}
-        <rect x="0" y="0" width="542" height="560" fill="url(#africaTint)" />
+        <rect x="0" y="0" width="307" height="325" fill="url(#africaTint)" />
         {/* Sweeping signal arcs — bold dark bands with a faint inner highlight */}
-        <g fill="none" stroke="#06201A" strokeWidth="15" opacity="0.6" strokeLinecap="round">
+        <g fill="none" stroke="#06201A" strokeWidth="9" opacity="0.55" strokeLinecap="round">
           {ARCS.map(r => <circle key={r} cx={ARC_CX} cy={ARC_CY} r={r} />)}
         </g>
-        <g fill="none" stroke="rgba(160,240,205,0.35)" strokeWidth="2">
-          {ARCS.map(r => <circle key={r} cx={ARC_CX} cy={ARC_CY} r={r - 6} />)}
+        <g fill="none" stroke="rgba(160,240,205,0.32)" strokeWidth="1.5">
+          {ARCS.map(r => <circle key={r} cx={ARC_CX} cy={ARC_CY} r={r - 4} />)}
         </g>
       </g>
-
-      <path d={AFRICA_PATH} fill="none" stroke="rgba(45,166,126,0.55)" strokeWidth="2" />
     </svg>
   );
 }
@@ -153,11 +153,16 @@ export default function Login() {
       </div>
 
       {/* Left: brand + sign-in */}
-      <div className="relative z-10 flex flex-col w-full md:w-[52%] lg:w-[48%] px-6 sm:px-12 lg:px-16 py-8 overflow-y-auto">
+      <div className="no-scrollbar relative z-10 flex flex-col w-full md:w-[52%] lg:w-[48%] px-6 sm:px-12 lg:px-16 py-8 overflow-y-auto">
         {/* Brand */}
         <div className="mb-auto">
-          <img src="/momentum-logo-light.svg" alt="Momentum Africa Partners" className="h-12 w-auto object-contain block" />
-          <span className="block mt-2.5" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.22em' }}>
+          <span
+            className="inline-flex rounded-xl px-3.5 py-2.5"
+            style={{ background: 'rgba(255,255,255,0.97)', boxShadow: '0 6px 20px rgba(0,0,0,0.28)' }}
+          >
+            <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-9 w-auto object-contain block" />
+          </span>
+          <span className="block mt-3" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.22em' }}>
             STAKEHOLDER INTELLIGENCE TOOL
           </span>
         </div>
@@ -242,13 +247,13 @@ export default function Login() {
             <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.14)' }} />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-wrap justify-center gap-2">
             {demoUsers.map(u => (
               <button
                 key={u.id}
                 onClick={() => quick(u.id)}
                 className="flex items-center gap-2 rounded-lg text-left transition-colors"
-                style={{ padding: '8px 10px', border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.05)' }}
+                style={{ flexBasis: 'calc(50% - 0.25rem)', padding: '8px 10px', border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.05)' }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
               >
@@ -267,7 +272,7 @@ export default function Login() {
         </div>
 
         {/* Footer + slide dots */}
-        <div className="mt-auto flex items-center justify-between gap-4 pt-4">
+        <div className="mt-auto pt-6 flex flex-col items-center gap-2.5">
           <div className="flex items-center gap-2">
             {SLIDES.map((_, i) => (
               <button
@@ -282,7 +287,7 @@ export default function Login() {
               />
             ))}
           </div>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.625rem' }}>
+          <p className="text-center" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.625rem' }}>
             Protected workspace · routed to your role's view after sign-in.
           </p>
         </div>

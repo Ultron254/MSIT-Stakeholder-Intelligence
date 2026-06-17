@@ -52,9 +52,9 @@ export default function Campaigns() {
     <div className="page-enter space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-display-md" style={{ color: 'var(--text-primary)' }}>Campaigns</h1>
+          <h1 className="text-display-md" style={{ color: 'var(--text-primary)' }}>Focal Points</h1>
           <p className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-            Every policy initiative the team is advocating for. Switch a campaign to load its stakeholder portfolio.
+            Every policy initiative the team is advocating for. Switch a focal point to load its stakeholder portfolio.
           </p>
         </div>
         {canCreate && (
@@ -63,13 +63,13 @@ export default function Campaigns() {
             className="flex items-center gap-2 rounded-lg btn-press"
             style={{ padding: '9px 16px', background: 'var(--gradient-brand)', color: 'white', fontWeight: 600, fontSize: '0.875rem', boxShadow: 'var(--shadow-brand)' }}
           >
-            <Plus size={16} /> New Campaign
+            <Plus size={16} /> New Focal Point
           </button>
         )}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total Campaigns" value={campaigns.length} />
+        <StatCard label="Total Focal Points" value={campaigns.length} />
         <StatCard label="Active" value={campaigns.filter(c => c.status === 'active').length} color="var(--brand-primary)" />
         <StatCard label="Completed" value={campaigns.filter(c => c.status === 'completed').length} color="#475569" />
         <StatCard label="Stakeholders Tracked" value={Object.values(counts).reduce((a, b) => a + b, 0)} />
@@ -84,7 +84,7 @@ export default function Campaigns() {
 
       {past.length > 0 && (
         <div>
-          <h2 className="text-heading-md mb-3" style={{ color: 'var(--text-primary)' }}>Past Campaigns</h2>
+          <h2 className="text-heading-md mb-3" style={{ color: 'var(--text-primary)' }}>Past Focal Points</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {past.map(c => <CampaignCard key={c.id} c={c} count={counts[c.id] ?? 0} onOpen={() => open(c)} />)}
           </div>
@@ -180,7 +180,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
     };
     addCampaign(campaign);
     setCreated(id);
-    addToast('Campaign created', 'success');
+    addToast('Focal point created', 'success');
   };
 
   const goAddStakeholders = () => {
@@ -204,7 +204,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
               <Megaphone size={16} />
             </div>
             <div>
-              <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{created ? 'Campaign created' : 'New Campaign'}</div>
+              <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{created ? 'Focal point created' : 'New Focal Point'}</div>
               <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{created ? 'Set up complete' : `Step ${step} of 2`}</div>
             </div>
           </div>
@@ -219,7 +219,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
               </div>
               <h3 className="text-heading-md mt-3" style={{ color: 'var(--text-primary)' }}>{name}</h3>
               <p className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                The campaign is live. Add stakeholders now or jump to its dashboard.
+                The focal point is live. Add stakeholders now or jump to its dashboard.
               </p>
               <div className="flex items-center justify-center gap-3 mt-5">
                 <button onClick={goAddStakeholders} className="flex items-center gap-2 rounded-lg btn-press" style={{ padding: '9px 16px', background: 'var(--gradient-brand)', color: 'white', fontWeight: 600, fontSize: '0.8125rem' }}>
@@ -232,14 +232,14 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
             </div>
           ) : step === 1 ? (
             <div className="space-y-4">
-              <Field label="Campaign name">
+              <Field label="Focal point name">
                 <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Digital Identity Reform Bill 2026" className="msit-input" />
               </Field>
               <Field label="Short name (shown in switcher)">
                 <input value={shortName} onChange={(e) => setShortName(e.target.value)} placeholder="e.g. Digital Identity" className="msit-input" />
               </Field>
               <Field label="Description">
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="What is this campaign advocating for?" className="msit-input" style={{ resize: 'none' }} />
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="What is this focal point advocating for?" className="msit-input" style={{ resize: 'none' }} />
               </Field>
               <div className="flex justify-end gap-3 pt-2">
                 <button onClick={onClose} className="rounded-lg" style={{ padding: '9px 16px', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 600 }}>Cancel</button>
@@ -281,12 +281,12 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
               <div className="rounded-lg p-3 flex items-start gap-2" style={{ background: 'rgba(45,166,126,0.06)', border: '1px solid rgba(45,166,126,0.18)' }}>
                 <Sparkles size={15} style={{ color: 'var(--brand-primary)', marginTop: 1 }} />
                 <p className="text-body-sm" style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                  After creating, you can add stakeholders, score them, and the quadrant map populates automatically for this campaign.
+                  After creating, you can add stakeholders, score them, and the quadrant map populates automatically for this focal point.
                 </p>
               </div>
               <div className="flex justify-between gap-3 pt-2">
                 <button onClick={() => setStep(1)} className="rounded-lg" style={{ padding: '9px 16px', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 600 }}>Back</button>
-                <button disabled={!canSubmit} onClick={submit} className="rounded-lg btn-press" style={{ padding: '9px 18px', background: canSubmit ? 'var(--gradient-brand)' : 'var(--bg-inset)', color: canSubmit ? 'white' : 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600 }}>Create campaign</button>
+                <button disabled={!canSubmit} onClick={submit} className="rounded-lg btn-press" style={{ padding: '9px 18px', background: canSubmit ? 'var(--gradient-brand)' : 'var(--bg-inset)', color: canSubmit ? 'white' : 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600 }}>Create focal point</button>
               </div>
             </div>
           )}

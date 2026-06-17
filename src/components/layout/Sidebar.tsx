@@ -33,7 +33,7 @@ const navGroups: NavGroup[] = [
       { id: 'stakeholders', label: 'Stakeholders', icon: Users, roles: ALL },
       { id: 'add-stakeholder', label: 'Add Stakeholder', icon: UserPlus, roles: ['analyst', 'lead', 'partner', 'admin'] },
       { id: 'quadrant-map', label: 'Quadrant Map', icon: Target, roles: ALL },
-      { id: 'campaigns', label: 'Campaigns', icon: Megaphone, roles: ALL },
+      { id: 'campaigns', label: 'Focal Points', icon: Megaphone, roles: ALL },
     ],
   },
   {

@@ -73,7 +73,7 @@ export default function TeamActivity() {
       <div>
         <h1 className="text-display-md" style={{ color: 'var(--text-primary)' }}>Team Activity</h1>
         <p className="text-body-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          Oversight of what the team is doing across all campaigns — scores submitted, engagements logged and items awaiting approval.
+          Oversight of what the team is doing across all focal points — scores submitted, engagements logged and items awaiting approval.
         </p>
       </div>
 

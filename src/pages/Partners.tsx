@@ -48,7 +48,7 @@ export default function Partners() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ControlCard icon={<Globe size={18} />} title="Full visibility" desc="See every stakeholder, engagement and campaign across the organization." />
+        <ControlCard icon={<Globe size={18} />} title="Full visibility" desc="See every stakeholder, engagement and focal point across the organization." />
         <ControlCard icon={<Crown size={18} />} title="Highest authority" desc="Approve clients, sign off scores and override engagement plans." />
         <ControlCard icon={<Lock size={18} />} title="Private VIP layer" desc="Tag sensitive contacts only you can see — invisible to all other accounts." />
       </div>

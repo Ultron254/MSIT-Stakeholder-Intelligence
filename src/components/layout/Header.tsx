@@ -19,7 +19,7 @@ const PAGE_TITLES: Record<string, string> = {
   users: 'Users & Access',
   'add-stakeholder': 'Add Stakeholder',
   'data-streams': 'Data Streams',
-  campaigns: 'Campaigns',
+  campaigns: 'Focal Points',
   approvals: 'Approvals',
   clients: 'Clients',
   'team-activity': 'Team Activity',

@@ -250,7 +250,7 @@ export const COMPONENT_DESCRIPTIONS: Record<Component, string> = {
   relationship: 'Quality and depth of existing relationship with the advocacy team',
   risk: 'Potential to negatively impact objectives (higher = riskier)',
   sentiment: 'Current disposition towards the policy objective',
-  alignment: 'Strategic interest alignment with campaign goals',
+  alignment: 'Strategic interest alignment with focal point goals',
   impact: 'Potential magnitude of contribution to desired outcome',
 };
 

@@ -156,7 +156,7 @@ const RATIONALES: Record<Component, string> = {
   relationship: 'Assessed from frequency and quality of direct engagements and existing rapport.',
   risk: 'Evaluated considering potential for opposition and history with similar initiatives.',
   sentiment: 'Inferred from recent public statements and private meeting tone.',
-  alignment: 'Determined by overlap between stated priorities and the campaign objectives.',
+  alignment: 'Determined by overlap between stated priorities and the focal point objectives.',
   impact: 'Estimated contribution magnitude if fully engaged.',
 };
 const COMPONENTS: Component[] = ['influence','relationship','risk','sentiment','alignment','impact'];
@@ -233,7 +233,7 @@ function genCampaign(campaignId: string, defs: CDef[], completed: boolean, idPre
         : result.quadrant === 'hidden_champion' ? 'strategic_ally'
         : result.quadrant === 'monitor_exit' ? 'hidden_champion' : null,
       approach: APPROACHES[result.quadrant],
-      plan_30_day: 'Schedule introductory engagement and share the campaign brief tailored to their priorities.',
+      plan_30_day: 'Schedule introductory engagement and share the focal point brief tailored to their priorities.',
       plan_60_day: 'Second engagement to address objections and explore areas of alignment.',
       plan_90_day: 'Assess progress and escalate to the engagement lead if conversion stalls.',
       assigned_to: i % 2 === 0 ? 'u-001' : 'u-002',
@@ -247,7 +247,7 @@ function genCampaign(campaignId: string, defs: CDef[], completed: boolean, idPre
         stakeholder_id: d.id, objective_id: campaignId,
         engagement_type: (['meeting','phone_call','email','event'] as const)[i % 4],
         date: fmt(subDays(scoredAt, 10 + i * 2)),
-        description: 'Engagement on the campaign provisions and the stakeholder\'s position.',
+        description: 'Engagement on the focal point provisions and the stakeholder\'s position.',
         outcome: result.quadrant === 'strategic_ally' ? 'positive' : result.quadrant === 'monitor_exit' ? 'neutral' : 'neutral',
         follow_up_required: result.quadrant === 'power_gap',
         follow_up_date: result.quadrant === 'power_gap' ? fmt(subDays(scoredAt, -10)) : null,

@@ -13,7 +13,7 @@ const QUADRANT_WHY: Record<Quadrant, string> = {
   strategic_ally: 'A committed supporter with real influence — a natural champion for your cause.',
   power_gap: 'Highly influential but not yet on side — a high-value conversion opportunity.',
   hidden_champion: 'Strongly supportive and ready to advocate — amplify their voice.',
-  monitor_exit: 'Lower priority right now — worth monitoring as the campaign evolves.',
+  monitor_exit: 'Lower priority right now — worth monitoring as the focal point evolves.',
 };
 
 export default function ClientApp() {

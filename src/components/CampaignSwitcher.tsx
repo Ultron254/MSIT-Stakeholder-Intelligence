@@ -51,7 +51,7 @@ export default function CampaignSwitcher({ variant = 'sidebar', collapsed = fals
       }}
     >
       <div className="px-3 py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-        <div className="text-label" style={{ fontSize: '0.625rem' }}>Switch Campaign</div>
+        <div className="text-label" style={{ fontSize: '0.625rem' }}>Switch Focal Point</div>
       </div>
       <div className="max-h-72 overflow-y-auto py-1">
         {active.map(c => (
@@ -71,7 +71,7 @@ export default function CampaignSwitcher({ variant = 'sidebar', collapsed = fals
         onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
       >
-        {canCreate ? <><Plus size={14} /> New campaign</> : <>View all campaigns</>}
+        {canCreate ? <><Plus size={14} /> New focal point</> : <>View all focal points</>}
       </button>
     </div>
   );
@@ -104,7 +104,7 @@ export default function CampaignSwitcher({ variant = 'sidebar', collapsed = fals
       <div className="relative px-2 mb-2" ref={ref}>
         <button
           onClick={() => setOpen(o => !o)}
-          aria-label="Switch campaign"
+          aria-label="Switch focal point"
           className="w-10 h-10 mx-auto flex items-center justify-center rounded-lg transition-colors"
           style={{ background: 'rgba(255,255,255,0.06)' }}
         >
@@ -137,7 +137,7 @@ export default function CampaignSwitcher({ variant = 'sidebar', collapsed = fals
         }}
       >
         <div className="flex items-center justify-between">
-          <div className="text-label" style={{ fontSize: '0.5625rem', color: 'rgba(255,255,255,0.55)' }}>Active Campaign</div>
+          <div className="text-label" style={{ fontSize: '0.5625rem', color: 'rgba(255,255,255,0.55)' }}>Active Focal Point</div>
           <ChevronsUpDown size={13} style={{ color: 'rgba(255,255,255,0.55)' }} />
         </div>
         <div className="flex items-center gap-2 mt-1.5">
