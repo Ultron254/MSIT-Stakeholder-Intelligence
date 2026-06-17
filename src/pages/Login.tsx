@@ -3,7 +3,6 @@ import { ArrowRight, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAppStore, users } from '../lib/store';
 import { ROLE_LABELS } from '../lib/types';
 import Portrait from '../components/ui/Portrait';
-import { AFRICA_PATHS, AFRICA_VIEWBOX } from '../lib/africaPath';
 
 // HD imagery of African professionals at work — collaborative teams in
 // modern African workplaces — on-brand for Momentum's people-centred,
@@ -28,61 +27,6 @@ const SLIDES = [
 
 // Sheila (analyst), Charles (lead), Ronny (partner), Ivy (admin), Grace (client).
 const DEMO_IDS = ['u-001', 'u-002', 'u-003', 'u-005', 'u-006'];
-
-// Concentric "signal" arcs that sweep across the continent, echoing the
-// stakeholder-intelligence radar motif in the brand mark. Sized to the
-// 307×325 continent viewBox.
-const ARCS = [98, 152, 212];
-const ARC_CX = 248;
-const ARC_CY = 88;
-
-function AfricaShowcase({ active }: { active: number }) {
-  return (
-    <svg
-      viewBox={AFRICA_VIEWBOX}
-      preserveAspectRatio="xMidYMid meet"
-      className="h-full w-full"
-      style={{ filter: 'drop-shadow(0 24px 50px rgba(0,0,0,0.5))' }}
-      aria-hidden
-    >
-      <defs>
-        {/* Union of the continent's country shapes → outer silhouette only */}
-        <clipPath id="africaClip">
-          {AFRICA_PATHS.map((d, i) => <path key={i} d={d} />)}
-        </clipPath>
-        <linearGradient id="africaTint" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#0B2A24" stopOpacity="0.45" />
-          <stop offset="0.55" stopColor="#114A3B" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#2DA67E" stopOpacity="0.5" />
-        </linearGradient>
-      </defs>
-
-      <g clipPath="url(#africaClip)">
-        <rect x="0" y="0" width="307" height="325" fill="#0A241E" />
-        {SLIDES.map((s, i) => (
-          <image
-            key={s.image}
-            href={s.image}
-            x="0"
-            y="0"
-            width="307"
-            height="325"
-            preserveAspectRatio="xMidYMid slice"
-            style={{ opacity: i === active ? 0.9 : 0, transition: 'opacity 1.1s ease-in-out' }}
-          />
-        ))}
-        <rect x="0" y="0" width="307" height="325" fill="url(#africaTint)" />
-        {/* Sweeping signal arcs — bold dark bands with a faint inner highlight */}
-        <g fill="none" stroke="#06201A" strokeWidth="9" opacity="0.55" strokeLinecap="round">
-          {ARCS.map(r => <circle key={r} cx={ARC_CX} cy={ARC_CY} r={r} />)}
-        </g>
-        <g fill="none" stroke="rgba(160,240,205,0.32)" strokeWidth="1.5">
-          {ARCS.map(r => <circle key={r} cx={ARC_CX} cy={ARC_CY} r={r - 4} />)}
-        </g>
-      </g>
-    </svg>
-  );
-}
 
 export default function Login() {
   const login = useAppStore(s => s.login);
@@ -149,7 +93,13 @@ export default function Login() {
         className="absolute top-1/2 hidden md:flex items-center justify-center pointer-events-none"
         style={{ right: '2.5vw', transform: 'translateY(-50%)', height: '90vh', width: '46vw' }}
       >
-        <AfricaShowcase active={slide} />
+        <img
+          src="/login-africa.png"
+          alt=""
+          aria-hidden
+          className="max-h-full max-w-full object-contain"
+          style={{ filter: 'drop-shadow(0 24px 50px rgba(0,0,0,0.5))' }}
+        />
       </div>
 
       {/* Left: brand + sign-in */}
