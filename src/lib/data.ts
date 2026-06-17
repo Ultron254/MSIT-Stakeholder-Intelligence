@@ -28,7 +28,7 @@ export const objectives: Objective[] = [
 // Users. Passwords are mocked for the POC -- there is no auth backend yet.
 export const users: User[] = [
   { id: 'u-001', email: 'sheila.wanjiku@momentum.africa', display_name: 'Sheila Wanjiku', role: 'analyst', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Senior Intelligence Analyst', portrait_url: 'https://images.pexels.com/photos/9908681/pexels-photo-9908681.jpeg?auto=compress&cs=tinysrgb&w=256&h=256&dpr=1&fit=crop', password: 'momentum', reports_to: 'u-002', last_login: fmt(subDays(NOW, 0)) },
-  { id: 'u-002', email: 'charles.mwangi@momentum.africa', display_name: 'Charles Mwangi', role: 'lead', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Engagement Lead', portrait_url: null, password: 'momentum', reports_to: 'u-003', last_login: fmt(subDays(NOW, 0)) },
+  { id: 'u-002', email: 'eric.mwangi@momentum.africa', display_name: 'Eric Mwangi', role: 'lead', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Engagement Lead', portrait_url: null, password: 'momentum', reports_to: 'u-003', last_login: fmt(subDays(NOW, 0)) },
   { id: 'u-003', email: 'ronny.saoke@momentum.africa', display_name: 'Ronny Saoke', role: 'partner', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Managing Partner', portrait_url: null, password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 1)) },
   { id: 'u-004', email: 'peter.maina@momentum.africa', display_name: 'Peter Maina', role: 'viewer', country_access: ['c-001'], is_active: true, gender: 'male', job_title: 'Policy Researcher', portrait_url: null, password: 'momentum', reports_to: 'u-002', last_login: fmt(subDays(NOW, 4)) },
   { id: 'u-005', email: 'admin@momentum.africa', display_name: 'Ivy Wambui', role: 'admin', country_access: ['c-001'], is_active: true, gender: 'female', job_title: 'Principal & Platform Administrator', portrait_url: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=256&h=256&dpr=1&fit=crop', password: 'momentum', reports_to: null, last_login: fmt(subDays(NOW, 0)) },
@@ -86,7 +86,7 @@ const stakeholderDefs: StakeholderDef[] = [
   // Hidden Champions (8)
   { id:'s-028', name:'Peter Kariuki', title:'CEO', org:'Kenya Power', sector:'business', layer:2, sensitive:false, gender:'male', I:3,R:4,K:2,S:4,A:4,M:3 },
   { id:'s-029', name:'Mary Njoroge', title:'MP, Nairobi County', org:'National Assembly', sector:'politics', layer:2, sensitive:false, gender:'female', I:3,R:5,K:2,S:5,A:4,M:3 },
-  { id:'s-030', name:'Charles Ongwae', title:'Director, Energy Planning', org:'Ministry of Energy', sector:'civil_service', layer:3, sensitive:false, gender:'male', I:3,R:4,K:1,S:4,A:5,M:3 },
+  { id:'s-030', name:'Daniel Ongwae', title:'Director, Energy Planning', org:'Ministry of Energy', sector:'civil_service', layer:3, sensitive:false, gender:'male', I:3,R:4,K:1,S:4,A:5,M:3 },
   { id:'s-031', name:'Elizabeth Omondi', title:'Legal Counsel', org:'Energy Tribunal', sector:'judiciary', layer:3, sensitive:false, gender:'female', I:3,R:4,K:2,S:4,A:5,M:2 },
   { id:'s-032', name:'James Nyakundi', title:'Program Manager', org:'World Bank Kenya', sector:'international', layer:3, sensitive:false, gender:'male', I:3,R:5,K:1,S:5,A:5,M:3 },
   { id:'s-033', name:'Agnes Chebet', title:'Journalist', org:'Citizen TV', sector:'media', layer:3, sensitive:false, gender:'female', I:3,R:4,K:2,S:5,A:4,M:2 },

@@ -87,7 +87,7 @@ const housingDefs: CDef[] = [
   { id:'a-006', name:'Faith Mumo', title:'CEO', org:'Affordable Homes SACCO', sector:'business', layer:3, sensitive:false, gender:'female', I:3,R:5,K:1,S:5,A:5,M:3 },
   { id:'a-007', name:'Hon. Timothy Wanyonyi', title:'MP, Housing Caucus', org:'National Assembly', sector:'politics', layer:2, sensitive:false, gender:'male', I:4,R:2,K:3,S:3,A:2,M:4 },
   { id:'a-008', name:'Lydia Achieng', title:'Banking Sector Analyst', org:'Equity Group', sector:'business', layer:3, sensitive:false, gender:'female', I:3,R:4,K:2,S:4,A:4,M:3 },
-  { id:'a-009', name:'Charles Omondi', title:'Chair', org:'Landlords Federation', sector:'business', layer:3, sensitive:false, gender:'male', I:3,R:2,K:4,S:2,A:2,M:3 },
+  { id:'a-009', name:'Brian Omondi', title:'Chair', org:'Landlords Federation', sector:'business', layer:3, sensitive:false, gender:'male', I:3,R:2,K:4,S:2,A:2,M:3 },
   { id:'a-010', name:'Dr. Nancy Gitau', title:'Housing Economist', org:'KIPPRA', sector:'academia', layer:3, sensitive:false, gender:'female', I:3,R:4,K:1,S:5,A:5,M:3 },
   { id:'a-011', name:'Stephen Macharia', title:'County Executive, Housing', org:'Nairobi County', sector:'civil_service', layer:2, sensitive:false, gender:'male', I:3,R:3,K:3,S:3,A:3,M:3 },
   { id:'a-012', name:'Mercy Wangari', title:'Coordinator', org:'Slum Dwellers Network', sector:'civil_society', layer:3, sensitive:false, gender:'female', I:2,R:5,K:1,S:5,A:5,M:2 },

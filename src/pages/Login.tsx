@@ -25,7 +25,7 @@ const SLIDES = [
   },
 ];
 
-// Sheila (analyst), Charles (lead), Ronny (partner), Ivy (admin), Grace (client).
+// Sheila (analyst), Eric (lead), Ronny (partner), Ivy (admin), Grace (client).
 const DEMO_IDS = ['u-001', 'u-002', 'u-003', 'u-005', 'u-006'];
 
 export default function Login() {

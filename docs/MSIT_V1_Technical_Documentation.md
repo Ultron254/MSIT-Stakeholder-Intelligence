@@ -1990,7 +1990,7 @@ export function getInitials(name: string): string {
 |----------|-------|-----------|-----------|
 | Strategic Allies | 12 | 80-96 | Dr. Sarah Wanjiku, Hon. Fatuma Hassan, Grace Akinyi, Michael Odhiambo, Dr. Amina Abdullahi |
 | Power Gaps | 15 | 52-74 | Hon. James Mwangi Kamau, Gen. Peter Mburu (Rtd), Stephen Letoo, Hon. Richard Koech, Dr. Wilson Songa |
-| Hidden Champions | 8 | 60-72 | Peter Kariuki, Mary Njoroge, Charles Ongwae, James Nyakundi, Kenneth Muturi |
+| Hidden Champions | 8 | 60-72 | Peter Kariuki, Mary Njoroge, Daniel Ongwae, James Nyakundi, Kenneth Muturi |
 | Monitor / Exit | 12 | 36-56 | Thomas Kiprotich, Samuel Otieno, Daniel Mwanzia, Jane Achieng, Margaret Wanjiku |
 
 #### Complete Stakeholder List
@@ -2038,7 +2038,7 @@ export function getInitials(name: string): string {
 |----|------|-------|--------------|--------|-------|-----------------------|
 | s-028 | Peter Kariuki | CEO | Kenya Power | business | 2 | 3/4/2/4/4/3 |
 | s-029 | Mary Njoroge | MP, Nairobi County | National Assembly | politics | 2 | 3/5/2/5/4/3 |
-| s-030 | Charles Ongwae | Director, Energy Planning | Ministry of Energy | civil_service | 3 | 3/4/1/4/5/3 |
+| s-030 | Daniel Ongwae | Director, Energy Planning | Ministry of Energy | civil_service | 3 | 3/4/1/4/5/3 |
 | s-031 | Elizabeth Omondi | Legal Counsel | Energy Tribunal | judiciary | 3 | 3/4/2/4/5/2 |
 | s-032 | James Nyakundi | Program Manager | World Bank Kenya | international | 3 | 3/5/1/5/5/3 |
 | s-033 | Agnes Chebet | Journalist | Citizen TV | media | 3 | 3/4/2/5/4/2 |
