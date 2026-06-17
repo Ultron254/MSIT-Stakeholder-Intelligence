@@ -8,6 +8,7 @@ import {
   AlertTriangle, TrendingUp, ArrowRight,
   FileText, MessageSquare, Shield, CheckCircle,
   Zap, MapPin, Calendar, Clock, HeartPulse, PhoneCall,
+  ChevronLeft, ChevronRight, Target,
 } from 'lucide-react';
 import { useAppStore, useCurrentCampaign } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
@@ -86,6 +87,56 @@ export default function Dashboard() {
       .sort((a, b) => (b.s.latestSnapshot?.sis_score ?? 0) - (a.s.latestSnapshot?.sis_score ?? 0))
       .slice(0, 5);
   }, [all, watchlist]);
+
+  // Campaign cycling for the hero arrows.
+  const campaigns = useAppStore(s => s.campaigns);
+  const setCampaign = useAppStore(s => s.setCampaign);
+  const snapshots = useAppStore(s => s.snapshots);
+  const cycleCampaign = (dir: 1 | -1) => {
+    if (!objective || campaigns.length < 2) return;
+    const idx = campaigns.findIndex(c => c.id === objective.id);
+    if (idx === -1) return;
+    const next = (idx + dir + campaigns.length) % campaigns.length;
+    setCampaign(campaigns[next].id);
+  };
+
+  // "Today's focus": a data-driven briefing of the most urgent shifts in the
+  // current campaign — the steepest score drop, a notable quadrant migration,
+  // and how many priority actions are overdue.
+  const todaysFocus = useMemo(() => {
+    const ids = new Set(all.map(s => s.id));
+    const grouped: Record<string, typeof snapshots> = {};
+    snapshots.forEach(sn => {
+      if (ids.has(sn.stakeholder_id)) (grouped[sn.stakeholder_id] ??= []).push(sn);
+    });
+    const drops: Array<{ name: string; from: number; to: number; delta: number }> = [];
+    const migrations: Array<{ name: string; to: Quadrant }> = [];
+    Object.entries(grouped).forEach(([sid, snaps]) => {
+      if (snaps.length < 2) return;
+      const sorted = [...snaps].sort((a, b) => new Date(a.scored_at).getTime() - new Date(b.scored_at).getTime());
+      const first = sorted[0];
+      const last = sorted[sorted.length - 1];
+      const delta = last.sis_score - first.sis_score;
+      const st = all.find(s => s.id === sid);
+      if (!st) return;
+      if (delta < 0) {
+        drops.push({ name: st.full_name, from: Math.round(first.sis_score), to: Math.round(last.sis_score), delta });
+      }
+      if (first.quadrant !== last.quadrant) {
+        migrations.push({ name: st.full_name, to: last.quadrant });
+      }
+    });
+    const topDrop = [...drops].sort((a, b) => a.delta - b.delta)[0] ?? null;
+    const migration = migrations.find(m => m.to === 'power_gap') ?? migrations[0] ?? null;
+    const parts: string[] = [];
+    if (topDrop) parts.push(`${topDrop.name}'s score dropped ${topDrop.from}→${topDrop.to} this period.`);
+    if (migration) parts.push(`${migration.name} migrated to ${QUADRANT_LABELS[migration.to]}.`);
+    if (engagementGap.length > 0) {
+      parts.push(`${engagementGap.length} priority ${engagementGap.length === 1 ? 'action is' : 'actions are'} overdue — immediate attention needed.`);
+    }
+    if (parts.length === 0) return 'Portfolio is steady — no critical score drops or overdue actions in this campaign right now.';
+    return parts.join(' ');
+  }, [all, snapshots, engagementGap]);
 
   const stats = useMemo(() => {
     const scored = all.filter(s => s.latestSnapshot);
@@ -219,7 +270,33 @@ export default function Dashboard() {
         {/* Sweeping shine */}
         <div className="hero-shine" />
 
-        <div className="relative p-6 md:p-8">
+        {/* Campaign cycling arrows */}
+        {campaigns.length > 1 && (
+          <>
+            <button
+              onClick={() => cycleCampaign(-1)}
+              aria-label="Previous campaign"
+              className="absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all btn-press"
+              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.28)', color: 'white' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              onClick={() => cycleCampaign(1)}
+              aria-label="Next campaign"
+              className="absolute right-2.5 md:right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all btn-press"
+              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.28)', color: 'white' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </>
+        )}
+
+        <div className="relative p-6 md:p-8 md:px-12">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             {/* Left: Bill identity */}
             <div className="flex-1 min-w-0">
@@ -377,6 +454,26 @@ export default function Dashboard() {
                 }}
               />
             </div>
+          </div>
+
+          {/* Today's focus — data-driven briefing */}
+          <div
+            className="hero-fade-in mt-6 rounded-xl p-4"
+            style={{
+              animationDelay: '0.65s',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
+            }}
+          >
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Target size={12} style={{ color: 'var(--brand-accent)' }} />
+              <span className="text-label" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.625rem' }}>
+                Today's Focus
+              </span>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.8125rem', lineHeight: 1.55 }}>
+              {todaysFocus}
+            </p>
           </div>
         </div>
       </div>

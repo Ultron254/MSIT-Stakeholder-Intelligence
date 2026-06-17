@@ -7,12 +7,15 @@ import Portrait from '../components/ui/Portrait';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 import { formatSIS, formatAxis } from '../lib/formatters';
+import RelationshipNetwork from '../components/RelationshipNetwork';
+import { Grid2x2, Share2 } from 'lucide-react';
 
 export default function QuadrantMap() {
   const all = useStakeholdersWithScores();
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const [activeQuadrant, setActiveQuadrant] = useState<Quadrant | null>(null);
   const [showLabels, setShowLabels] = useState(false);
+  const [view, setView] = useState<'matrix' | 'network'>('matrix');
 
   const scatterData = useMemo(() => {
     return all
@@ -97,22 +100,45 @@ export default function QuadrantMap() {
         <div>
           <h1 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Quadrant Map</h1>
           <p className="text-body-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Interactive stakeholder positioning across power and convertibility axes
+            {view === 'matrix'
+              ? 'Interactive stakeholder positioning across power and convertibility axes'
+              : 'Relationship intelligence: how the principal connects across affiliation groups'}
           </p>
         </div>
-        <label className="flex items-center gap-2 text-body-sm cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
-          <input
-            type="checkbox"
-            checked={showLabels}
-            onChange={(e) => setShowLabels(e.target.checked)}
-            className="rounded"
-          />
-          Show labels
-        </label>
+        <div className="flex items-center gap-4">
+          {view === 'matrix' && (
+            <label className="flex items-center gap-2 text-body-sm cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+              <input
+                type="checkbox"
+                checked={showLabels}
+                onChange={(e) => setShowLabels(e.target.checked)}
+                className="rounded"
+              />
+              Show labels
+            </label>
+          )}
+          {/* View toggle: matrix vs relationship network */}
+          <div className="flex items-center gap-1 rounded-lg p-1" style={{ background: 'var(--bg-inset)', border: '1px solid var(--border-default)' }}>
+            <button
+              onClick={() => setView('matrix')}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all"
+              style={{ background: view === 'matrix' ? 'var(--bg-elevated)' : 'transparent', color: view === 'matrix' ? 'var(--text-primary)' : 'var(--text-muted)', boxShadow: view === 'matrix' ? 'var(--shadow-sm)' : 'none' }}
+            >
+              <Grid2x2 size={14} /> Matrix
+            </button>
+            <button
+              onClick={() => setView('network')}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all"
+              style={{ background: view === 'network' ? 'var(--bg-elevated)' : 'transparent', color: view === 'network' ? 'var(--text-primary)' : 'var(--text-muted)', boxShadow: view === 'network' ? 'var(--shadow-sm)' : 'none' }}
+            >
+              <Share2 size={14} /> Network
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Quadrant filter chips */}
-      <div className="flex gap-2 flex-wrap">
+      {/* Quadrant filter chips (matrix only) */}
+      <div className="flex gap-2 flex-wrap" style={{ display: view === 'matrix' ? 'flex' : 'none' }}>
         <button
           onClick={() => setActiveQuadrant(null)}
           className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
@@ -140,7 +166,15 @@ export default function QuadrantMap() {
         ))}
       </div>
 
+      {/* Relationship network view */}
+      {view === 'network' && (
+        <Card className="!p-3 overflow-hidden">
+          <RelationshipNetwork stakeholders={all} onSelect={setSelectedStakeholder} />
+        </Card>
+      )}
+
       {/* Main Chart */}
+      {view === 'matrix' && (
       <Card className="!p-6">
         <div style={{ position: 'relative' }}>
           <ResponsiveContainer width="100%" height={480}>
@@ -205,6 +239,7 @@ export default function QuadrantMap() {
           )}
         </div>
       </Card>
+      )}
 
       {/* Quadrant Summary Cards + Migration Tracker */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

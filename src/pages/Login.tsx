@@ -31,7 +31,9 @@ const DEMO_IDS = ['u-001', 'u-002', 'u-003', 'u-005', 'u-006'];
 
 // Concentric "signal" arcs that sweep across the continent, echoing the
 // stakeholder-intelligence radar motif in the brand mark.
-const ARCS = [150, 235, 320, 405, 490];
+const ARCS = [175, 285, 395];
+const ARC_CX = 430;
+const ARC_CY = 150;
 
 function AfricaShowcase({ active }: { active: number }) {
   return (
@@ -68,12 +70,12 @@ function AfricaShowcase({ active }: { active: number }) {
           />
         ))}
         <rect x="0" y="0" width="542" height="560" fill="url(#africaTint)" />
-        {/* Sweeping signal arcs, centred off the upper-left */}
-        <g fill="none" stroke="#07201A" strokeWidth="11" opacity="0.5" strokeLinecap="round">
-          {ARCS.map(r => <circle key={r} cx="118" cy="128" r={r} />)}
+        {/* Sweeping signal arcs — bold dark bands with a faint inner highlight */}
+        <g fill="none" stroke="#06201A" strokeWidth="15" opacity="0.6" strokeLinecap="round">
+          {ARCS.map(r => <circle key={r} cx={ARC_CX} cy={ARC_CY} r={r} />)}
         </g>
-        <g fill="none" stroke="rgba(127,231,193,0.35)" strokeWidth="1.5">
-          {ARCS.map(r => <circle key={r} cx="118" cy="128" r={r - 3} />)}
+        <g fill="none" stroke="rgba(160,240,205,0.35)" strokeWidth="2">
+          {ARCS.map(r => <circle key={r} cx={ARC_CX} cy={ARC_CY} r={r - 6} />)}
         </g>
       </g>
 
@@ -142,10 +144,10 @@ export default function Login() {
         style={{ background: 'linear-gradient(110deg, rgba(10,32,27,0.96) 0%, rgba(10,32,27,0.86) 45%, rgba(10,32,27,0.55) 100%)' }}
       />
 
-      {/* Right: Africa showcase, partially bleeding off the edges */}
+      {/* Right: Africa showcase — fully framed in the right half with a margin */}
       <div
-        className="absolute top-1/2 hidden md:block pointer-events-none"
-        style={{ right: '-3vw', transform: 'translateY(-50%)', height: '98vh', width: '58vw' }}
+        className="absolute top-1/2 hidden md:flex items-center justify-center pointer-events-none"
+        style={{ right: '2.5vw', transform: 'translateY(-50%)', height: '90vh', width: '46vw' }}
       >
         <AfricaShowcase active={slide} />
       </div>
@@ -153,11 +155,9 @@ export default function Login() {
       {/* Left: brand + sign-in */}
       <div className="relative z-10 flex flex-col w-full md:w-[52%] lg:w-[48%] px-6 sm:px-12 lg:px-16 py-8 overflow-y-auto">
         {/* Brand */}
-        <div className="flex items-center gap-3 mb-auto">
-          <div className="rounded-lg px-3 py-2 flex items-center" style={{ background: 'rgba(255,255,255,0.96)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }}>
-            <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-6 w-auto object-contain block" />
-          </div>
-          <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.22em' }}>
+        <div className="mb-auto">
+          <img src="/momentum-logo-light.svg" alt="Momentum Africa Partners" className="h-12 w-auto object-contain block" />
+          <span className="block mt-2.5" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.22em' }}>
             STAKEHOLDER INTELLIGENCE TOOL
           </span>
         </div>
@@ -167,7 +167,7 @@ export default function Login() {
           <div key={slide} className="hero-fade-in mb-7">
             <h1
               className="font-display"
-              style={{ color: 'white', fontSize: 'clamp(1.9rem, 3.4vw, 2.6rem)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
+              style={{ color: 'white', fontSize: 'clamp(2.1rem, 3.4vw, 2.95rem)', lineHeight: 1.08, letterSpacing: '-0.02em', maxWidth: 380 }}
             >
               {SLIDES[slide].title}
             </h1>
