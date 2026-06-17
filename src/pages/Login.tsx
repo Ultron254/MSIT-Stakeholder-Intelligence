@@ -88,18 +88,49 @@ export default function Login() {
         style={{ background: 'linear-gradient(110deg, rgba(10,32,27,0.96) 0%, rgba(10,32,27,0.84) 45%, rgba(10,32,27,0.42) 100%)' }}
       />
 
-      {/* Right: Africa showcase — fully framed in the right half with a margin */}
+      {/* Right: Africa showcase — the continent silhouette (login-africa.png)
+          masks the same rotating slide imagery, so the photos inside Africa
+          cross-fade in sync with the headline and backdrop. The artwork's
+          arcs stay as transparent negative-space bands. */}
       <div
-        className="absolute top-1/2 hidden md:flex items-center justify-center pointer-events-none"
-        style={{ right: '2.5vw', transform: 'translateY(-50%)', height: '90vh', width: '46vw' }}
+        className="absolute top-1/2 hidden md:block pointer-events-none"
+        style={{ right: '2.5vw', transform: 'translateY(-50%)', height: '90vh', width: '46vw', filter: 'drop-shadow(0 24px 50px rgba(0,0,0,0.5))' }}
+        aria-hidden
       >
-        <img
-          src="/login-africa.png"
-          alt=""
-          aria-hidden
-          className="max-h-full max-w-full object-contain"
-          style={{ filter: 'drop-shadow(0 24px 50px rgba(0,0,0,0.5))' }}
-        />
+        <div
+          className="relative w-full h-full"
+          style={{
+            WebkitMaskImage: 'url(/login-africa.png)',
+            maskImage: 'url(/login-africa.png)',
+            WebkitMaskSize: 'contain',
+            maskSize: 'contain',
+            WebkitMaskRepeat: 'no-repeat',
+            maskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+          }}
+        >
+          {/* Dark base so any gaps read as deep green, not blank */}
+          <div className="absolute inset-0" style={{ background: '#0A241E' }} />
+          {/* Rotating slide imagery, cross-fading in sync with `slide` */}
+          {SLIDES.map((s, i) => (
+            <div
+              key={s.image}
+              className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+              style={{
+                opacity: i === slide ? 1 : 0,
+                backgroundImage: `url(${s.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            />
+          ))}
+          {/* Green duotone tint to match the brand showcase */}
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(135deg, rgba(11,42,36,0.55) 0%, rgba(17,74,59,0.4) 55%, rgba(45,166,126,0.55) 100%)' }}
+          />
+        </div>
       </div>
 
       {/* Left: brand + sign-in */}
