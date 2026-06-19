@@ -92,6 +92,15 @@ export default function ScoreUpdatePanel() {
 
   const handleSave = (status: 'draft' | 'submitted') => {
     if (!stakeholder) return;
+    // Evidence is mandatory before a score can be submitted for review.
+    if (status === 'submitted') {
+      const hasRationale = Object.values(rationales).some(r => r.trim());
+      const hasFile = Object.values(uploadedFiles).flat().length > 0;
+      if (!hasRationale && !hasFile) {
+        addToast('Add supporting evidence (a rationale or an attached file) before submitting', 'error');
+        return;
+      }
+    }
     const existingSnapCount = snapshots.filter(s => s.stakeholder_id === stakeholder.id).length;
     const newSnapshot = {
       id: `snap-new-${Date.now()}`,

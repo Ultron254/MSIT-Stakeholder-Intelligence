@@ -70,9 +70,9 @@ export default function Approvals() {
   const openReject = (snap: ScoreSnapshot) => { setRejecting(snap); setReason(''); setRejectEvidence(''); };
 
   const confirmReject = () => {
-    if (!rejecting || !reason.trim()) return;
+    if (!rejecting || !reason.trim() || !rejectEvidence.trim()) return;
     const st = stakeholderName(rejecting.stakeholder_id);
-    rejectSnapshot(rejecting.id, reason.trim(), rejectEvidence.trim() || undefined);
+    rejectSnapshot(rejecting.id, reason.trim(), rejectEvidence.trim());
     addActivity({
       id: `act-${Date.now()}`, type: 'approval',
       description: `Returned ${st?.full_name ?? 'a'} score snapshot for revision: ${reason.trim().slice(0, 80)}`,
@@ -274,11 +274,12 @@ export default function Approvals() {
                   />
                 </div>
                 <div>
-                  <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Supporting evidence (optional)</label>
+                  <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Submit evidence <span style={{ color: 'var(--status-danger)' }}>*</span></label>
                   <textarea
                     value={rejectEvidence} onChange={(e) => setRejectEvidence(e.target.value)} rows={2}
                     placeholder="Cite contradicting evidence, a source, or a meeting note the analyst should review."
-                    className="msit-input" style={{ resize: 'none' }}
+                    className="msit-input"
+                    style={{ resize: 'none', border: `1px solid ${rejectEvidence.trim() ? 'var(--border-default)' : 'var(--status-danger)'}` }}
                   />
                 </div>
                 <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
@@ -287,13 +288,18 @@ export default function Approvals() {
               </div>
               <div className="flex items-center justify-end gap-3 px-6 py-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                 <button onClick={() => setRejecting(null)} className="rounded-lg" style={{ padding: '9px 16px', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 600 }}>Cancel</button>
-                <button
-                  disabled={!reason.trim()} onClick={confirmReject}
-                  className="rounded-lg btn-press"
-                  style={{ padding: '9px 18px', background: reason.trim() ? '#DC2626' : 'var(--bg-inset)', color: reason.trim() ? 'white' : 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600 }}
-                >
-                  Return for revision
-                </button>
+                {(() => {
+                  const ready = reason.trim() && rejectEvidence.trim();
+                  return (
+                    <button
+                      disabled={!ready} onClick={confirmReject}
+                      className="rounded-lg btn-press"
+                      style={{ padding: '9px 18px', background: ready ? '#DC2626' : 'var(--bg-inset)', color: ready ? 'white' : 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600 }}
+                    >
+                      Return for revision
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           </div>
