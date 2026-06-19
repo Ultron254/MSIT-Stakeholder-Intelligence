@@ -3,11 +3,15 @@ import {
   LogOut, MapPin, Calendar, Sparkles, ArrowRight, X, Send, ShieldCheck,
   Clock, Target, Users as UsersIcon, Star, Building2, LayoutGrid, Share2,
   MessageSquare, ChevronLeft, ChevronRight, CalendarPlus, Handshake, CheckCircle2,
+  Briefcase, Gauge, Layers, Compass, TrendingUp, Activity, Phone, Mail, CalendarDays,
 } from 'lucide-react';
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer,
+} from 'recharts';
 import { useAppStore, useCurrentUser } from '../lib/store';
-import { QUADRANT_COLORS, QUADRANT_LABELS, SECTOR_LABELS } from '../lib/types';
-import type { Quadrant, StakeholderWithScore, ClientRequest } from '../lib/types';
-import { formatDate, formatSIS, daysUntil, formatRelativeDate } from '../lib/formatters';
+import { QUADRANT_COLORS, QUADRANT_LABELS, SECTOR_LABELS, COMPONENT_DESCRIPTIONS } from '../lib/types';
+import type { Quadrant, StakeholderWithScore, ClientRequest, EngagementRecord } from '../lib/types';
+import { formatDate, formatSIS, daysUntil, formatRelativeDate, formatLayer, formatAxis } from '../lib/formatters';
 import Portrait from '../components/ui/Portrait';
 import RelationshipNetwork from '../components/RelationshipNetwork';
 import EgoNetwork from '../components/EgoNetwork';
@@ -292,46 +296,18 @@ export default function ClientApp() {
       {detail && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0" style={{ background: 'rgba(15,30,41,0.45)' }} onClick={() => setSelected(null)} />
-          <div className="relative h-full overflow-y-auto" style={{ width: 'min(440px, 100%)', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)', animation: 'slideInRight 0.25s ease' }}>
-            <div className="sticky top-0 flex items-center justify-between px-5 py-4" style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
-              <span className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>Stakeholder profile</span>
+          <div className="relative h-full overflow-y-auto" style={{ width: 'min(560px, 100%)', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)', animation: 'slideInRight 0.25s ease' }}>
+            <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4" style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+              <span className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>Stakeholder dossier</span>
               <button onClick={() => setSelected(null)} aria-label="Close"><X size={18} style={{ color: 'var(--text-muted)' }} /></button>
             </div>
-            <div className="p-5">
-              <div className="flex items-center gap-3">
-                <Portrait name={detail.full_name} gender={detail.gender} portraitUrl={detail.portrait_url} size={56} />
-                <div>
-                  <div className="text-heading-md" style={{ color: 'var(--text-primary)' }}>{detail.full_name}</div>
-                  <div className="text-body-sm" style={{ color: 'var(--text-muted)' }}>{detail.title}</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-5">
-                <DrawerMeta icon={<Building2 size={14} />} label="Organization" value={detail.organization} />
-                <DrawerMeta icon={<Target size={14} />} label="Sector" value={SECTOR_LABELS[detail.sector]} />
-              </div>
-              {detail.latestSnapshot && (
-                <div className="rounded-xl p-4 mt-4" style={{ background: 'var(--bg-secondary)' }}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-label">Intelligence score</span>
-                    <span className="font-display" style={{ fontSize: '1.75rem', color: 'var(--text-primary)' }}>{formatSIS(detail.latestSnapshot.sis_score)}</span>
-                  </div>
-                  <div className="mt-2">
-                    <span className="px-2 py-0.5 rounded" style={{ background: QUADRANT_COLORS[detail.latestSnapshot.quadrant].bg, color: QUADRANT_COLORS[detail.latestSnapshot.quadrant].text, fontSize: '0.6875rem', fontWeight: 600 }}>
-                      {QUADRANT_LABELS[detail.latestSnapshot.quadrant]}
-                    </span>
-                  </div>
-                  <p className="text-body-sm mt-3" style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{QUADRANT_WHY[detail.latestSnapshot.quadrant]}</p>
-                </div>
-              )}
-              {/* This stakeholder's connections within your curated set */}
-              <div className="mt-5">
-                <div className="text-label mb-1" style={{ fontSize: '0.5625rem' }}>Their network</div>
-                <EgoNetwork focalId={detail.id} all={curated} onSelect={(id) => setSelected(id)} height={240} showLegend={false} />
-              </div>
-              <button onClick={() => { setRequesting(detail); }} className="w-full flex items-center justify-center gap-2 rounded-lg btn-press mt-4" style={{ padding: '10px 16px', background: 'var(--gradient-brand)', color: 'white', fontSize: '0.8125rem', fontWeight: 600 }}>
-                <Send size={15} /> Request an engagement <ArrowRight size={15} />
-              </button>
-            </div>
+            <StakeholderDossier
+              detail={detail}
+              engagements={engagements.filter(e => e.stakeholder_id === detail.id)}
+              curated={curated}
+              onSelect={(id) => setSelected(id)}
+              onRequest={(s) => setRequesting(s)}
+            />
           </div>
         </div>
       )}
@@ -363,6 +339,229 @@ function DrawerMeta({ icon, label, value }: { icon: React.ReactNode; label: stri
     <div className="rounded-lg p-3" style={{ background: 'var(--bg-secondary)' }}>
       <div className="flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>{icon}<span className="text-label" style={{ fontSize: '0.5rem' }}>{label}</span></div>
       <div className="text-body-sm mt-1" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{value}</div>
+    </div>
+  );
+}
+
+const tierLabel = (v: number) => v >= 4.5 ? 'Dominant' : v >= 3.5 ? 'High' : v >= 2.5 ? 'Moderate' : v >= 1.5 ? 'Low' : 'Minimal';
+
+// Client-friendly interpretation of each scoring component. `invert` marks
+// components where a higher value is less favourable (risk).
+const CLIENT_COMPONENTS = [
+  { key: 'influence_score', label: 'Influence', desc: COMPONENT_DESCRIPTIONS.influence, invert: false },
+  { key: 'relationship_score', label: 'Relationship', desc: COMPONENT_DESCRIPTIONS.relationship, invert: false },
+  { key: 'sentiment_score', label: 'Sentiment', desc: COMPONENT_DESCRIPTIONS.sentiment, invert: false },
+  { key: 'alignment_score', label: 'Alignment', desc: COMPONENT_DESCRIPTIONS.alignment, invert: false },
+  { key: 'impact_score', label: 'Strategic impact', desc: COMPONENT_DESCRIPTIONS.impact, invert: false },
+  { key: 'risk_score', label: 'Risk', desc: COMPONENT_DESCRIPTIONS.risk, invert: true },
+] as const;
+
+const ENG_ICON: Record<EngagementRecord['engagement_type'], React.ReactNode> = {
+  meeting: <UsersIcon size={13} />, phone_call: <Phone size={13} />, email: <Mail size={13} />,
+  event: <CalendarDays size={13} />, social: <Share2 size={13} />, third_party_intro: <Handshake size={13} />,
+  formal_submission: <Briefcase size={13} />,
+};
+const OUTCOME_STYLE: Record<EngagementRecord['outcome'], { label: string; bg: string; text: string }> = {
+  positive: { label: 'Positive', bg: 'rgba(45,166,126,0.12)', text: '#1F7A5C' },
+  neutral: { label: 'Neutral', bg: 'rgba(100,116,139,0.12)', text: '#475569' },
+  negative: { label: 'Negative', bg: 'rgba(220,38,38,0.1)', text: '#B91C1C' },
+  pending: { label: 'Pending', bg: 'rgba(217,119,6,0.12)', text: '#B45309' },
+};
+
+function shortLast(full: string) {
+  return full.replace(/^(Hon\.|Dr\.|Eng\.|Prof\.|Amb\.|Mr\.|Mrs\.|Ms\.)\s+/i, '').split(' ').slice(-1)[0];
+}
+
+function buildNarrative(d: StakeholderWithScore): string {
+  const snap = d.latestSnapshot;
+  const name = shortLast(d.full_name);
+  const sector = SECTOR_LABELS[d.sector];
+  const circle = formatLayer(d.proximity_layer);
+  let s = `${d.full_name} serves as ${d.title}${d.organization ? ` at ${d.organization}` : ''}, operating within the ${sector.toLowerCase()} sphere and sitting in your ${circle.toLowerCase()} circle of influence.`;
+  if (snap) {
+    s += ` With an intelligence score of ${formatSIS(snap.sis_score)}, ${name} is profiled as a ${QUADRANT_LABELS[snap.quadrant].toLowerCase()}: ${QUADRANT_WHY[snap.quadrant].toLowerCase()}`;
+    const ranked = [...CLIENT_COMPONENTS]
+      .filter(c => !c.invert)
+      .map(c => ({ c, v: (snap[c.key as keyof typeof snap] as number) }))
+      .sort((a, b) => b.v - a.v);
+    if (ranked.length) {
+      s += ` Their strongest lever is ${ranked[0].c.label.toLowerCase()} (${tierLabel(ranked[0].v).toLowerCase()}), while ${ranked[ranked.length - 1].c.label.toLowerCase()} is the area with the most room to develop.`;
+    }
+  }
+  return s;
+}
+
+function StakeholderDossier({
+  detail, engagements, curated, onSelect, onRequest,
+}: {
+  detail: StakeholderWithScore;
+  engagements: EngagementRecord[];
+  curated: StakeholderWithScore[];
+  onSelect: (id: string) => void;
+  onRequest: (s: StakeholderWithScore) => void;
+}) {
+  const snap = detail.latestSnapshot;
+  const qc = snap ? QUADRANT_COLORS[snap.quadrant] : null;
+
+  const radarData = snap ? [
+    { component: 'Influence', value: snap.influence_score },
+    { component: 'Relationship', value: snap.relationship_score },
+    { component: 'Risk Adj.', value: snap.risk_adjusted },
+    { component: 'Sentiment', value: snap.sentiment_score },
+    { component: 'Alignment', value: snap.alignment_score },
+    { component: 'Impact', value: snap.impact_score },
+  ] : [];
+
+  const engs = [...engagements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const outcomes = {
+    positive: engs.filter(e => e.outcome === 'positive').length,
+    neutral: engs.filter(e => e.outcome === 'neutral').length,
+    negative: engs.filter(e => e.outcome === 'negative').length,
+  };
+
+  return (
+    <div className="p-5 pb-8">
+      {/* Identity */}
+      <div className="flex items-start gap-3.5">
+        <Portrait name={detail.full_name} gender={detail.gender} portraitUrl={detail.portrait_url} size={64} />
+        <div className="min-w-0">
+          <div className="text-heading-md" style={{ color: 'var(--text-primary)' }}>{detail.full_name}</div>
+          <div className="text-body-sm" style={{ color: 'var(--text-muted)' }}>{detail.title}</div>
+          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            <span className="px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)', fontSize: '0.625rem', fontWeight: 600 }}>{SECTOR_LABELS[detail.sector]}</span>
+            <span className="px-2 py-0.5 rounded-full inline-flex items-center gap-1" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)', fontSize: '0.625rem', fontWeight: 600 }}>
+              <Layers size={10} /> {formatLayer(detail.proximity_layer)} circle
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Profile narrative */}
+      <div className="rounded-xl p-4 mt-4" style={{ background: 'var(--bg-secondary)' }}>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <Compass size={13} style={{ color: 'var(--brand-primary)' }} />
+          <span className="text-label" style={{ fontSize: '0.5625rem' }}>Profile</span>
+        </div>
+        <p className="text-body-sm" style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', lineHeight: 1.55 }}>{buildNarrative(detail)}</p>
+      </div>
+
+      {/* Key facts */}
+      <div className="grid grid-cols-2 gap-3 mt-4">
+        <DrawerMeta icon={<Building2 size={14} />} label="Organization" value={detail.organization || '—'} />
+        <DrawerMeta icon={<Target size={14} />} label="Sector / Industry" value={SECTOR_LABELS[detail.sector]} />
+        {snap && <DrawerMeta icon={<Gauge size={14} />} label="Power axis" value={formatAxis(snap.power_axis)} />}
+        {snap && <DrawerMeta icon={<TrendingUp size={14} />} label="Convertibility" value={formatAxis(snap.convertibility_axis)} />}
+      </div>
+
+      {/* Position / score */}
+      {snap && qc && (
+        <div className="rounded-xl p-4 mt-4" style={{ background: `linear-gradient(135deg, ${qc.bg}, var(--bg-secondary))`, border: `1px solid ${qc.text}22` }}>
+          <div className="flex items-center justify-between">
+            <span className="text-label">Intelligence score</span>
+            <span className="font-display" style={{ fontSize: '1.875rem', color: 'var(--text-primary)' }}>{formatSIS(snap.sis_score)}</span>
+          </div>
+          <div className="mt-1">
+            <span className="px-2 py-0.5 rounded" style={{ background: qc.bg, color: qc.text, fontSize: '0.6875rem', fontWeight: 700 }}>
+              {QUADRANT_LABELS[snap.quadrant]}
+            </span>
+          </div>
+          <p className="text-body-sm mt-2.5" style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', lineHeight: 1.5 }}>{QUADRANT_WHY[snap.quadrant]}</p>
+        </div>
+      )}
+
+      {/* Influence profile: radar + interpreted bars */}
+      {snap && (
+        <div className="rounded-xl p-4 mt-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Activity size={13} style={{ color: 'var(--brand-primary)' }} />
+            <span className="text-label" style={{ fontSize: '0.5625rem' }}>Influence profile</span>
+          </div>
+          <ResponsiveContainer width="100%" height={210}>
+            <RadarChart data={radarData} outerRadius="72%">
+              <PolarGrid stroke="var(--border-default)" />
+              <PolarAngleAxis dataKey="component" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} />
+              <PolarRadiusAxis angle={30} domain={[0, 5]} tick={false} axisLine={false} />
+              <Radar dataKey="value" stroke={qc?.dot ?? 'var(--brand-primary)'} fill={qc?.dot ?? 'var(--brand-primary)'} fillOpacity={0.18} strokeWidth={2} />
+            </RadarChart>
+          </ResponsiveContainer>
+          <div className="space-y-2.5 mt-1">
+            {CLIENT_COMPONENTS.map(c => {
+              const v = snap[c.key as keyof typeof snap] as number;
+              const pct = (v / 5) * 100;
+              const good = c.invert ? 5 - v : v;
+              const barColor = good >= 3.5 ? '#2DA67E' : good >= 2.5 ? '#D97706' : '#DC2626';
+              return (
+                <div key={c.key}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-body-sm" style={{ color: 'var(--text-primary)', fontSize: '0.75rem', fontWeight: 600 }}>{c.label}</span>
+                    <span className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{tierLabel(v)} · {v}/5</span>
+                  </div>
+                  <div className="h-1.5 rounded-full mt-1 overflow-hidden" style={{ background: 'var(--bg-inset)' }}>
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
+                  </div>
+                  <p className="text-body-sm mt-0.5" style={{ color: 'var(--text-muted)', fontSize: '0.625rem', lineHeight: 1.4 }}>{c.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Engagement momentum */}
+      <div className="rounded-xl p-4 mt-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+        <div className="flex items-center gap-1.5 mb-2.5">
+          <Handshake size={13} style={{ color: 'var(--brand-primary)' }} />
+          <span className="text-label" style={{ fontSize: '0.5625rem' }}>Engagement momentum</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="rounded-lg p-2.5 text-center" style={{ background: 'var(--bg-secondary)' }}>
+            <div className="font-display" style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>{engs.length}</div>
+            <div className="text-label" style={{ fontSize: '0.5rem' }}>Touchpoints</div>
+          </div>
+          <div className="rounded-lg p-2.5 text-center" style={{ background: 'var(--bg-secondary)' }}>
+            <div className="font-display" style={{ fontSize: '1.25rem', color: '#1F7A5C' }}>{outcomes.positive}</div>
+            <div className="text-label" style={{ fontSize: '0.5rem' }}>Positive</div>
+          </div>
+          <div className="rounded-lg p-2.5 text-center" style={{ background: 'var(--bg-secondary)' }}>
+            <div className="text-body-sm" style={{ fontSize: '0.8125rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: 4 }}>
+              {engs[0] ? formatRelativeDate(engs[0].date) : '—'}
+            </div>
+            <div className="text-label" style={{ fontSize: '0.5rem' }}>Last contact</div>
+          </div>
+        </div>
+        {engs.length === 0 ? (
+          <p className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>No engagements logged yet. Request one below and the team will open the relationship.</p>
+        ) : (
+          <div className="space-y-1.5">
+            {engs.slice(0, 4).map(e => {
+              const os = OUTCOME_STYLE[e.outcome];
+              return (
+                <div key={e.id} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2" style={{ background: 'var(--bg-secondary)' }}>
+                  <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(45,166,126,0.1)', color: 'var(--brand-primary)' }}>{ENG_ICON[e.engagement_type]}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-body-sm capitalize" style={{ color: 'var(--text-primary)', fontSize: '0.75rem', fontWeight: 600 }}>{e.engagement_type.replace(/_/g, ' ')}</div>
+                    <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.625rem' }}>{formatDate(e.date)}</div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded shrink-0" style={{ background: os.bg, color: os.text, fontSize: '0.5625rem', fontWeight: 700 }}>{os.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Network */}
+      <div className="rounded-xl p-3 mt-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+        <div className="flex items-center gap-1.5 mb-1 px-1">
+          <Share2 size={13} style={{ color: 'var(--brand-primary)' }} />
+          <span className="text-label" style={{ fontSize: '0.5625rem' }}>Their network</span>
+        </div>
+        <EgoNetwork focalId={detail.id} all={curated} onSelect={onSelect} height={360} showLegend nodeScale={1.35} fontScale={1.7} />
+      </div>
+
+      <button onClick={() => onRequest(detail)} className="w-full flex items-center justify-center gap-2 rounded-lg btn-press mt-5" style={{ padding: '12px 16px', background: 'var(--gradient-brand)', color: 'white', fontSize: '0.875rem', fontWeight: 600 }}>
+        <Send size={15} /> Request an engagement <ArrowRight size={15} />
+      </button>
     </div>
   );
 }

@@ -23,12 +23,16 @@ export default function EgoNetwork({
   onSelect,
   height = 460,
   showLegend = true,
+  nodeScale = 1,
+  fontScale = 1,
 }: {
   focalId: string;
   all: StakeholderWithScore[];
   onSelect?: (id: string) => void;
   height?: number;
   showLegend?: boolean;
+  nodeScale?: number;
+  fontScale?: number;
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const focal = all.find(s => s.id === focalId);
@@ -127,12 +131,13 @@ export default function EgoNetwork({
           return (
             <Node
               key={r.stakeholder.id}
-              x={p.x} y={p.y} r={r.kind === 'colleague' ? 11 : 9}
+              x={p.x} y={p.y} r={(r.kind === 'colleague' ? 11 : 9) * nodeScale}
               color={RELATION_COLORS[r.kind]}
               label={shortName(r.stakeholder.full_name)}
               fullLabel={`${r.stakeholder.full_name} · ${RELATION_LABELS[r.kind]}`}
               delay={0.2 + i * 0.05}
               lit={isLit(r.stakeholder.id)}
+              fontScale={fontScale}
               onHover={() => setHovered(r.stakeholder.id)}
               onLeave={() => setHovered(null)}
               onClick={onSelect ? () => onSelect(r.stakeholder.id) : undefined}
@@ -150,9 +155,9 @@ export default function EgoNetwork({
           />
         </g>
         <Node
-          x={CX} y={CY} r={18} color="#0F1E29"
+          x={CX} y={CY} r={18 * nodeScale} color="#0F1E29"
           label={shortName(focal.full_name)} fullLabel={`${focal.full_name} — focal stakeholder`}
-          bold delay={0} lit={isLit(focalId)}
+          bold delay={0} lit={isLit(focalId)} fontScale={fontScale}
           onHover={() => setHovered(focalId)} onLeave={() => setHovered(null)}
         />
       </svg>
@@ -165,10 +170,10 @@ export default function EgoNetwork({
 }
 
 function Node({
-  x, y, r, color, label, fullLabel, delay, lit, bold, onHover, onLeave, onClick,
+  x, y, r, color, label, fullLabel, delay, lit, bold, fontScale = 1, onHover, onLeave, onClick,
 }: {
   x: number; y: number; r: number; color: string; label: string; fullLabel: string;
-  delay: number; lit: boolean; bold?: boolean;
+  delay: number; lit: boolean; bold?: boolean; fontScale?: number;
   onHover: () => void; onLeave: () => void; onClick?: () => void;
 }) {
   return (
@@ -181,7 +186,7 @@ function Node({
         <motion.g animate={{ y: bold ? 0 : [0, -3, 0] }} transition={{ duration: 3.4 + (x % 7) * 0.2, repeat: Infinity, ease: 'easeInOut' }} whileHover={{ scale: 1.16 }}>
           <circle r={r + 3} fill={color} opacity={0.16} />
           <circle r={r} fill={color} stroke="white" strokeWidth={bold ? 2.5 : 1.5} />
-          <text y={r + 11} textAnchor="middle" style={{ fontSize: bold ? 9.5 : 8, fontWeight: bold ? 700 : 500, fill: 'var(--text-secondary)', pointerEvents: 'none' }}>
+          <text y={r + 11 * fontScale} textAnchor="middle" style={{ fontSize: (bold ? 9.5 : 8) * fontScale, fontWeight: bold ? 700 : 500, fill: 'var(--text-secondary)', pointerEvents: 'none' }}>
             {label.length > 18 ? `${label.slice(0, 17)}…` : label}
           </text>
           <title>{fullLabel}</title>
