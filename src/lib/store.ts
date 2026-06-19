@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import type {
   Quadrant, Sector, Confidence, ScoreSnapshot, Stakeholder, EngagementRecord,
   WatchlistSignal, User, EvidenceRecord, StakeholderWithScore, Campaign, Client,
-  PartnerInvite, UserRole,
+  PartnerInvite, UserRole, EngagementPlan, ClientRequest,
 } from './types';
 import type { ActivityItem } from './data';
 import {
@@ -38,15 +38,15 @@ interface Filters {
 const seedClients: Client[] = [
   {
     id: 'cl-001', name: 'Grace Kimani', client_type: 'organization', organization: 'Green Future Foundation',
-    email: 'grace.kimani@greenfuture.org', campaign_id: 'o-001',
-    curated_stakeholder_ids: ['s-001', 's-003', 's-005', 's-007', 's-009', 's-013', 's-028', 's-029', 's-032'],
-    brief: 'Philanthropic funder seeking aligned champions and convertible legislators to support the renewable energy transition.',
+    email: 'grace.kimani@greenfuture.org', campaign_ids: ['o-001', 'o-005'],
+    curated_stakeholder_ids: ['s-001', 's-003', 's-005', 's-007', 's-009', 's-013', 's-028', 's-029', 's-032', 'w-001', 'w-002', 'w-004', 'w-009'],
+    brief: 'Philanthropic funder seeking aligned champions and convertible legislators across the renewable energy transition and water resource reform.',
     access_level: 'detailed', status: 'approved', created_by: 'u-002', approved_by: 'u-003',
     created_at: '2026-03-20', gender: 'female', portrait_url: null,
   },
   {
     id: 'cl-002', name: 'Halisi Renewables Ltd', client_type: 'organization', organization: 'Halisi Renewables Ltd',
-    email: 'partnerships@halisi.co.ke', campaign_id: 'o-001',
+    email: 'partnerships@halisi.co.ke', campaign_ids: ['o-001'],
     curated_stakeholder_ids: ['s-001', 's-004', 's-011', 's-028'],
     brief: 'Private developer evaluating which regulators and legislators to prioritise for project approvals.',
     access_level: 'overview', status: 'pending_approval', created_by: 'u-002', approved_by: null,
@@ -105,7 +105,17 @@ interface AppState {
   snapshots: ScoreSnapshot[];
   addSnapshot: (snapshot: ScoreSnapshot) => void;
   approveSnapshot: (id: string, approverId: string) => void;
-  rejectSnapshot: (id: string) => void;
+  rejectSnapshot: (id: string, reason?: string, evidence?: string) => void;
+
+  // Engagement plans live in state so leads/partners/analysts can edit them.
+  plans: EngagementPlan[];
+  addPlan: (plan: EngagementPlan) => void;
+  updatePlan: (id: string, updates: Partial<EngagementPlan>) => void;
+
+  // Requests raised from the client portal (intros / meetings / briefings).
+  clientRequests: ClientRequest[];
+  addClientRequest: (request: ClientRequest) => void;
+  updateClientRequest: (id: string, updates: Partial<ClientRequest>) => void;
 
   engagements: EngagementRecord[];
   addEngagement: (record: EngagementRecord) => void;
@@ -206,6 +216,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   storeStakeholders: [...stakeholders, ...extraStakeholders],
   activityFeed: [...activityFeed, ...extraActivity],
 
+  plans: [...engagementPlans, ...extraPlans],
+  addPlan: (plan) => set(s => ({ plans: [...s.plans, plan] })),
+  updatePlan: (id, updates) => set(s => ({
+    plans: s.plans.map(p => p.id === id ? { ...p, ...updates } : p),
+  })),
+
+  clientRequests: [],
+  addClientRequest: (request) => set(s => ({ clientRequests: [request, ...s.clientRequests] })),
+  updateClientRequest: (id, updates) => set(s => ({
+    clientRequests: s.clientRequests.map(r => r.id === id ? { ...r, ...updates } : r),
+  })),
+
   clients: [...seedClients],
   addClient: (client) => set(s => ({ clients: [...s.clients, client] })),
   approveClient: (id, approverId) => set(s => ({
@@ -278,8 +300,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       ? { ...sn, workflow_status: 'approved', approved_by: approverId, approved_at: new Date().toISOString().slice(0, 10) }
       : sn),
   })),
-  rejectSnapshot: (id) => set(s => ({
-    snapshots: s.snapshots.map(sn => sn.id === id ? { ...sn, workflow_status: 'rejected' } : sn),
+  rejectSnapshot: (id, reason, evidence) => set(s => ({
+    snapshots: s.snapshots.map(sn => sn.id === id
+      ? { ...sn, workflow_status: 'rejected', rejection_reason: reason ?? null, rejection_evidence: evidence ?? null }
+      : sn),
   })),
 
   addEngagement: (record) => set(s => ({ engagements: [...s.engagements, record] })),

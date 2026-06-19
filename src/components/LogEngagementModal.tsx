@@ -270,7 +270,7 @@ export default function LogEngagementModal() {
               onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-primary)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'var(--text-primary)'; }}
             >
-              Log Engagement
+              Save
             </button>
           </div>
         </div>

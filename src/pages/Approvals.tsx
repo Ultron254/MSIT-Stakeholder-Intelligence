@@ -26,6 +26,9 @@ export default function Approvals() {
 
   const [tab, setTab] = useState<'pending' | 'decided'>('pending');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState<ScoreSnapshot | null>(null);
+  const [reason, setReason] = useState('');
+  const [rejectEvidence, setRejectEvidence] = useState('');
 
   // Only surface snapshots for stakeholders the current user is allowed to see.
   // Partner-restricted VIP contacts must never appear to a non-owner.
@@ -52,21 +55,32 @@ export default function Approvals() {
   const userName = (id: string) => storeUsers.find(u => u.id === id)?.display_name ?? id;
   const campaignName = (id: string) => campaigns.find(c => c.id === id)?.short_name ?? id;
 
-  const decide = (snap: ScoreSnapshot, approve: boolean) => {
+  const approve = (snap: ScoreSnapshot) => {
     const st = stakeholderName(snap.stakeholder_id);
-    if (approve) {
-      approveSnapshot(snap.id, me?.id ?? 'u-002');
-      addActivity({
-        id: `act-${Date.now()}`, type: 'approval',
-        description: `Approved ${st?.full_name ?? 'a'} score snapshot (SIS ${snap.sis_score.toFixed(0)})`,
-        stakeholder_id: snap.stakeholder_id, user_id: me?.id ?? 'u-002',
-        timestamp: new Date().toISOString().slice(0, 10),
-      });
-      addToast(`Approved ${st?.full_name ?? 'snapshot'}`, 'success');
-    } else {
-      rejectSnapshot(snap.id);
-      addToast(`Returned ${st?.full_name ?? 'snapshot'} for revision`, 'info');
-    }
+    approveSnapshot(snap.id, me?.id ?? 'u-002');
+    addActivity({
+      id: `act-${Date.now()}`, type: 'approval',
+      description: `Approved ${st?.full_name ?? 'a'} score snapshot (SIS ${snap.sis_score.toFixed(0)})`,
+      stakeholder_id: snap.stakeholder_id, user_id: me?.id ?? 'u-002',
+      timestamp: new Date().toISOString().slice(0, 10),
+    });
+    addToast(`Approved ${st?.full_name ?? 'snapshot'}`, 'success');
+  };
+
+  const openReject = (snap: ScoreSnapshot) => { setRejecting(snap); setReason(''); setRejectEvidence(''); };
+
+  const confirmReject = () => {
+    if (!rejecting || !reason.trim()) return;
+    const st = stakeholderName(rejecting.stakeholder_id);
+    rejectSnapshot(rejecting.id, reason.trim(), rejectEvidence.trim() || undefined);
+    addActivity({
+      id: `act-${Date.now()}`, type: 'approval',
+      description: `Returned ${st?.full_name ?? 'a'} score snapshot for revision: ${reason.trim().slice(0, 80)}`,
+      stakeholder_id: rejecting.stakeholder_id, user_id: me?.id ?? 'u-002',
+      timestamp: new Date().toISOString().slice(0, 10),
+    });
+    addToast(`Returned ${st?.full_name ?? 'snapshot'} for revision`, 'info');
+    setRejecting(null);
   };
 
   const list = tab === 'pending' ? pending : decided;
@@ -106,7 +120,8 @@ export default function Approvals() {
           {list.map(snap => {
             const st = stakeholderName(snap.stakeholder_id);
             if (!st) return null;
-            const evCount = evidence.filter(e => e.snapshot_id === snap.id).length;
+            const snapEvidence = evidence.filter(e => e.snapshot_id === snap.id);
+            const evCount = snapEvidence.length;
             const isOpen = expanded === snap.id;
             return (
               <Card key={snap.id} className="overflow-hidden">
@@ -162,6 +177,33 @@ export default function Approvals() {
                         );
                       })}
                     </div>
+
+                    {/* Attached evidence — visible to the approver so the
+                        decision is grounded in what the analyst submitted. */}
+                    <div className="mb-3">
+                      <div className="text-label mb-2" style={{ fontSize: '0.5625rem' }}>Submitted evidence ({snapEvidence.length})</div>
+                      {snapEvidence.length === 0 ? (
+                        <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>No evidence was attached to this submission.</div>
+                      ) : (
+                        <div className="space-y-2">
+                          {snapEvidence.map(ev => (
+                            <div key={ev.id} className="rounded-lg p-3" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)' }}>
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-heading-sm" style={{ color: 'var(--text-primary)', fontSize: '0.8125rem' }}>{ev.title}</span>
+                                <span className="px-1.5 py-0.5 rounded shrink-0" style={{ background: 'var(--bg-inset)', color: 'var(--text-muted)', fontSize: '0.5625rem', fontWeight: 600, textTransform: 'capitalize' }}>{ev.evidence_type.replace(/_/g, ' ')}</span>
+                              </div>
+                              <p className="text-body-sm mt-1" style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{ev.description}</p>
+                              <div className="flex items-center gap-2 mt-1.5" style={{ fontSize: '0.625rem', color: 'var(--text-muted)' }}>
+                                <span className="capitalize">{ev.sensitivity}</span>
+                                {ev.source_url && <><span>·</span><a href={ev.source_url} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)' }}>Source</a></>}
+                                <span>·</span><span>Confidence {ev.confidence_contribution}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex items-center gap-3" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                       <span>Overall confidence</span>
                       <ConfidenceBadge confidence={snap.overall_confidence} />
@@ -171,17 +213,27 @@ export default function Approvals() {
                   </div>
                 )}
 
+                {snap.workflow_status === 'rejected' && snap.rejection_reason && (
+                  <div className="mt-3 rounded-lg p-3" style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.18)' }}>
+                    <div className="text-label" style={{ fontSize: '0.5625rem', color: '#B91C1C' }}>Reason returned</div>
+                    <p className="text-body-sm mt-1" style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{snap.rejection_reason}</p>
+                    {snap.rejection_evidence && (
+                      <p className="text-body-sm mt-2" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}><span style={{ fontWeight: 600 }}>Evidence cited:</span> {snap.rejection_evidence}</p>
+                    )}
+                  </div>
+                )}
+
                 {snap.workflow_status === 'submitted' && (
                   <div className="flex items-center gap-2 mt-4 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                     <button
-                      onClick={() => decide(snap, true)}
+                      onClick={() => approve(snap)}
                       className="flex items-center gap-1.5 rounded-lg btn-press"
                       style={{ padding: '7px 14px', background: 'var(--gradient-brand)', color: 'white', fontSize: '0.8125rem', fontWeight: 600 }}
                     >
                       <Check size={15} /> Approve
                     </button>
                     <button
-                      onClick={() => decide(snap, false)}
+                      onClick={() => openReject(snap)}
                       className="flex items-center gap-1.5 rounded-lg btn-press"
                       style={{ padding: '7px 14px', border: '1px solid var(--border-default)', color: 'var(--status-danger)', fontSize: '0.8125rem', fontWeight: 600 }}
                     >
@@ -194,6 +246,59 @@ export default function Approvals() {
           })}
         </div>
       )}
+
+      {/* Return-for-revision modal: capture a reason (required) + evidence */}
+      {rejecting && (() => {
+        const st = stakeholderName(rejecting.stakeholder_id);
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 modal-backdrop" style={{ background: 'rgba(15,30,41,0.45)' }} onClick={() => setRejecting(null)} />
+            <div className="modal-content relative w-full rounded-2xl overflow-hidden" style={{ maxWidth: 520, background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
+              <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(220,38,38,0.1)', color: '#B91C1C' }}><X size={16} /></div>
+                  <div>
+                    <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>Return for revision</div>
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{st?.full_name} · {st?.organization}</div>
+                  </div>
+                </div>
+                <button onClick={() => setRejecting(null)} aria-label="Close"><X size={18} style={{ color: 'var(--text-muted)' }} /></button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Reason for returning <span style={{ color: 'var(--status-danger)' }}>*</span></label>
+                  <textarea
+                    value={reason} onChange={(e) => setReason(e.target.value)} rows={3}
+                    placeholder="Explain what needs to change before this can be approved…"
+                    className="msit-input" style={{ resize: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Supporting evidence (optional)</label>
+                  <textarea
+                    value={rejectEvidence} onChange={(e) => setRejectEvidence(e.target.value)} rows={2}
+                    placeholder="Cite contradicting evidence, a source, or a meeting note the analyst should review."
+                    className="msit-input" style={{ resize: 'none' }}
+                  />
+                </div>
+                <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                  The analyst will see this reason and evidence against the returned submission so they can revise and resubmit.
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-3 px-6 py-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <button onClick={() => setRejecting(null)} className="rounded-lg" style={{ padding: '9px 16px', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 600 }}>Cancel</button>
+                <button
+                  disabled={!reason.trim()} onClick={confirmReject}
+                  className="rounded-lg btn-press"
+                  style={{ padding: '9px 18px', background: reason.trim() ? '#DC2626' : 'var(--bg-inset)', color: reason.trim() ? 'white' : 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600 }}
+                >
+                  Return for revision
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

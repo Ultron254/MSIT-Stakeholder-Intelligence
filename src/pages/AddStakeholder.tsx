@@ -7,9 +7,10 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer,
 } from 'recharts';
-import { useAppStore } from '../lib/store';
+import { useAppStore, useStakeholdersWithScores } from '../lib/store';
 import { calculateFullScore, getSISColor } from '../lib/scoring-engine';
 import { Card, QuadrantBadge } from '../components/ui/Badges';
+import type { StakeholderWithScore } from '../lib/types';
 import {
   SECTOR_LABELS, COMPONENT_LABELS, COMPONENT_DESCRIPTIONS,
   QUADRANT_COLORS,
@@ -50,6 +51,7 @@ export default function AddStakeholder() {
   const addActivity = useAppStore(s => s.addActivity);
   const currentCampaignId = useAppStore(s => s.currentCampaignId);
   const currentUserId = useAppStore(s => s.currentUserId);
+  const existing = useStakeholdersWithScores();
 
   // Section 1: Identity
   const [fullName, setFullName] = useState('');
@@ -651,9 +653,116 @@ export default function AddStakeholder() {
                 </RadarChart>
               </ResponsiveContainer>
             </Card>
+
+            {/* Live relationship / proximity preview */}
+            <Card>
+              <h3 className="text-heading-md mb-1" style={{ color: 'var(--text-primary)' }}>Relationship Preview</h3>
+              <p className="text-body-sm mb-2" style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                Where {fullName || 'this stakeholder'} sits in the proximity rings and who they connect to.
+              </p>
+              <ProximityMap
+                name={fullName}
+                layer={layer}
+                sector={sector}
+                organization={organization}
+                accent={qColor.dot}
+                existing={existing}
+              />
+            </Card>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+const RING_RADIUS: Record<ProximityLayer, number> = { 1: 52, 2: 92, 3: 132 };
+const RING_NAME: Record<ProximityLayer, string> = { 1: 'Core', 2: 'Inner', 3: 'Outer' };
+
+function ProximityMap({
+  name, layer, sector, organization, accent, existing,
+}: {
+  name: string; layer: ProximityLayer; sector: Sector; organization: string;
+  accent: string; existing: StakeholderWithScore[];
+}) {
+  const CXp = 175, CYp = 165;
+  const related = useMemo(() => {
+    const org = organization.trim().toLowerCase();
+    const colleagues = org ? existing.filter(s => s.organization.toLowerCase() === org) : [];
+    const colleagueIds = new Set(colleagues.map(c => c.id));
+    const peers = existing
+      .filter(s => s.sector === sector && !colleagueIds.has(s.id))
+      .sort((a, b) => (b.latestSnapshot?.sis_score ?? 0) - (a.latestSnapshot?.sis_score ?? 0))
+      .slice(0, 5);
+    return [
+      ...colleagues.slice(0, 3).map(s => ({ s, kind: 'colleague' as const })),
+      ...peers.map(s => ({ s, kind: 'peer' as const })),
+    ].slice(0, 7);
+  }, [existing, sector, organization]);
+
+  const newX = CXp;
+  const newY = CYp - RING_RADIUS[layer];
+
+  const relPositions = related.map((r, i) => {
+    const rl = r.s.proximity_layer;
+    const total = related.length;
+    const a = (-Math.PI / 2) + ((i + 1) / (total + 1)) * Math.PI * 2;
+    return { ...r, x: CXp + Math.cos(a) * RING_RADIUS[rl], y: CYp + Math.sin(a) * RING_RADIUS[rl] };
+  });
+
+  return (
+    <div>
+      <svg viewBox="0 0 350 320" className="w-full" style={{ height: 280, display: 'block' }}>
+        {/* Proximity rings */}
+        {([3, 2, 1] as ProximityLayer[]).map(l => (
+          <g key={l}>
+            <circle cx={CXp} cy={CYp} r={RING_RADIUS[l]} fill="none" stroke="var(--border-default)" strokeDasharray="3 5" strokeWidth={1} />
+            <text x={CXp} y={CYp - RING_RADIUS[l] - 4} textAnchor="middle" style={{ fontSize: 8, fill: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.08em' }}>
+              {RING_NAME[l].toUpperCase()}
+            </text>
+          </g>
+        ))}
+
+        {/* Centre = focal point */}
+        <circle cx={CXp} cy={CYp} r={6} fill="var(--text-muted)" opacity={0.5} />
+        <text x={CXp} y={CYp + 18} textAnchor="middle" style={{ fontSize: 7.5, fill: 'var(--text-muted)' }}>Focal point</text>
+
+        {/* Edges new -> related */}
+        {relPositions.map((r) => (
+          <line key={`e-${r.s.id}`} x1={newX} y1={newY} x2={r.x} y2={r.y}
+            stroke={r.kind === 'colleague' ? '#2563EB' : '#2DA67E'} strokeWidth={r.kind === 'colleague' ? 1.6 : 1} opacity={0.45} />
+        ))}
+
+        {/* Related nodes */}
+        {relPositions.map((r) => (
+          <g key={r.s.id}>
+            <circle cx={r.x} cy={r.y} r={7} fill={r.kind === 'colleague' ? '#2563EB' : '#2DA67E'} stroke="white" strokeWidth={1.5} />
+            <text x={r.x} y={r.y + 16} textAnchor="middle" style={{ fontSize: 7, fill: 'var(--text-secondary)' }}>
+              {r.s.full_name.replace(/^(Hon\.|Dr\.|Eng\.|Prof\.|Amb\.)\s+/i, '').split(' ').slice(-1)[0]}
+            </text>
+          </g>
+        ))}
+
+        {/* New stakeholder node (pulsing) */}
+        <circle cx={newX} cy={newY} r={14} fill={accent} opacity={0.18}>
+          <animate attributeName="r" values="11;18;11" dur="2.4s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.28;0;0.28" dur="2.4s" repeatCount="indefinite" />
+        </circle>
+        <circle cx={newX} cy={newY} r={11} fill={accent} stroke="white" strokeWidth={2.5} />
+        <text x={newX} y={newY - 16} textAnchor="middle" style={{ fontSize: 9, fill: 'var(--text-primary)', fontWeight: 700 }}>
+          {name ? name.replace(/^(Hon\.|Dr\.|Eng\.|Prof\.|Amb\.)\s+/i, '').split(' ').slice(-1)[0] : 'New'}
+        </text>
+      </svg>
+      <div className="flex items-center justify-center gap-4 mt-1" style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: accent }} /> New ({RING_NAME[layer]})</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#2563EB' }} /> Colleagues</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#2DA67E' }} /> Sector peers</span>
+      </div>
+      {related.length === 0 && (
+        <p className="text-body-sm text-center mt-2" style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+          No related stakeholders in this focal point yet — they'll appear as you add an organisation or sector.
+        </p>
+      )}
     </div>
   );
 }

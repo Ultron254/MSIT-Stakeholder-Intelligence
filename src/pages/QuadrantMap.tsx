@@ -8,7 +8,8 @@ import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 import { formatSIS, formatAxis } from '../lib/formatters';
 import RelationshipNetwork from '../components/RelationshipNetwork';
-import { Grid2x2, Share2 } from 'lucide-react';
+import EgoNetwork from '../components/EgoNetwork';
+import { Grid2x2, Share2, ArrowRight } from 'lucide-react';
 
 export default function QuadrantMap() {
   const all = useStakeholdersWithScores();
@@ -16,6 +17,9 @@ export default function QuadrantMap() {
   const [activeQuadrant, setActiveQuadrant] = useState<Quadrant | null>(null);
   const [showLabels, setShowLabels] = useState(false);
   const [view, setView] = useState<'matrix' | 'network'>('matrix');
+  // Network sub-mode: 'overview' = affiliation map, otherwise an ego network
+  // rooted on the chosen stakeholder (so every node can be the focal point).
+  const [networkFocal, setNetworkFocal] = useState<string>('overview');
 
   const scatterData = useMemo(() => {
     return all
@@ -169,7 +173,34 @@ export default function QuadrantMap() {
       {/* Relationship network view */}
       {view === 'network' && (
         <Card className="!p-3 overflow-hidden">
-          <RelationshipNetwork stakeholders={all} onSelect={setSelectedStakeholder} />
+          <div className="flex flex-wrap items-center justify-between gap-3 px-1 pb-3 mb-1" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            <div className="flex items-center gap-2">
+              <span className="text-label" style={{ fontSize: '0.625rem' }}>Focal point</span>
+              <select
+                value={networkFocal}
+                onChange={(e) => setNetworkFocal(e.target.value)}
+                className="rounded-lg px-3 py-1.5 text-body-sm outline-none"
+                style={{ background: 'var(--bg-inset)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', maxWidth: 280 }}
+              >
+                <option value="overview">Portfolio overview (affiliation map)</option>
+                {[...all].filter(s => s.latestSnapshot).sort((a, b) => a.full_name.localeCompare(b.full_name)).map(s => (
+                  <option key={s.id} value={s.id}>{s.full_name}</option>
+                ))}
+              </select>
+            </div>
+            {networkFocal !== 'overview' && (
+              <button onClick={() => setSelectedStakeholder(networkFocal)} className="flex items-center gap-1.5 text-body-sm" style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>
+                Open full profile <ArrowRight size={14} />
+              </button>
+            )}
+          </div>
+          {networkFocal === 'overview' ? (
+            <RelationshipNetwork stakeholders={all} onSelect={(id) => setNetworkFocal(id)} />
+          ) : (
+            <div className="pt-2">
+              <EgoNetwork focalId={networkFocal} all={all} onSelect={(id) => setNetworkFocal(id)} height={520} />
+            </div>
+          )}
         </Card>
       )}
 

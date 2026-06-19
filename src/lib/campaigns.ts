@@ -47,7 +47,31 @@ export const campaigns: Campaign[] = [
     id: 'o-006', country_id: 'c-001', name: 'Agricultural Subsidy Reform 2025', short_name: 'Agri Subsidy Reform',
     description: 'Restructuring of fertiliser subsidies and the e-voucher programme. Enacted in late 2025; retained for historical analysis.',
     policy_domain: 'Agriculture', region: 'Kenya', target_date: '2025-12-15', status: 'completed',
-    created_at: fmt(subDays(NOW, 400)), accent: '#15803D', lead_user_id: 'u-002',
+    created_at: fmt(subDays(NOW, 400)), accent: '#15803D', lead_user_id: 'u-002', focal_type: 'topic',
+  },
+  // --- Person focal point: a key player whose influence network we map ---
+  {
+    id: 'o-007', country_id: 'c-001', name: 'Hon. Aisha Mohamed — Influence Network', short_name: 'Hon. Aisha Mohamed',
+    description: 'Mapping the relationships, allies and rivals around Hon. Aisha Mohamed as she consolidates influence ahead of the 2027 leadership cycle.',
+    policy_domain: 'Political Leadership', region: 'Kenya', target_date: '2027-03-31', status: 'active',
+    created_at: fmt(subDays(NOW, 60)), accent: '#DB2777', lead_user_id: 'u-002', focal_type: 'person',
+    subject: {
+      name: 'Hon. Aisha Mohamed', role: 'Deputy Majority Leader', organization: 'National Assembly',
+      sector: 'politics', gender: 'female',
+      portrait_url: 'https://images.pexels.com/photos/3760790/pexels-photo-3760790.jpeg?auto=compress&cs=tinysrgb&w=256&h=256&dpr=1&fit=crop',
+    },
+  },
+  // --- Company focal point: the stakeholder map around an organisation ---
+  {
+    id: 'o-008', country_id: 'c-001', name: 'Halisi Renewables Ltd — Stakeholder Map', short_name: 'Halisi Renewables',
+    description: 'The full stakeholder landscape around Halisi Renewables Ltd — regulators, financiers, board, partners and competitors shaping its market position.',
+    policy_domain: 'Private Sector', region: 'Kenya', target_date: '2026-12-31', status: 'active',
+    created_at: fmt(subDays(NOW, 45)), accent: '#0EA5E9', lead_user_id: 'u-002', focal_type: 'company',
+    subject: {
+      name: 'Halisi Renewables Ltd', role: 'Independent Power Producer',
+      industry: 'Renewable Energy', headquarters: 'Nairobi, Kenya', founded: '2014', employees: '480+',
+      sector: 'business',
+    },
   },
 ];
 
@@ -142,6 +166,38 @@ const agriDefs: CDef[] = [
   { id:'g-010', name:'Dr. Lucy Muchiri', title:'Country Director', org:'FAO Kenya', sector:'international', layer:2, sensitive:false, gender:'female', I:4,R:5,K:1,S:5,A:5,M:4 },
   { id:'g-011', name:'Samuel Tanui', title:'Chair', org:'Maize Millers Association', sector:'business', layer:3, sensitive:false, gender:'male', I:3,R:3,K:3,S:3,A:3,M:3 },
   { id:'g-012', name:'Grace Atieno', title:'Agriculture Reporter', org:'KBC', sector:'media', layer:3, sensitive:false, gender:'female', I:2,R:3,K:3,S:3,A:3,M:2 },
+];
+
+// --- Person focal point (o-007): network around Hon. Aisha Mohamed ---
+const personDefs: CDef[] = [
+  { id:'p-001', name:'Hon. Aisha Mohamed', title:'Deputy Majority Leader', org:'National Assembly', sector:'politics', layer:1, sensitive:false, gender:'female', I:5,R:5,K:1,S:5,A:5,M:5 },
+  { id:'p-002', name:'Hon. Kevin Otieno', title:'Majority Whip & Ally', org:'National Assembly', sector:'politics', layer:1, sensitive:false, gender:'male', I:4,R:5,K:1,S:5,A:5,M:4 },
+  { id:'p-003', name:'Salma Yusuf', title:'Chief of Staff', org:'Office of Hon. Mohamed', sector:'politics', layer:1, sensitive:true, gender:'female', I:3,R:5,K:1,S:5,A:5,M:3 },
+  { id:'p-004', name:'Hon. George Thuo', title:'Rival Faction Leader', org:'National Assembly', sector:'politics', layer:1, sensitive:true, gender:'male', I:5,R:2,K:5,S:1,A:1,M:5 },
+  { id:'p-005', name:'Dr. Njeri Kamau', title:'Senior Policy Advisor', org:'Office of Hon. Mohamed', sector:'civil_service', layer:2, sensitive:false, gender:'female', I:3,R:5,K:1,S:5,A:5,M:3 },
+  { id:'p-006', name:'Hassan Ali', title:'County Mobiliser', org:'Coast Regional Bloc', sector:'civil_society', layer:2, sensitive:false, gender:'male', I:3,R:4,K:2,S:4,A:4,M:3 },
+  { id:'p-007', name:'Beatrice Wanjala', title:'Political Editor', org:'Nation Media', sector:'media', layer:2, sensitive:false, gender:'female', I:4,R:3,K:3,S:3,A:3,M:3 },
+  { id:'p-008', name:'Hon. Daniel Korir', title:'Coalition Negotiator', org:'Senate', sector:'politics', layer:2, sensitive:false, gender:'male', I:4,R:3,K:3,S:3,A:3,M:4 },
+  { id:'p-009', name:'Lucy Mwende', title:'Major Campaign Financier', org:'Mwende Holdings', sector:'business', layer:2, sensitive:true, gender:'female', I:4,R:4,K:2,S:4,A:4,M:4 },
+  { id:'p-010', name:'Prof. Eric Wahome', title:'Strategy Consultant', org:'Strathmore University', sector:'academia', layer:3, sensitive:false, gender:'male', I:3,R:4,K:1,S:4,A:5,M:3 },
+  { id:'p-011', name:'Hon. Mary Chebet', title:'Backbench Swing Vote', org:'National Assembly', sector:'politics', layer:3, sensitive:false, gender:'female', I:2,R:2,K:3,S:3,A:2,M:3 },
+  { id:'p-012', name:'James Mutiso', title:'Opposition Strategist', org:'Independent', sector:'politics', layer:3, sensitive:true, gender:'male', I:3,R:1,K:5,S:1,A:1,M:3 },
+];
+
+// --- Company focal point (o-008): stakeholder map around Halisi Renewables ---
+const companyDefs: CDef[] = [
+  { id:'co-001', name:'Aamir Khan', title:'Group CEO', org:'Halisi Renewables Ltd', sector:'business', layer:1, sensitive:false, gender:'male', I:5,R:5,K:1,S:5,A:5,M:5 },
+  { id:'co-002', name:'Nadia Omar', title:'Chair of the Board', org:'Halisi Renewables Ltd', sector:'business', layer:1, sensitive:false, gender:'female', I:5,R:5,K:1,S:5,A:5,M:4 },
+  { id:'co-003', name:'Dr. Amina Abdullahi', title:'Lead Regulator', org:'Energy & Petroleum Regulatory Auth.', sector:'civil_service', layer:1, sensitive:false, gender:'female', I:5,R:4,K:2,S:4,A:4,M:5 },
+  { id:'co-004', name:'Geoffrey Mwaura', title:'Lead Project Financier', org:'Africa Infrastructure Bank', sector:'business', layer:2, sensitive:true, gender:'male', I:4,R:5,K:1,S:5,A:5,M:4 },
+  { id:'co-005', name:'Priya Shah', title:'Chief Financial Officer', org:'Halisi Renewables Ltd', sector:'business', layer:1, sensitive:false, gender:'female', I:4,R:5,K:1,S:5,A:5,M:4 },
+  { id:'co-006', name:'Hon. Fatuma Hassan', title:'Energy Committee Chair', org:'National Assembly', sector:'politics', layer:2, sensitive:false, gender:'female', I:5,R:4,K:2,S:4,A:5,M:5 },
+  { id:'co-007', name:'Tom Kiprotich', title:'CEO, Rival IPP', org:'Rift Power Ltd', sector:'business', layer:2, sensitive:true, gender:'male', I:4,R:2,K:5,S:2,A:2,M:4 },
+  { id:'co-008', name:'Wanjiru Ngugi', title:'Community Liaison', org:'Turkana Host Community', sector:'civil_society', layer:2, sensitive:false, gender:'female', I:2,R:4,K:3,S:4,A:4,M:3 },
+  { id:'co-009', name:'Sanjay Patel', title:'Technology Partner', org:'SolarGrid Systems', sector:'business', layer:3, sensitive:false, gender:'male', I:3,R:5,K:1,S:5,A:5,M:3 },
+  { id:'co-010', name:'Caroline Adhiambo', title:'Energy Correspondent', org:'Business Daily', sector:'media', layer:3, sensitive:false, gender:'female', I:3,R:3,K:3,S:3,A:3,M:2 },
+  { id:'co-011', name:'Eng. Robert Kimani', title:'Grid Operator Liaison', org:'Kenya Power', sector:'civil_service', layer:2, sensitive:false, gender:'male', I:4,R:3,K:3,S:3,A:3,M:4 },
+  { id:'co-012', name:'Linda Wekesa', title:'Environmental Auditor', org:'NEMA', sector:'civil_service', layer:3, sensitive:false, gender:'female', I:3,R:3,K:3,S:3,A:4,M:3 },
 ];
 
 // Partner-restricted VIP contacts. Only Ronny (u-003) sees these. They show
@@ -307,6 +363,8 @@ const generated: CampaignData[] = [
   genCampaign('o-004', educationDefs, false),
   genCampaign('o-005', waterDefs, false),
   genCampaign('o-006', agriDefs, true),
+  genCampaign('o-007', personDefs, false),
+  genCampaign('o-008', companyDefs, false),
 ];
 
 // VIP records (assigned to their campaigns, restricted to the partner).

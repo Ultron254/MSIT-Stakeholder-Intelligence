@@ -8,12 +8,12 @@ import {
   AlertTriangle, TrendingUp, ArrowRight,
   FileText, MessageSquare, Shield, CheckCircle,
   Zap, MapPin, Calendar, Clock, HeartPulse, PhoneCall,
-  ChevronLeft, ChevronRight, Target,
+  ChevronLeft, ChevronRight, Target, Building2, Briefcase, Globe, Users2,
 } from 'lucide-react';
 import { useAppStore, useCurrentCampaign } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge, SeverityBadge } from '../components/ui/Badges';
-import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
+import { QUADRANT_COLORS, QUADRANT_LABELS, FOCAL_TYPE_LABELS } from '../lib/types';
 import type { Quadrant } from '../lib/types';
 import { NOW } from '../lib/constants';
 import { formatRelativeDate, formatDate, formatSIS, daysUntil } from '../lib/formatters';
@@ -316,7 +316,9 @@ export default function Dashboard() {
                     />
                   </span>
                   <span style={{ color: '#86EFAC', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em' }}>
-                    LIVE FOCAL POINT
+                    {campaign.focal_type && campaign.focal_type !== 'topic'
+                      ? `LIVE · ${FOCAL_TYPE_LABELS[campaign.focal_type].toUpperCase()}`
+                      : 'LIVE FOCAL POINT'}
                   </span>
                 </div>
                 <span
@@ -346,6 +348,36 @@ export default function Dashboard() {
               >
                 {objective.description}
               </p>
+
+              {/* Subject identity — person & company focal points track an entity,
+                  so we surface who/what the surrounding network revolves around. */}
+              {campaign.focal_type === 'person' && campaign.subject && (
+                <div className="hero-fade-in mt-4 inline-flex items-center gap-3 rounded-xl p-2.5 pr-4" style={{ animationDelay: '0.3s', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>
+                  <Portrait name={campaign.subject.name} gender={campaign.subject.gender ?? 'female'} portraitUrl={campaign.subject.portrait_url ?? null} size={46} />
+                  <div>
+                    <div style={{ color: 'white', fontWeight: 700, fontSize: '0.875rem' }}>{campaign.subject.name}</div>
+                    <div className="flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.75rem' }}>
+                      <Briefcase size={12} style={{ color: 'var(--brand-accent)' }} />
+                      {campaign.subject.role}{campaign.subject.organization ? ` · ${campaign.subject.organization}` : ''}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {campaign.focal_type === 'company' && campaign.subject && (
+                <div className="hero-fade-in mt-4 inline-flex items-center gap-3 rounded-xl p-2.5 pr-5" style={{ animationDelay: '0.3s', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg, ${campaign.accent ?? '#0EA5E9'}, rgba(255,255,255,0.25))` }}>
+                    <Building2 size={22} style={{ color: 'white' }} />
+                  </div>
+                  <div>
+                    <div style={{ color: 'white', fontWeight: 700, fontSize: '0.875rem' }}>{campaign.subject.name}</div>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5" style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.6875rem' }}>
+                      {campaign.subject.industry && <span className="flex items-center gap-1"><Briefcase size={11} style={{ color: 'var(--brand-accent)' }} />{campaign.subject.industry}</span>}
+                      {campaign.subject.headquarters && <span className="flex items-center gap-1"><Globe size={11} style={{ color: 'var(--brand-accent)' }} />{campaign.subject.headquarters}</span>}
+                      {campaign.subject.employees && <span className="flex items-center gap-1"><Users2 size={11} style={{ color: 'var(--brand-accent)' }} />{campaign.subject.employees}</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="hero-fade-in flex flex-wrap items-center gap-4 mt-5" style={{ animationDelay: '0.35s' }}>
                 <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
@@ -407,7 +439,9 @@ export default function Dashboard() {
                   className="text-label mb-1"
                   style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.625rem' }}
                 >
-                  Stakeholders
+                  {campaign.focal_type === 'person' ? 'In network'
+                    : campaign.focal_type === 'company' ? 'Stakeholders mapped'
+                    : 'Stakeholders'}
                 </div>
                 <div
                   className="font-display"
@@ -421,7 +455,9 @@ export default function Dashboard() {
                   {stats.total}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.25rem' }}>
-                  across 7 sectors
+                  {campaign.focal_type === 'person' ? 'around the key person'
+                    : campaign.focal_type === 'company' ? 'connected to the organisation'
+                    : 'across 7 sectors'}
                 </div>
               </div>
             </div>
@@ -604,7 +640,7 @@ export default function Dashboard() {
                   className="flex items-center gap-1 rounded-lg btn-press shrink-0"
                   style={{ padding: '5px 10px', background: 'var(--gradient-brand)', color: 'white', fontSize: '0.6875rem', fontWeight: 600 }}
                 >
-                  <PhoneCall size={12} /> Contact
+                  <PhoneCall size={12} /> Follow up
                 </button>
               </div>
             ))}

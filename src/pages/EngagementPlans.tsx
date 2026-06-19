@@ -1,15 +1,24 @@
-import { useMemo } from 'react';
-import { useAppStore, allEngagementPlans } from '../lib/store';
+import { useMemo, useState } from 'react';
+import { Search, X, Pencil, Target as TargetIcon } from 'lucide-react';
+import { useAppStore, useCurrentUser } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { QuadrantBadge, SISBadge } from '../components/ui/Badges';
 import Portrait from '../components/ui/Portrait';
-import { QUADRANT_COLORS } from '../lib/types';
-import type { Quadrant } from '../lib/types';
+import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
+import type { Quadrant, EngagementPlan } from '../lib/types';
+
+const QUADRANT_ORDER: Quadrant[] = ['strategic_ally', 'power_gap', 'hidden_champion', 'monitor_exit'];
 
 export default function EngagementPlans() {
   const all = useStakeholdersWithScores();
   const setSelectedStakeholder = useAppStore(s => s.setSelectedStakeholder);
   const currentCampaignId = useAppStore(s => s.currentCampaignId);
+  const plans = useAppStore(s => s.plans);
+  const me = useCurrentUser();
+  const [search, setSearch] = useState('');
+  const [editing, setEditing] = useState<EngagementPlan | null>(null);
+
+  const canEdit = me?.role === 'analyst' || me?.role === 'lead' || me?.role === 'partner' || me?.role === 'admin';
 
   const columns: { quadrant: Quadrant; label: string }[] = [
     { quadrant: 'strategic_ally', label: 'Strategic Allies' },
@@ -18,90 +27,97 @@ export default function EngagementPlans() {
     { quadrant: 'monitor_exit', label: 'Monitor / Exit' },
   ];
 
+  const getStakeholder = (id: string) => all.find(s => s.id === id);
+
   const plansByQuadrant = useMemo(() => {
-    const result: Record<Quadrant, typeof allEngagementPlans> = {
+    const result: Record<Quadrant, EngagementPlan[]> = {
       strategic_ally: [], power_gap: [], hidden_champion: [], monitor_exit: [],
     };
-    // Only count/show plans for stakeholders the current user can actually see
-    // in this campaign (excludes hidden partner-restricted VIPs).
     const visibleIds = new Set(all.map(s => s.id));
-    allEngagementPlans
+    const q = search.trim().toLowerCase();
+    plans
       .filter(p => p.objective_id === currentCampaignId && visibleIds.has(p.stakeholder_id))
-      .forEach(p => {
-        result[p.current_quadrant as Quadrant]?.push(p);
-      });
+      .filter(p => {
+        if (!q) return true;
+        const st = getStakeholder(p.stakeholder_id);
+        return st?.full_name.toLowerCase().includes(q)
+          || st?.organization.toLowerCase().includes(q)
+          || p.approach.toLowerCase().includes(q);
+      })
+      .forEach(p => { result[p.current_quadrant as Quadrant]?.push(p); });
     return result;
-  }, [currentCampaignId, all]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentCampaignId, all, plans, search]);
 
-  const getStakeholder = (id: string) => all.find(s => s.id === id);
+  const totalShown = QUADRANT_ORDER.reduce((n, q) => n + plansByQuadrant[q].length, 0);
 
   return (
     <div className="page-enter space-y-5">
-      <div>
-        <h1 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Engagement Plans</h1>
-        <p className="text-body-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          30/60/90 day strategic plans organized by quadrant
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-heading-lg" style={{ color: 'var(--text-primary)' }}>Engagement Plans</h1>
+          <p className="text-body-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            30/60/90 day strategic plans organized by quadrant{canEdit ? ' — click Edit on any card to update the plan' : ''}
+          </p>
+        </div>
+        <div className="relative w-full sm:w-80">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+          <input
+            type="text"
+            placeholder="Search stakeholder, org or approach…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-lg pl-9 pr-9 py-2 text-body-sm outline-none"
+            style={{ background: 'var(--bg-inset)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2" aria-label="Clear search">
+              <X size={14} style={{ color: 'var(--text-muted)' }} />
+            </button>
+          )}
+        </div>
       </div>
+
+      {search && (
+        <div className="text-body-sm" style={{ color: 'var(--text-muted)' }}>{totalShown} plan{totalShown === 1 ? '' : 's'} match "{search}"</div>
+      )}
 
       {/* Kanban board */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4" style={{ minHeight: 600 }}>
         {columns.map(col => {
-          const plans = plansByQuadrant[col.quadrant] ?? [];
+          const colPlans = plansByQuadrant[col.quadrant] ?? [];
           const qColor = QUADRANT_COLORS[col.quadrant];
           return (
             <div key={col.quadrant} className="flex flex-col">
-              {/* Column header */}
-              <div
-                className="flex items-center justify-between px-3 py-2.5 rounded-t-lg"
-                style={{ background: qColor.bg, borderBottom: `2px solid ${qColor.border}` }}
-              >
+              <div className="flex items-center justify-between px-3 py-2.5 rounded-t-lg" style={{ background: qColor.bg, borderBottom: `2px solid ${qColor.border}` }}>
                 <span className="text-heading-sm" style={{ color: qColor.text }}>{col.label}</span>
-                <span className="font-mono text-xs" style={{ color: qColor.text }}>{plans.length}</span>
+                <span className="font-mono text-xs" style={{ color: qColor.text }}>{colPlans.length}</span>
               </div>
 
-              {/* Cards */}
-              <div
-                className="flex-1 space-y-2 p-2 rounded-b-lg overflow-y-auto"
-                style={{ background: 'var(--bg-secondary)', maxHeight: 700 }}
-              >
-                {plans.map(plan => {
+              <div className="flex-1 space-y-2 p-2 rounded-b-lg overflow-y-auto" style={{ background: 'var(--bg-secondary)', maxHeight: 700 }}>
+                {colPlans.length === 0 && (
+                  <div className="text-body-sm text-center py-6" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>No plans here.</div>
+                )}
+                {colPlans.map(plan => {
                   const stakeholder = getStakeholder(plan.stakeholder_id);
                   if (!stakeholder) return null;
                   return (
                     <div
                       key={plan.id}
-                      onClick={() => setSelectedStakeholder(plan.stakeholder_id)}
-                      className="rounded-lg p-3 cursor-pointer transition-all"
-                      style={{
-                        background: 'var(--bg-elevated)',
-                        border: '1px solid var(--border-default)',
-                        boxShadow: 'var(--shadow-sm)',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--border-strong)';
-                        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--border-default)';
-                        e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                      }}
+                      className="rounded-lg p-3 transition-all"
+                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-sm)' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Portrait name={stakeholder.full_name} gender={stakeholder.gender} portraitUrl={stakeholder.portrait_url} size={28} />
-                        <span className="text-heading-sm truncate flex-1" style={{ color: 'var(--text-primary)' }}>
-                          {stakeholder.full_name}
-                        </span>
-                        {stakeholder.latestSnapshot && (
-                          <SISBadge score={stakeholder.latestSnapshot.sis_score} size="sm" />
-                        )}
-                      </div>
-                      <div className="text-body-sm mb-2 truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>
-                        {stakeholder.organization}
-                      </div>
-                      <div className="text-body-sm line-clamp-2" style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                        {plan.approach}
-                      </div>
+                      <button onClick={() => setSelectedStakeholder(plan.stakeholder_id)} className="w-full text-left">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Portrait name={stakeholder.full_name} gender={stakeholder.gender} portraitUrl={stakeholder.portrait_url} size={28} />
+                          <span className="text-heading-sm truncate flex-1" style={{ color: 'var(--text-primary)' }}>{stakeholder.full_name}</span>
+                          {stakeholder.latestSnapshot && <SISBadge score={stakeholder.latestSnapshot.sis_score} size="sm" />}
+                        </div>
+                        <div className="text-body-sm mb-2 truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{stakeholder.organization}</div>
+                        <div className="text-body-sm line-clamp-2" style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{plan.approach}</div>
+                      </button>
                       {plan.target_quadrant && plan.target_quadrant !== plan.current_quadrant && (
                         <div className="flex items-center gap-1.5 mt-2">
                           <span className="text-label" style={{ fontSize: '0.5625rem' }}>Target</span>
@@ -109,15 +125,12 @@ export default function EngagementPlans() {
                         </div>
                       )}
                       <div className="flex items-center justify-between mt-2 pt-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
-                        <span
-                          className="text-xs font-medium capitalize px-1.5 py-0.5 rounded"
-                          style={{
-                            color: plan.status === 'active' ? 'var(--status-success)' : 'var(--text-muted)',
-                            background: plan.status === 'active' ? 'var(--quadrant-ally-bg)' : 'var(--bg-inset)',
-                          }}
-                        >
-                          {plan.status}
-                        </span>
+                        <span className="text-xs font-medium capitalize px-1.5 py-0.5 rounded" style={{ color: plan.status === 'active' ? 'var(--status-success)' : 'var(--text-muted)', background: plan.status === 'active' ? 'var(--quadrant-ally-bg)' : 'var(--bg-inset)' }}>{plan.status}</span>
+                        {canEdit && (
+                          <button onClick={() => setEditing(plan)} className="flex items-center gap-1 rounded-md px-2 py-1" style={{ color: 'var(--accent-primary)', fontSize: '0.6875rem', fontWeight: 600 }}>
+                            <Pencil size={11} /> Edit
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -126,6 +139,87 @@ export default function EngagementPlans() {
             </div>
           );
         })}
+      </div>
+
+      {editing && <EditPlanModal plan={editing} stakeholderName={getStakeholder(editing.stakeholder_id)?.full_name ?? 'Stakeholder'} onClose={() => setEditing(null)} />}
+    </div>
+  );
+}
+
+function EditPlanModal({ plan, stakeholderName, onClose }: { plan: EngagementPlan; stakeholderName: string; onClose: () => void }) {
+  const updatePlan = useAppStore(s => s.updatePlan);
+  const addToast = useAppStore(s => s.addToast);
+  const [approach, setApproach] = useState(plan.approach);
+  const [target, setTarget] = useState<Quadrant | ''>(plan.target_quadrant ?? '');
+  const [p30, setP30] = useState(plan.plan_30_day);
+  const [p60, setP60] = useState(plan.plan_60_day);
+  const [p90, setP90] = useState(plan.plan_90_day);
+  const [status, setStatus] = useState<EngagementPlan['status']>(plan.status);
+
+  const save = () => {
+    updatePlan(plan.id, {
+      approach: approach.trim(), target_quadrant: target || null,
+      plan_30_day: p30.trim(), plan_60_day: p60.trim(), plan_90_day: p90.trim(), status,
+    });
+    addToast('Engagement plan updated', 'success');
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 modal-backdrop" style={{ background: 'rgba(15,30,41,0.45)' }} onClick={onClose} />
+      <div className="modal-content relative w-full rounded-2xl overflow-hidden flex flex-col" style={{ maxWidth: 640, maxHeight: '90vh', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
+        <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(45,166,126,0.12)', color: 'var(--brand-primary)' }}><TargetIcon size={16} /></div>
+            <div>
+              <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>Edit engagement plan</div>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{stakeholderName}</div>
+            </div>
+          </div>
+          <button onClick={onClose} aria-label="Close"><X size={18} style={{ color: 'var(--text-muted)' }} /></button>
+        </div>
+
+        <div className="p-6 overflow-y-auto space-y-4">
+          <div>
+            <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Strategic approach</label>
+            <textarea value={approach} onChange={(e) => setApproach(e.target.value)} rows={2} className="msit-input" style={{ resize: 'none' }} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Target quadrant</label>
+              <select value={target} onChange={(e) => setTarget(e.target.value as Quadrant | '')} className="msit-input">
+                <option value="">No target</option>
+                {QUADRANT_ORDER.map(q => <option key={q} value={q}>{QUADRANT_LABELS[q]}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Status</label>
+              <select value={status} onChange={(e) => setStatus(e.target.value as EngagementPlan['status'])} className="msit-input">
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>30-day plan</label>
+            <textarea value={p30} onChange={(e) => setP30(e.target.value)} rows={2} className="msit-input" style={{ resize: 'none' }} />
+          </div>
+          <div>
+            <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>60-day plan</label>
+            <textarea value={p60} onChange={(e) => setP60(e.target.value)} rows={2} className="msit-input" style={{ resize: 'none' }} />
+          </div>
+          <div>
+            <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>90-day plan</label>
+            <textarea value={p90} onChange={(e) => setP90(e.target.value)} rows={2} className="msit-input" style={{ resize: 'none' }} />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 px-6 py-4 shrink-0" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="rounded-lg" style={{ padding: '9px 16px', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 600 }}>Cancel</button>
+          <button onClick={save} className="rounded-lg btn-press" style={{ padding: '9px 18px', background: 'var(--gradient-brand)', color: 'white', fontSize: '0.8125rem', fontWeight: 600 }}>Save plan</button>
+        </div>
       </div>
     </div>
   );

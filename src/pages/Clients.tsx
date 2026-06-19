@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   Plus, X, Briefcase, Building2, User as UserIcon, Check, Clock, Eye,
-  CheckCircle2, ShieldAlert,
+  CheckCircle2, ShieldAlert, Search,
 } from 'lucide-react';
 import { useAppStore, useCurrentUser } from '../lib/store';
 import { Card, EmptyState } from '../components/ui/Badges';
@@ -35,6 +35,7 @@ export default function Clients() {
 
   const approved = clients.filter(c => c.status === 'approved').length;
   const pending = clients.filter(c => c.status === 'pending_approval').length;
+  const activeFocalPoints = new Set(clients.flatMap(c => c.campaign_ids)).size;
 
   return (
     <div className="page-enter space-y-6">
@@ -58,7 +59,7 @@ export default function Clients() {
         <Card><div className="text-label mb-2">Total Clients</div><div className="text-metric-sm" style={{ color: 'var(--text-primary)' }}>{clients.length}</div></Card>
         <Card><div className="text-label mb-2">Approved</div><div className="text-metric-sm" style={{ color: 'var(--brand-primary)' }}>{approved}</div></Card>
         <Card><div className="text-label mb-2">Pending Approval</div><div className="text-metric-sm" style={{ color: pending > 0 ? 'var(--status-warning)' : 'var(--text-primary)' }}>{pending}</div></Card>
-        <Card><div className="text-label mb-2">Active Focal Points</div><div className="text-metric-sm" style={{ color: 'var(--text-primary)' }}>{new Set(clients.map(c => c.campaign_id)).size}</div></Card>
+        <Card><div className="text-label mb-2">Active Focal Points</div><div className="text-metric-sm" style={{ color: 'var(--text-primary)' }}>{activeFocalPoints}</div></Card>
       </div>
 
       {isPartner && pending > 0 && (
@@ -93,8 +94,16 @@ export default function Clients() {
 
                 <p className="text-body-sm mt-3" style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{c.brief}</p>
 
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  <Meta label="Focal Point" value={campaignName(c.campaign_id)} />
+                <div className="mt-3">
+                  <div className="text-label mb-1.5" style={{ fontSize: '0.5625rem' }}>Focal points ({c.campaign_ids.length})</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {c.campaign_ids.map(id => (
+                      <span key={id} className="px-2 py-0.5 rounded-full" style={{ background: 'rgba(45,166,126,0.1)', color: '#1F7A5C', fontSize: '0.6875rem', fontWeight: 600 }}>{campaignName(id)}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mt-4">
                   <Meta label="Curated stakeholders" value={`${c.curated_stakeholder_ids.length}`} />
                   <Meta label="Access level" value={c.access_level === 'detailed' ? 'Detailed' : 'Overview'} />
                   <Meta label="Created" value={formatDate(c.created_at)} />
@@ -149,25 +158,45 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
   const [type, setType] = useState<'individual' | 'organization'>('organization');
   const [org, setOrg] = useState('');
   const [email, setEmail] = useState('');
-  const [campaignId, setCampaignId] = useState(campaigns.find(c => c.status === 'active')?.id ?? campaigns[0]?.id ?? 'o-001');
+  const defaultCampaign = campaigns.find(c => c.status === 'active')?.id ?? campaigns[0]?.id ?? 'o-001';
+  const [campaignIds, setCampaignIds] = useState<string[]>([defaultCampaign]);
   const [access, setAccess] = useState<'overview' | 'detailed'>('overview');
   const [brief, setBrief] = useState('');
   const [curated, setCurated] = useState<string[]>([]);
+  const [stakeholderSearch, setStakeholderSearch] = useState('');
 
-  const campaignStakeholders = useMemo(
-    () => storeStakeholders.filter(s => s.campaign_id === campaignId && !s.vip_owner_id),
-    [storeStakeholders, campaignId]
+  const selectableCampaigns = campaigns.filter(c => c.status === 'active' || c.status === 'draft');
+
+  // Curated stakeholders are drawn from the union of all selected focal points.
+  const eligibleStakeholders = useMemo(
+    () => storeStakeholders
+      .filter(s => campaignIds.includes(s.campaign_id) && !s.vip_owner_id)
+      .sort((a, b) => a.full_name.localeCompare(b.full_name)),
+    [storeStakeholders, campaignIds]
   );
+  const visibleStakeholders = useMemo(() => {
+    const q = stakeholderSearch.trim().toLowerCase();
+    if (!q) return eligibleStakeholders;
+    return eligibleStakeholders.filter(s => s.full_name.toLowerCase().includes(q) || s.organization.toLowerCase().includes(q));
+  }, [eligibleStakeholders, stakeholderSearch]);
 
+  const campaignName = (id: string) => campaigns.find(c => c.id === id)?.short_name ?? id;
   const toggle = (id: string) => setCurated(c => c.includes(id) ? c.filter(x => x !== id) : [...c, id]);
-  const canSubmit = name.trim() && email.trim() && curated.length > 0;
+  const toggleCampaign = (id: string) => setCampaignIds(prev => {
+    const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+    return next.length ? next : prev; // keep at least one
+  });
+  // Drop curated picks that are no longer eligible when focal points change.
+  const eligibleIds = new Set(eligibleStakeholders.map(s => s.id));
+  const validCurated = curated.filter(id => eligibleIds.has(id));
+  const canSubmit = name.trim() && email.trim() && campaignIds.length > 0 && validCurated.length > 0;
 
   const submit = () => {
     const status: Client['status'] = isPartner ? 'approved' : 'pending_approval';
     const client: Client = {
       id: `cl-${Date.now().toString().slice(-6)}`,
       name: name.trim(), client_type: type, organization: org.trim() || name.trim(), email: email.trim(),
-      campaign_id: campaignId, curated_stakeholder_ids: curated, brief: brief.trim() || 'No brief provided.',
+      campaign_ids: campaignIds, curated_stakeholder_ids: validCurated, brief: brief.trim() || 'No brief provided.',
       access_level: access, status, created_by: me?.id ?? 'u-002',
       approved_by: isPartner ? (me?.id ?? 'u-003') : null,
       created_at: new Date().toISOString().slice(0, 10), gender: type === 'individual' ? 'female' : 'male', portrait_url: null,
@@ -180,10 +209,10 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 modal-backdrop" style={{ background: 'rgba(15,30,41,0.45)' }} onClick={onClose} />
-      <div className="modal-content relative w-full rounded-2xl overflow-hidden flex flex-col" style={{ maxWidth: 620, maxHeight: '90vh', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
+      <div className="modal-content relative w-full rounded-2xl overflow-hidden flex flex-col" style={{ maxWidth: 680, maxHeight: '92vh', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
         <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(196,149,106,0.14)', color: '#A06A3F' }}><Briefcase size={16} /></div>
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(196,149,106,0.14)', color: '#A06A3F' }}><Briefcase size={17} /></div>
             <div>
               <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>New Client</div>
               <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{isPartner ? 'As a partner this goes live immediately' : 'Will require partner approval'}</div>
@@ -192,44 +221,71 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} aria-label="Close"><X size={18} style={{ color: 'var(--text-muted)' }} /></button>
         </div>
 
-        <div className="p-6 overflow-y-auto space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Client name"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Grace Kimani / Acme Ltd" className="msit-input" /></Field>
-            <Field label="Type">
-              <select value={type} onChange={(e) => setType(e.target.value as 'individual' | 'organization')} className="msit-input">
-                <option value="organization">Organization</option>
-                <option value="individual">Individual</option>
-              </select>
-            </Field>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Organization"><input value={org} onChange={(e) => setOrg(e.target.value)} placeholder="Company / institution" className="msit-input" /></Field>
-            <Field label="Email"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="client@example.com" className="msit-input" /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Focal Point">
-              <select value={campaignId} onChange={(e) => { setCampaignId(e.target.value); setCurated([]); }} className="msit-input">
-                {campaigns.map(c => <option key={c.id} value={c.id}>{c.short_name}</option>)}
-              </select>
-            </Field>
+        <div className="px-6 py-5 overflow-y-auto space-y-5">
+          {/* Identity */}
+          <section className="space-y-4">
+            <SectionLabel>Client details</SectionLabel>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Client name"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Grace Kimani / Acme Ltd" className="msit-input" /></Field>
+              <Field label="Type">
+                <select value={type} onChange={(e) => setType(e.target.value as 'individual' | 'organization')} className="msit-input">
+                  <option value="organization">Organization</option>
+                  <option value="individual">Individual</option>
+                </select>
+              </Field>
+              <Field label="Organization"><input value={org} onChange={(e) => setOrg(e.target.value)} placeholder="Company / institution" className="msit-input" /></Field>
+              <Field label="Email"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="client@example.com" className="msit-input" /></Field>
+            </div>
             <Field label="Access level">
               <select value={access} onChange={(e) => setAccess(e.target.value as 'overview' | 'detailed')} className="msit-input">
                 <option value="overview">Overview (scores & quadrants)</option>
-                <option value="detailed">Detailed (profiles & plans)</option>
+                <option value="detailed">Detailed (profiles, plans & network)</option>
               </select>
             </Field>
-          </div>
-          <Field label="Client brief"><textarea value={brief} onChange={(e) => setBrief(e.target.value)} rows={2} placeholder="What is the client trying to achieve?" className="msit-input" style={{ resize: 'none' }} /></Field>
+            <Field label="Client brief"><textarea value={brief} onChange={(e) => setBrief(e.target.value)} rows={2} placeholder="What is the client trying to achieve?" className="msit-input" style={{ resize: 'none' }} /></Field>
+          </section>
 
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-label">Curated stakeholders ({curated.length} selected)</label>
-              <button onClick={() => setCurated(curated.length === campaignStakeholders.length ? [] : campaignStakeholders.map(s => s.id))} style={{ fontSize: '0.6875rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
-                {curated.length === campaignStakeholders.length ? 'Clear all' : 'Select all'}
+          {/* Focal points — multi-select */}
+          <section className="space-y-2">
+            <SectionLabel>Focal points ({campaignIds.length})</SectionLabel>
+            <p className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>A client can be associated with multiple focal points and scroll between them in their portal.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {selectableCampaigns.map(c => {
+                const on = campaignIds.includes(c.id);
+                return (
+                  <button key={c.id} onClick={() => toggleCampaign(c.id)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-colors"
+                    style={{ background: on ? 'rgba(45,166,126,0.07)' : 'var(--bg-inset)', border: `1px solid ${on ? 'var(--brand-primary)' : 'var(--border-default)'}` }}>
+                    <span className="w-4 h-4 rounded flex items-center justify-center shrink-0" style={{ border: on ? 'none' : '1.5px solid var(--border-strong)', background: on ? 'var(--brand-primary)' : 'transparent' }}>
+                      {on && <Check size={11} color="white" />}
+                    </span>
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: c.accent }} />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate" style={{ color: 'var(--text-primary)', fontSize: '0.8125rem', fontWeight: 600 }}>{c.short_name}</div>
+                      <div className="truncate" style={{ color: 'var(--text-muted)', fontSize: '0.625rem' }}>{c.policy_domain}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Curated stakeholders from union of selected focal points */}
+          <section className="space-y-2">
+            <div className="flex items-center justify-between">
+              <SectionLabel>Curated stakeholders ({validCurated.length} selected)</SectionLabel>
+              <button onClick={() => setCurated(validCurated.length === eligibleStakeholders.length ? [] : eligibleStakeholders.map(s => s.id))} style={{ fontSize: '0.6875rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                {validCurated.length === eligibleStakeholders.length ? 'Clear all' : 'Select all'}
               </button>
             </div>
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+              <input value={stakeholderSearch} onChange={(e) => setStakeholderSearch(e.target.value)} placeholder="Search stakeholders to add…" className="msit-input" style={{ paddingLeft: 34 }} />
+            </div>
             <div className="rounded-lg max-h-56 overflow-y-auto" style={{ border: '1px solid var(--border-default)' }}>
-              {campaignStakeholders.map(s => {
+              {visibleStakeholders.length === 0 && (
+                <div className="px-3 py-6 text-center text-body-sm" style={{ color: 'var(--text-muted)' }}>No stakeholders match.</div>
+              )}
+              {visibleStakeholders.map(s => {
                 const checked = curated.includes(s.id);
                 return (
                   <button key={s.id} onClick={() => toggle(s.id)} className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors" style={{ background: checked ? 'rgba(45,166,126,0.06)' : 'transparent', borderBottom: '1px solid var(--border-subtle)' }}>
@@ -241,11 +297,12 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
                       <div className="truncate" style={{ color: 'var(--text-primary)', fontSize: '0.8125rem', fontWeight: 500 }}>{s.full_name}</div>
                       <div className="truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{s.organization}</div>
                     </div>
+                    <span className="px-1.5 py-0.5 rounded shrink-0" style={{ background: 'var(--bg-inset)', color: 'var(--text-muted)', fontSize: '0.5625rem', fontWeight: 600 }}>{campaignName(s.campaign_id)}</span>
                   </button>
                 );
               })}
             </div>
-          </div>
+          </section>
         </div>
 
         <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ borderTop: '1px solid var(--border-subtle)' }}>
@@ -269,4 +326,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </div>
   );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <div className="text-label" style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', letterSpacing: '0.08em' }}>{children}</div>;
 }

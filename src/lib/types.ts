@@ -84,6 +84,9 @@ export interface ScoreSnapshot {
   approved_by: string | null;
   scored_at: string;
   approved_at: string | null;
+  // Populated when a lead/partner returns a submission for revision.
+  rejection_reason?: string | null;
+  rejection_evidence?: string | null;
 }
 
 export interface EvidenceRecord {
@@ -254,9 +257,29 @@ export const COMPONENT_DESCRIPTIONS: Record<Component, string> = {
   impact: 'Potential magnitude of contribution to desired outcome',
 };
 
-// A campaign is a policy initiative the team is advocating for. Each campaign
-// has its own stakeholder portfolio, so switching campaigns swaps the whole
-// quadrant landscape. (Supersedes the older single-objective model.)
+// A focal point is the centre of an intelligence effort. It can be a policy
+// topic (the original model), a specific person (a key player / principal we
+// are mapping the influence network around), or a company / organisation.
+// Each focal point has its own stakeholder portfolio, so switching swaps the
+// whole quadrant landscape. (Supersedes the older single-objective model.)
+export type FocalType = 'topic' | 'person' | 'company';
+
+// For person & company focal points we capture the subject being tracked. The
+// surrounding stakeholders become the network of influence around them.
+export interface FocalSubject {
+  name: string;
+  role?: string;          // person title / company tagline
+  organization?: string;  // person's affiliation
+  sector?: Sector;
+  portrait_url?: string | null;
+  gender?: 'female' | 'male';
+  // company-specific
+  industry?: string;
+  headquarters?: string;
+  founded?: string;
+  employees?: string;
+}
+
 export interface Campaign {
   id: string;
   country_id: string;
@@ -270,7 +293,16 @@ export interface Campaign {
   created_at: string;
   accent: string;
   lead_user_id: string;
+  // Defaults to 'topic' for legacy focal points.
+  focal_type?: FocalType;
+  subject?: FocalSubject;
 }
+
+export const FOCAL_TYPE_LABELS: Record<FocalType, string> = {
+  topic: 'Topic',
+  person: 'Key Person',
+  company: 'Organisation',
+};
 
 export const CAMPAIGN_STATUS_LABELS: Record<Campaign['status'], string> = {
   active: 'Active',
@@ -289,7 +321,9 @@ export interface Client {
   client_type: 'individual' | 'organization';
   organization: string;
   email: string;
-  campaign_id: string;
+  // A client can be associated with multiple focal points and scroll between
+  // them in their portal. (Legacy single campaign_id is migrated to this.)
+  campaign_ids: string[];
   curated_stakeholder_ids: string[];
   brief: string;
   access_level: 'overview' | 'detailed';
@@ -299,6 +333,20 @@ export interface Client {
   created_at: string;
   gender?: 'female' | 'male';
   portrait_url?: string | null;
+}
+
+// A request raised from the client portal — an introduction or a meeting ask
+// that flows back to the Momentum engagement team.
+export interface ClientRequest {
+  id: string;
+  client_id: string;
+  stakeholder_id: string;
+  campaign_id: string;
+  request_type: 'introduction' | 'meeting' | 'briefing';
+  note: string;
+  preferred_date: string | null;
+  status: 'requested' | 'in_progress' | 'scheduled' | 'declined';
+  created_at: string;
 }
 
 export const CLIENT_STATUS_LABELS: Record<Client['status'], string> = {

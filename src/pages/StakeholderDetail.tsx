@@ -6,7 +6,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts';
-import { useAppStore, allEngagementPlans, useCurrentUser } from '../lib/store';
+import { useAppStore, useCurrentUser } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { Card, QuadrantBadge, SISBadge, ConfidenceBadge, SectorBadge, LayerIndicator, ScoreBar, WorkflowBadge, EngagementTypeBadge, OutcomeBadge, EmptyState } from '../components/ui/Badges';
 import { QUADRANT_COLORS, COMPONENT_DESCRIPTIONS } from '../lib/types';
@@ -14,6 +14,7 @@ import type { Quadrant, Component } from '../lib/types';
 import { formatRelativeDate, formatDate, formatSIS, formatAxis, formatLayer } from '../lib/formatters';
 import { getSISColor } from '../lib/scoring-engine';
 import Portrait from '../components/ui/Portrait';
+import EgoNetwork from '../components/EgoNetwork';
 
 type Tab = 'overview' | 'engagements' | 'evidence' | 'history' | 'plan';
 
@@ -23,6 +24,7 @@ export default function StakeholderDetail() {
   const snapshots = useAppStore(s => s.snapshots);
   const engagements = useAppStore(s => s.engagements);
   const evidence = useAppStore(s => s.evidence);
+  const plans = useAppStore(s => s.plans);
   const openLogEngagement = useAppStore(s => s.openLogEngagement);
   const openAddWatchlist = useAppStore(s => s.openAddWatchlist);
   const storeUsers = useAppStore(s => s.storeUsers);
@@ -53,7 +55,8 @@ export default function StakeholderDetail() {
   const stakeEvidence = evidence
     .filter(e => e.stakeholder_id === stakeholder.id)
     .sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime());
-  const plan = allEngagementPlans.find(p => p.stakeholder_id === stakeholder.id);
+  const plan = plans.find(p => p.stakeholder_id === stakeholder.id && p.objective_id === stakeholder.campaign_id)
+    ?? plans.find(p => p.stakeholder_id === stakeholder.id);
   const qColor = snap ? QUADRANT_COLORS[snap.quadrant] : QUADRANT_COLORS.monitor_exit;
 
   const radarData = snap ? [
@@ -366,30 +369,13 @@ export default function StakeholderDetail() {
                 </Card>
               )}
 
-              {/* Related stakeholders */}
+              {/* Related stakeholders — interactive network map */}
               <Card>
-                <h3 className="text-heading-md mb-3" style={{ color: 'var(--text-primary)' }}>Related Stakeholders</h3>
-                <div className="space-y-1.5">
-                  {all
-                    .filter(s => s.id !== stakeholder.id && (s.sector === stakeholder.sector || s.organization === stakeholder.organization))
-                    .slice(0, 5)
-                    .map(s => (
-                      <button
-                        key={s.id}
-                        onClick={() => useAppStore.getState().setSelectedStakeholder(s.id)}
-                        className="w-full flex items-center gap-2.5 py-1.5 px-2 rounded-md text-left transition-colors"
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <Portrait name={s.full_name} gender={s.gender} portraitUrl={s.portrait_url} size={28} />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-body-sm truncate" style={{ color: 'var(--text-primary)' }}>{s.full_name}</div>
-                          <div className="text-body-sm truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{s.organization}</div>
-                        </div>
-                        {s.latestSnapshot && <SISBadge score={s.latestSnapshot.sis_score} size="sm" />}
-                      </button>
-                    ))}
-                </div>
+                <h3 className="text-heading-md mb-1" style={{ color: 'var(--text-primary)' }}>Relationship Network</h3>
+                <p className="text-body-sm mb-2" style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                  How {stakeholder.full_name.split(' ')[0]} connects across the portfolio. Click a node to jump to that profile.
+                </p>
+                <EgoNetwork focalId={stakeholder.id} all={all} onSelect={(id) => useAppStore.getState().setSelectedStakeholder(id)} height={320} />
               </Card>
             </div>
           </div>
