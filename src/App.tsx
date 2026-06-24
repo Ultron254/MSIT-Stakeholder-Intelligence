@@ -51,12 +51,16 @@ function App() {
     );
   }
 
-  const mgmtPages = ['approvals', 'team-activity', 'clients', 'scoring-config', 'users', 'appearance'];
+  const mgmtPages = ['approvals', 'team-activity', 'clients', 'scoring-config', 'users'];
   const partnerPages = ['partners'];
+  const adminPages = ['appearance'];
   const isMgmt = user.role === 'lead' || user.role === 'partner' || user.role === 'admin';
   const isPartner = user.role === 'partner' || user.role === 'admin';
+  const isAdmin = user.role === 'admin';
   const page =
-    (mgmtPages.includes(currentPage) && !isMgmt) || (partnerPages.includes(currentPage) && !isPartner)
+    (mgmtPages.includes(currentPage) && !isMgmt) ||
+    (partnerPages.includes(currentPage) && !isPartner) ||
+    (adminPages.includes(currentPage) && !isAdmin)
       ? 'dashboard'
       : currentPage;
 

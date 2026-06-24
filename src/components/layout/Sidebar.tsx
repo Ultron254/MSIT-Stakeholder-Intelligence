@@ -25,6 +25,7 @@ interface NavGroup {
 const ALL: UserRole[] = ['analyst', 'lead', 'partner', 'viewer', 'admin'];
 const MGMT: UserRole[] = ['lead', 'partner', 'admin'];
 const PARTNER: UserRole[] = ['partner', 'admin'];
+const ADMIN: UserRole[] = ['admin'];
 
 const navGroups: NavGroup[] = [
   {
@@ -62,7 +63,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Settings',
     items: [
-      { id: 'appearance', label: 'Appearance', icon: Palette, roles: MGMT },
+      { id: 'appearance', label: 'Appearance', icon: Palette, roles: ADMIN },
       { id: 'scoring-config', label: 'Scoring Config', icon: Settings, roles: MGMT },
       { id: 'users', label: 'Users & Access', icon: UserCog, roles: MGMT },
       { id: 'partners', label: 'Partners', icon: Handshake, roles: PARTNER },
