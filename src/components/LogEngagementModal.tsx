@@ -112,7 +112,7 @@ export default function LogEngagementModal() {
           </div>
 
           {/* Form */}
-          <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+          <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1 min-h-0">
             {/* Stakeholder selector */}
             <div>
               <label className="text-label mb-1.5 block">

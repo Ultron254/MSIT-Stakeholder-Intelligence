@@ -208,7 +208,7 @@ function EditPlanModal({ plan, stakeholderName, onClose }: { plan: EngagementPla
       <div className="modal-content relative w-full rounded-2xl overflow-hidden flex flex-col" style={{ maxWidth: 640, maxHeight: '90vh', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
         <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(45,166,126,0.12)', color: 'var(--brand-primary)' }}><TargetIcon size={16} /></div>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(var(--brand-primary-rgb),0.12)', color: 'var(--brand-primary)' }}><TargetIcon size={16} /></div>
             <div>
               <div className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>Edit engagement plan</div>
               <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{stakeholderName}</div>
@@ -217,7 +217,7 @@ function EditPlanModal({ plan, stakeholderName, onClose }: { plan: EngagementPla
           <button onClick={onClose} aria-label="Close"><X size={18} style={{ color: 'var(--text-muted)' }} /></button>
         </div>
 
-        <div className="p-6 overflow-y-auto space-y-4">
+        <div className="flex-1 min-h-0 p-6 overflow-y-auto space-y-4">
           <div>
             <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Strategic approach</label>
             <textarea value={approach} onChange={(e) => setApproach(e.target.value)} rows={2} className="msit-input" style={{ resize: 'none' }} />

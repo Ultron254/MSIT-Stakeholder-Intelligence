@@ -251,7 +251,7 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} aria-label="Close"><X size={18} style={{ color: 'var(--text-muted)' }} /></button>
         </div>
 
-        <div className="px-6 py-5 overflow-y-auto space-y-5">
+        <div className="flex-1 min-h-0 px-6 py-5 overflow-y-auto space-y-5">
           {/* Identity */}
           <section className="space-y-4">
             <SectionLabel>Client details</SectionLabel>
