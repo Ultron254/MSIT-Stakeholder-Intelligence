@@ -1,13 +1,27 @@
 import { useMemo, useState } from 'react';
-import { Search, X, Pencil, Target as TargetIcon } from 'lucide-react';
+import { Search, X, Pencil, Target as TargetIcon, CalendarDays, AlertCircle } from 'lucide-react';
+import { differenceInDays, parseISO } from 'date-fns';
 import { useAppStore, useCurrentUser } from '../lib/store';
 import { useStakeholdersWithScores } from '../lib/store';
 import { QuadrantBadge, SISBadge } from '../components/ui/Badges';
 import Portrait from '../components/ui/Portrait';
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../lib/types';
 import type { Quadrant, EngagementPlan } from '../lib/types';
+import { NOW } from '../lib/constants';
 
 const QUADRANT_ORDER: Quadrant[] = ['strategic_ally', 'power_gap', 'hidden_champion', 'monitor_exit'];
+
+// Countdown cue for an engagement plan's end date. Turns red as the deadline
+// approaches (or passes), amber within a month, green when there's runway.
+function planCountdown(endDate: string | null | undefined): { label: string; color: string; bg: string; urgent: boolean } | null {
+  if (!endDate) return null;
+  const days = differenceInDays(parseISO(endDate), NOW);
+  if (days < 0) return { label: `${Math.abs(days)}d overdue`, color: '#DC2626', bg: 'rgba(220,38,38,0.1)', urgent: true };
+  if (days === 0) return { label: 'Due today', color: '#DC2626', bg: 'rgba(220,38,38,0.1)', urgent: true };
+  if (days <= 7) return { label: `${days}d left`, color: '#DC2626', bg: 'rgba(220,38,38,0.1)', urgent: true };
+  if (days <= 30) return { label: `${days}d left`, color: '#B45309', bg: 'rgba(217,119,6,0.1)', urgent: false };
+  return { label: `${days}d left`, color: '#1F7A5C', bg: 'rgba(45,166,126,0.1)', urgent: false };
+}
 
 export default function EngagementPlans() {
   const all = useStakeholdersWithScores();
@@ -124,6 +138,23 @@ export default function EngagementPlans() {
                           <QuadrantBadge quadrant={plan.target_quadrant} size="sm" />
                         </div>
                       )}
+                      {(() => {
+                        const cd = planCountdown(plan.end_date);
+                        if (!cd) return null;
+                        return (
+                          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded" style={{ background: cd.bg, color: cd.color, fontSize: '0.625rem', fontWeight: 700 }}>
+                              {cd.urgent ? <AlertCircle size={11} /> : <CalendarDays size={11} />}
+                              {cd.label}
+                            </span>
+                            {plan.end_date && (
+                              <span style={{ fontSize: '0.5625rem', color: 'var(--text-muted)' }}>
+                                ends {new Date(plan.end_date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                       <div className="flex items-center justify-between mt-2 pt-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
                         <span className="text-xs font-medium capitalize px-1.5 py-0.5 rounded" style={{ color: plan.status === 'active' ? 'var(--status-success)' : 'var(--text-muted)', background: plan.status === 'active' ? 'var(--quadrant-ally-bg)' : 'var(--bg-inset)' }}>{plan.status}</span>
                         {canEdit && (
@@ -155,11 +186,17 @@ function EditPlanModal({ plan, stakeholderName, onClose }: { plan: EngagementPla
   const [p60, setP60] = useState(plan.plan_60_day);
   const [p90, setP90] = useState(plan.plan_90_day);
   const [status, setStatus] = useState<EngagementPlan['status']>(plan.status);
+  const [startDate, setStartDate] = useState(plan.start_date ?? '');
+  const [endDate, setEndDate] = useState(plan.end_date ?? '');
+
+  const datesInvalid = !!startDate && !!endDate && endDate < startDate;
 
   const save = () => {
+    if (datesInvalid) { addToast('End date must be after the start date', 'error'); return; }
     updatePlan(plan.id, {
       approach: approach.trim(), target_quadrant: target || null,
       plan_30_day: p30.trim(), plan_60_day: p60.trim(), plan_90_day: p90.trim(), status,
+      start_date: startDate || null, end_date: endDate || null,
     });
     addToast('Engagement plan updated', 'success');
     onClose();
@@ -202,6 +239,22 @@ function EditPlanModal({ plan, stakeholderName, onClose }: { plan: EngagementPla
               </select>
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Start date</label>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="msit-input" />
+            </div>
+            <div>
+              <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>End date</label>
+              <input type="date" value={endDate} min={startDate || undefined} onChange={(e) => setEndDate(e.target.value)} className="msit-input"
+                style={datesInvalid ? { borderColor: 'var(--status-danger)' } : undefined} />
+            </div>
+            {datesInvalid && (
+              <div className="col-span-2 flex items-center gap-1.5" style={{ color: 'var(--status-danger)', fontSize: '0.6875rem' }}>
+                <AlertCircle size={12} /> End date must be on or after the start date.
+              </div>
+            )}
+          </div>
           <div>
             <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>30-day plan</label>
             <textarea value={p30} onChange={(e) => setP30(e.target.value)} rows={2} className="msit-input" style={{ resize: 'none' }} />
@@ -218,7 +271,7 @@ function EditPlanModal({ plan, stakeholderName, onClose }: { plan: EngagementPla
 
         <div className="flex items-center justify-end gap-3 px-6 py-4 shrink-0" style={{ borderTop: '1px solid var(--border-subtle)' }}>
           <button onClick={onClose} className="rounded-lg" style={{ padding: '9px 16px', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 600 }}>Cancel</button>
-          <button onClick={save} className="rounded-lg btn-press" style={{ padding: '9px 18px', background: 'var(--gradient-brand)', color: 'white', fontSize: '0.8125rem', fontWeight: 600 }}>Save plan</button>
+          <button onClick={save} disabled={datesInvalid} className="rounded-lg btn-press" style={{ padding: '9px 18px', background: datesInvalid ? 'var(--bg-inset)' : 'var(--gradient-brand)', color: datesInvalid ? 'var(--text-muted)' : 'white', fontSize: '0.8125rem', fontWeight: 600 }}>Save plan</button>
         </div>
       </div>
     </div>

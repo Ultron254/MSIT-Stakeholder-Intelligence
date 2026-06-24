@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import {
   Plus, X, Briefcase, Building2, User as UserIcon, Check, Clock, Eye,
-  CheckCircle2, ShieldAlert, Search,
+  CheckCircle2, ShieldAlert, Search, MapPin,
 } from 'lucide-react';
 import { useAppStore, useCurrentUser } from '../lib/store';
 import { Card, EmptyState } from '../components/ui/Badges';
-import { CLIENT_STATUS_LABELS } from '../lib/types';
+import { CLIENT_STATUS_LABELS, SECTOR_LABELS } from '../lib/types';
 import type { Client } from '../lib/types';
+import { COUNTRY_OPTIONS } from '../lib/locations';
 import { formatDate } from '../lib/formatters';
 import Portrait from '../components/ui/Portrait';
 
@@ -88,7 +89,9 @@ export default function Clients() {
                       <span className="text-heading-sm" style={{ color: 'var(--text-primary)' }}>{c.name}</span>
                       <span className="px-2 py-0.5 rounded" style={{ background: ss.bg, color: ss.text, fontSize: '0.625rem', fontWeight: 700 }}>{CLIENT_STATUS_LABELS[c.status]}</span>
                     </div>
-                    <div className="text-body-sm" style={{ color: 'var(--text-muted)' }}>{c.organization} · {c.email}</div>
+                    <div className="text-body-sm" style={{ color: 'var(--text-muted)' }}>
+                      {c.organization} · {c.email}{c.country ? <> · <MapPin size={11} className="inline -mt-0.5" /> {c.country}</> : null}
+                    </div>
                   </div>
                 </div>
 
@@ -102,6 +105,17 @@ export default function Clients() {
                     ))}
                   </div>
                 </div>
+
+                {c.sectors && c.sectors.length > 0 && (
+                  <div className="mt-3">
+                    <div className="text-label mb-1.5" style={{ fontSize: '0.5625rem' }}>Sectors of interest</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.sectors.map(s => (
+                        <span key={s} className="px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-inset)', color: 'var(--text-secondary)', fontSize: '0.6875rem', fontWeight: 600, border: '1px solid var(--border-subtle)' }}>{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-3 gap-3 mt-4">
                   <Meta label="Curated stakeholders" value={`${c.curated_stakeholder_ids.length}`} />
@@ -164,6 +178,21 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
   const [brief, setBrief] = useState('');
   const [curated, setCurated] = useState<string[]>([]);
   const [stakeholderSearch, setStakeholderSearch] = useState('');
+  const [country, setCountry] = useState('Kenya');
+  const [sectors, setSectors] = useState<string[]>([]);
+  const [sectorOptions, setSectorOptions] = useState<string[]>(Object.values(SECTOR_LABELS));
+  const [newSector, setNewSector] = useState('');
+
+  const toggleSector = (s: string) => setSectors(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  const addNewSector = () => {
+    const v = newSector.trim();
+    if (!v) return;
+    const existing = sectorOptions.find(o => o.toLowerCase() === v.toLowerCase());
+    const label = existing ?? v;
+    if (!existing) setSectorOptions(o => [...o, label]);
+    setSectors(prev => prev.includes(label) ? prev : [...prev, label]);
+    setNewSector('');
+  };
 
   const selectableCampaigns = campaigns.filter(c => c.status === 'active' || c.status === 'draft');
 
@@ -197,6 +226,7 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
       id: `cl-${Date.now().toString().slice(-6)}`,
       name: name.trim(), client_type: type, organization: org.trim() || name.trim(), email: email.trim(),
       campaign_ids: campaignIds, curated_stakeholder_ids: validCurated, brief: brief.trim() || 'No brief provided.',
+      sectors, country,
       access_level: access, status, created_by: me?.id ?? 'u-002',
       approved_by: isPartner ? (me?.id ?? 'u-003') : null,
       created_at: new Date().toISOString().slice(0, 10), gender: type === 'individual' ? 'female' : 'male', portrait_url: null,
@@ -235,6 +265,14 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
               </Field>
               <Field label="Organization"><input value={org} onChange={(e) => setOrg(e.target.value)} placeholder="Company / institution" className="msit-input" /></Field>
               <Field label="Email"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="client@example.com" className="msit-input" /></Field>
+              <Field label="Location / country">
+                <div className="relative">
+                  <MapPin size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+                  <select value={country} onChange={(e) => setCountry(e.target.value)} className="msit-input" style={{ paddingLeft: 34 }}>
+                    {COUNTRY_OPTIONS.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
+              </Field>
             </div>
             <Field label="Access level">
               <select value={access} onChange={(e) => setAccess(e.target.value as 'overview' | 'detailed')} className="msit-input">
@@ -243,6 +281,36 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
               </select>
             </Field>
             <Field label="Client brief"><textarea value={brief} onChange={(e) => setBrief(e.target.value)} rows={2} placeholder="What is the client trying to achieve?" className="msit-input" style={{ resize: 'none' }} /></Field>
+          </section>
+
+          {/* Sectors — multi-select with inline create */}
+          <section className="space-y-2">
+            <SectionLabel>Sectors of interest ({sectors.length})</SectionLabel>
+            <p className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>Pick all that apply, or add a new sector if it isn't listed.</p>
+            <div className="flex flex-wrap gap-1.5">
+              {sectorOptions.map(s => {
+                const on = sectors.includes(s);
+                return (
+                  <button key={s} type="button" onClick={() => toggleSector(s)} className="px-2.5 py-1 rounded-full transition-colors flex items-center gap-1"
+                    style={{ background: on ? 'rgba(45,166,126,0.12)' : 'var(--bg-inset)', border: `1px solid ${on ? 'var(--brand-primary)' : 'var(--border-default)'}`, color: on ? '#1F7A5C' : 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600 }}>
+                    {on && <Check size={11} />} {s}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                value={newSector}
+                onChange={(e) => setNewSector(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNewSector(); } }}
+                placeholder="Add a new sector…"
+                className="msit-input flex-1"
+              />
+              <button type="button" onClick={addNewSector} disabled={!newSector.trim()} className="flex items-center gap-1 rounded-lg shrink-0 btn-press"
+                style={{ padding: '8px 12px', background: newSector.trim() ? 'rgba(45,166,126,0.12)' : 'var(--bg-inset)', color: newSector.trim() ? '#1F7A5C' : 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, border: '1px solid var(--border-default)' }}>
+                <Plus size={13} /> Add
+              </button>
+            </div>
           </section>
 
           {/* Focal points — multi-select */}

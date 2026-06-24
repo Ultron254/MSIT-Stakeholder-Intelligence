@@ -129,6 +129,10 @@ export interface EngagementPlan {
   plan_90_day: string;
   assigned_to: string;
   status: 'active' | 'completed' | 'paused';
+  // Optional planning window. The card surfaces a countdown that turns red
+  // as the end date approaches.
+  start_date?: string | null;
+  end_date?: string | null;
 }
 
 export interface WatchlistSignal {
@@ -326,6 +330,10 @@ export interface Client {
   campaign_ids: string[];
   curated_stakeholder_ids: string[];
   brief: string;
+  // Sectors of interest (free-form so new sectors can be added inline).
+  sectors?: string[];
+  // Location / country the client operates from.
+  country?: string;
   access_level: 'overview' | 'detailed';
   status: 'pending_approval' | 'approved' | 'rejected' | 'suspended';
   created_by: string;

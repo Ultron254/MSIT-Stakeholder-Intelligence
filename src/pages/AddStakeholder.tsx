@@ -20,6 +20,7 @@ import type {
   Stakeholder, ScoreSnapshot, EvidenceRecord,
 } from '../lib/types';
 import { formatSIS, formatAxis } from '../lib/formatters';
+import { COUNTRY_OPTIONS } from '../lib/locations';
 import { NOW } from '../lib/constants';
 import { format } from 'date-fns';
 import { getInitials } from '../lib/avatar';
@@ -62,6 +63,7 @@ export default function AddStakeholder() {
   const [title, setTitle] = useState('');
   const [organization, setOrganization] = useState('');
   const [sector, setSector] = useState<Sector>('politics');
+  const [countryId, setCountryId] = useState('c-001');
   const [layer, setLayer] = useState<ProximityLayer>(2);
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [sensitive, setSensitive] = useState(false);
@@ -145,7 +147,7 @@ export default function AddStakeholder() {
 
     const stakeholder: Stakeholder = {
       id: stakeholderId,
-      country_id: 'c-001',
+      country_id: countryId,
       campaign_id: currentCampaignId,
       full_name: fullName.trim(),
       title: title.trim(),
@@ -251,7 +253,7 @@ export default function AddStakeholder() {
               onClick={() => {
                 setSubmitted(false);
                 setFullName(''); setTitle(''); setOrganization('');
-                setSector('politics'); setLayer(2); setSensitive(false);
+                setSector('politics'); setCountryId('c-001'); setLayer(2); setSensitive(false);
                 setScores({ influence: 3, relationship: 3, risk: 3, sentiment: 3, alignment: 3, impact: 3 });
                 setEvidenceEntries([newEvidenceEntry()]);
                 setConnections([]);
@@ -374,6 +376,15 @@ export default function AddStakeholder() {
                   style={{ background: 'var(--bg-inset)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                 >
                   {sectors.map(s => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-label mb-1.5 block">Country</label>
+                <select value={countryId} onChange={e => setCountryId(e.target.value)}
+                  className="w-full rounded-lg px-3 py-2.5 text-body-sm outline-none"
+                  style={{ background: 'var(--bg-inset)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+                >
+                  {COUNTRY_OPTIONS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>

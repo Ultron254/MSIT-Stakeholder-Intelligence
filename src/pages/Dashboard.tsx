@@ -28,6 +28,14 @@ function daysSince(date: string | null): number | null {
   return differenceInDays(NOW, parseISO(date));
 }
 
+// High-visibility SIS colour coding: green > 80, orange 60-79, red < 60.
+// Bright variants are used so the score reads clearly on the dark hero.
+function sisHero(score: number): { color: string; tier: string; glow: string } {
+  if (score >= 80) return { color: '#4ADE80', tier: 'Good', glow: 'rgba(74,222,128,0.55)' };
+  if (score >= 60) return { color: '#FBBF24', tier: 'Watch', glow: 'rgba(251,191,36,0.5)' };
+  return { color: '#F87171', tier: 'At risk', glow: 'rgba(248,113,113,0.5)' };
+}
+
 const QUADRANT_TOOLTIPS: Record<Quadrant, string> = {
   strategic_ally: 'High influence + supportive stance. Protect, leverage and amplify these relationships.',
   power_gap: 'High influence but unsupportive or neutral. Priority targets for conversion engagement.',
@@ -414,21 +422,34 @@ export default function Dashboard() {
                 >
                   Portfolio SIS
                 </div>
-                <div
-                  className="font-display"
-                  style={{
-                    fontSize: '2.25rem',
-                    lineHeight: 1,
-                    color: 'white',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
-                  {formatSIS(stats.avgSIS)}
-                </div>
-                <div className="flex items-center gap-1 mt-1 justify-end" style={{ color: '#86EFAC' }}>
-                  <TrendingUp size={12} />
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>+2.4 vs last month</span>
-                </div>
+                {(() => {
+                  const sh = sisHero(stats.avgSIS);
+                  return (
+                    <>
+                      <div
+                        className="font-display"
+                        style={{
+                          fontSize: '2.5rem',
+                          lineHeight: 1,
+                          color: sh.color,
+                          fontVariantNumeric: 'tabular-nums',
+                          textShadow: `0 0 18px ${sh.glow}`,
+                        }}
+                      >
+                        {formatSIS(stats.avgSIS)}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-1.5 justify-end">
+                        <span
+                          className="px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                          style={{ background: `${sh.color}22`, border: `1px solid ${sh.color}66`, color: sh.color, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.04em' }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: sh.color, boxShadow: `0 0 6px ${sh.color}` }} />
+                          {sh.tier}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
               <div
                 className="w-px self-stretch"

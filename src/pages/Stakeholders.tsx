@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Search, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Download, Megaphone, Building2, User as UserIcon } from 'lucide-react';
 import { useAppStore } from '../lib/store';
-import { useFilteredStakeholders, useStakeholdersWithScores } from '../lib/store';
+import { useFilteredStakeholders, useStakeholdersWithScores, useCurrentCampaign } from '../lib/store';
 import { QuadrantBadge, SISBadge, ConfidenceBadge, SectorBadge, LayerIndicator, Card } from '../components/ui/Badges';
 import { QUADRANT_LABELS, SECTOR_LABELS } from '../lib/types';
 import type { Quadrant, Sector, StakeholderWithScore } from '../lib/types';
@@ -31,7 +31,12 @@ export default function Stakeholders() {
   const { filters, setFilter, clearFilters, setSelectedStakeholder } = useAppStore();
   const filtered = useFilteredStakeholders();
   const totalCount = useStakeholdersWithScores().length;
+  const campaign = useCurrentCampaign();
   const [page, setPage] = useState(0);
+
+  const focalAccent = campaign?.accent ?? 'var(--brand-primary)';
+  const focalTypeLabel = campaign?.focal_type === 'person' ? 'Key person' : campaign?.focal_type === 'company' ? 'Organisation' : 'Topic';
+  const FocalTypeIcon = campaign?.focal_type === 'person' ? UserIcon : campaign?.focal_type === 'company' ? Building2 : Megaphone;
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
@@ -62,6 +67,32 @@ export default function Stakeholders() {
           <Download size={14} /> Export CSV
         </button>
       </div>
+
+      {/* Focal point banner — maps the listed stakeholders to their focal point */}
+      {campaign && (
+        <div
+          className="flex items-center gap-3 rounded-xl px-4 py-2.5"
+          style={{
+            background: `linear-gradient(90deg, ${focalAccent}1A 0%, transparent 60%)`,
+            border: '1px solid var(--border-subtle)',
+            borderLeft: `3px solid ${focalAccent}`,
+          }}
+        >
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${focalAccent}24`, color: focalAccent }}>
+            <FocalTypeIcon size={16} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-label" style={{ fontSize: '0.5625rem', color: 'var(--text-muted)' }}>Focal point</span>
+              <span className="text-heading-sm truncate" style={{ color: 'var(--text-primary)' }}>{campaign.name}</span>
+              <span className="px-1.5 py-0.5 rounded" style={{ background: `${focalAccent}1F`, color: focalAccent, fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{focalTypeLabel}</span>
+            </div>
+            <div className="text-body-sm truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>
+              {filtered.length} stakeholder{filtered.length === 1 ? '' : 's'} mapped to this focal point
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filter Bar */}
       <Card className="!p-4">

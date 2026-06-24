@@ -30,6 +30,7 @@ const navGroups: NavGroup[] = [
     label: 'Intelligence',
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ALL },
+      { id: 'watchlist', label: 'Watchlist', icon: AlertTriangle, roles: ALL },
       { id: 'stakeholders', label: 'Stakeholders', icon: Users, roles: ALL },
       { id: 'add-stakeholder', label: 'Add Stakeholder', icon: UserPlus, roles: ['analyst', 'lead', 'partner', 'admin'] },
       { id: 'quadrant-map', label: 'Quadrant Map', icon: Target, roles: ALL },
@@ -46,7 +47,6 @@ const navGroups: NavGroup[] = [
   {
     label: 'Monitoring',
     items: [
-      { id: 'watchlist', label: 'Watchlist', icon: AlertTriangle, roles: ALL },
       { id: 'data-streams', label: 'Data Streams', icon: Radio, roles: ALL },
     ],
   },
