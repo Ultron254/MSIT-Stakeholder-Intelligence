@@ -50,6 +50,11 @@
   --gradient-brand: linear-gradient(135deg, #2DA67E 0%, #5BC09D 100%);
   --gradient-brand-dark: linear-gradient(135deg, #0F1E29 0%, #1A2D3A 60%, #2A4253 100%);
   --gradient-brand-hero: linear-gradient(135deg, #0F1E29 0%, #1A2D3A 50%, #1F4D45 100%);
+  --gradient-sidebar: linear-gradient(180deg, #0F1E29 0%, #1A2D3A 100%);
+  /* RGB triplet for the brand colour so we can build rgba() that re-tints per theme */
+  --brand-primary-rgb: 45, 166, 126;
+  --selection-bg: rgba(45, 166, 126, 0.2);
+  --bg-texture: none;
   --font-display: 'Instrument Serif', Georgia, serif;
   --font-body: 'Instrument Sans', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -183,8 +188,8 @@ body {
 }
 
 @keyframes progress-glow {
-  0%, 100% { box-shadow: 0 0 12px rgba(45,166,126,0.5); }
-  50% { box-shadow: 0 0 24px rgba(45,166,126,0.8); }
+  0%, 100% { box-shadow: 0 0 12px rgba(var(--brand-primary-rgb),0.5); }
+  50% { box-shadow: 0 0 24px rgba(var(--brand-primary-rgb),0.8); }
 }
 
 @keyframes badge-glow {
@@ -358,7 +363,7 @@ tr.hoverable:hover {
 
 /* Selection color */
 ::selection {
-  background: rgba(45, 166, 126, 0.2);
+  background: var(--selection-bg);
   color: var(--text-primary);
 }
 
@@ -393,7 +398,7 @@ html { scroll-behavior: smooth; }
   transition: background 0.15s ease;
 }
 .row-hover:hover {
-  background: rgba(45, 166, 126, 0.04) !important;
+  background: rgba(var(--brand-primary-rgb), 0.04) !important;
 }
 
 /* Button press scale */
@@ -404,7 +409,7 @@ html { scroll-behavior: smooth; }
 /* Focus ring brand-colored */
 .focus-ring:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--bg-elevated), 0 0 0 4px rgba(45, 166, 126, 0.4);
+  box-shadow: 0 0 0 2px var(--bg-elevated), 0 0 0 4px rgba(var(--brand-primary-rgb), 0.4);
 }
 
 /* Stagger animation for list items */
@@ -439,7 +444,7 @@ html { scroll-behavior: smooth; }
 /* Gradient border on focus for inputs */
 input:focus, textarea:focus, select:focus {
   border-color: var(--brand-primary) !important;
-  box-shadow: 0 0 0 3px rgba(45, 166, 126, 0.1) !important;
+  box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), 0.1) !important;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -478,7 +483,7 @@ input:focus, textarea:focus, select:focus {
   background: linear-gradient(
     90deg,
     var(--bg-secondary) 0%,
-    rgba(45, 166, 126, 0.05) 40%,
+    rgba(var(--brand-primary-rgb), 0.05) 40%,
     var(--bg-secondary) 60%,
     var(--bg-secondary) 100%
   );

@@ -17,12 +17,15 @@ import {
   extraPlans, extraEngagements, extraEvidence, extraWatchlist, extraActivity,
 } from './campaigns';
 import { detectRedFlags } from './scoring-engine';
+import {
+  type ThemeId, applyTheme, loadThemePref, saveThemePref,
+} from './theme';
 
 export type Page =
   | 'dashboard' | 'stakeholders' | 'stakeholder-detail' | 'quadrant-map'
   | 'engagements' | 'engagement-plans' | 'watchlist' | 'scoring-config'
   | 'users' | 'add-stakeholder' | 'data-streams' | 'campaigns'
-  | 'approvals' | 'clients' | 'team-activity' | 'partners';
+  | 'approvals' | 'clients' | 'team-activity' | 'partners' | 'appearance';
 
 interface Filters {
   search: string;
@@ -168,6 +171,13 @@ interface AppState {
 
   activityFeed: ActivityItem[];
   addActivity: (activity: ActivityItem) => void;
+
+  // Appearance / theming. Token overrides are layered on top of the preset.
+  themeId: ThemeId;
+  themeCustom: Record<string, string>;
+  setThemeId: (id: ThemeId) => void;
+  updateThemeTokens: (tokens: Record<string, string>) => void;
+  resetTheme: () => void;
 }
 
 const defaultFilters: Filters = {
@@ -178,6 +188,8 @@ const defaultFilters: Filters = {
   confidence: [],
   sortBy: 'sis_desc',
 };
+
+const initialThemePref = loadThemePref();
 
 export const useAppStore = create<AppState>((set, get) => ({
   authedUserId: null,
@@ -328,6 +340,27 @@ export const useAppStore = create<AppState>((set, get) => ({
   })),
 
   addActivity: (activity) => set(s => ({ activityFeed: [activity, ...s.activityFeed] })),
+
+  // ---- Appearance / theming -------------------------------------------------
+  themeId: initialThemePref.id,
+  themeCustom: initialThemePref.custom,
+  setThemeId: (id) => {
+    // Switching preset starts from a clean slate (drops custom overrides).
+    applyTheme(id, {});
+    saveThemePref({ id, custom: {} });
+    set({ themeId: id, themeCustom: {} });
+  },
+  updateThemeTokens: (tokens) => set(s => {
+    const custom = { ...s.themeCustom, ...tokens };
+    applyTheme(s.themeId, custom);
+    saveThemePref({ id: s.themeId, custom });
+    return { themeCustom: custom };
+  }),
+  resetTheme: () => set(s => {
+    applyTheme(s.themeId, {});
+    saveThemePref({ id: s.themeId, custom: {} });
+    return { themeCustom: {} };
+  }),
 }));
 
 export {

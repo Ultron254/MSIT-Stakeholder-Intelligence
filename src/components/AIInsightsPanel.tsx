@@ -252,8 +252,8 @@ export default function AIInsightsPanel() {
       <div
         className="relative px-4 py-3 overflow-hidden shrink-0"
         style={{
-          background: 'linear-gradient(135deg, #0F1E29 0%, #1A2D3A 60%, #1F4D45 100%)',
-          borderBottom: '1px solid rgba(45,166,126,0.25)',
+          background: 'var(--gradient-brand-hero)',
+          borderBottom: '1px solid rgba(var(--brand-primary-rgb),0.25)',
         }}
       >
         <div className="hero-shine" />
@@ -261,8 +261,8 @@ export default function AIInsightsPanel() {
           <div
             className="relative w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
             style={{
-              background: 'linear-gradient(135deg, #2DA67E 0%, #5BC09D 100%)',
-              boxShadow: '0 4px 12px rgba(45,166,126,0.4)',
+              background: 'var(--gradient-brand)',
+              boxShadow: '0 4px 12px rgba(var(--brand-primary-rgb),0.4)',
             }}
           >
             <Sparkles size={18} style={{ color: 'white' }} />
@@ -270,7 +270,7 @@ export default function AIInsightsPanel() {
               className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
               style={{
                 background: '#4ADE80',
-                boxShadow: '0 0 0 1.5px #1A2D3A',
+                boxShadow: '0 0 0 1.5px var(--brand-navy)',
                 animation: 'pulse-dot 2s ease-in-out infinite',
               }}
             />
@@ -354,14 +354,14 @@ export default function AIInsightsPanel() {
                   onClick={() => send(p.prompt)}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all duration-150 hover:-translate-y-px"
                   style={{
-                    background: 'rgba(45,166,126,0.06)',
-                    border: '1px solid rgba(45,166,126,0.18)',
-                    color: '#1F7A5C',
+                    background: 'rgba(var(--brand-primary-rgb),0.06)',
+                    border: '1px solid rgba(var(--brand-primary-rgb),0.18)',
+                    color: 'var(--brand-primary-dark)',
                     fontSize: '0.6875rem',
                     fontWeight: 500,
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(45,166,126,0.12)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(45,166,126,0.06)'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(var(--brand-primary-rgb),0.12)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(var(--brand-primary-rgb),0.06)'; }}
                 >
                   <Icon size={11} />
                   {p.label}
@@ -382,8 +382,8 @@ export default function AIInsightsPanel() {
           className="flex items-end gap-2 rounded-xl px-3 py-2 transition-all duration-150"
           style={{
             background: 'var(--bg-elevated)',
-            border: `1px solid ${input ? 'rgba(45,166,126,0.4)' : 'var(--border-default)'}`,
-            boxShadow: input ? '0 0 0 3px rgba(45,166,126,0.08)' : 'none',
+            border: `1px solid ${input ? 'rgba(var(--brand-primary-rgb),0.4)' : 'var(--border-default)'}`,
+            boxShadow: input ? '0 0 0 3px rgba(var(--brand-primary-rgb),0.08)' : 'none',
           }}
         >
           <MessageSquarePlus size={15} style={{ color: 'var(--text-muted)', marginBottom: 4 }} />
@@ -410,9 +410,9 @@ export default function AIInsightsPanel() {
             disabled={!input.trim() || isThinking}
             className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 shrink-0"
             style={{
-              background: input.trim() ? 'linear-gradient(135deg, #2DA67E 0%, #228866 100%)' : 'var(--bg-inset)',
+              background: input.trim() ? 'var(--gradient-brand)' : 'var(--bg-inset)',
               color: input.trim() ? 'white' : 'var(--text-muted)',
-              boxShadow: input.trim() ? '0 2px 8px rgba(45,166,126,0.3)' : 'none',
+              boxShadow: input.trim() ? '0 2px 8px rgba(var(--brand-primary-rgb),0.3)' : 'none',
               opacity: isThinking ? 0.5 : 1,
               cursor: input.trim() && !isThinking ? 'pointer' : 'not-allowed',
             }}
@@ -448,7 +448,7 @@ function CollapsedRail({
     <div
       className="h-full flex flex-col items-center py-3"
       style={{
-        background: 'linear-gradient(180deg, #0F1E29 0%, #1A2D3A 60%, #1F4D45 100%)',
+        background: 'var(--gradient-brand-hero)',
       }}
     >
       {/* Expand button */}
@@ -458,8 +458,8 @@ function CollapsedRail({
           aria-label="Expand AI panel"
           className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150 hover:scale-105"
           style={{
-            background: 'linear-gradient(135deg, #2DA67E 0%, #5BC09D 100%)',
-            boxShadow: '0 4px 12px rgba(45,166,126,0.4)',
+            background: 'var(--gradient-brand)',
+            boxShadow: '0 4px 12px rgba(var(--brand-primary-rgb),0.4)',
           }}
         >
           <Sparkles size={16} style={{ color: 'white' }} />
@@ -521,11 +521,11 @@ function CollapsedRail({
             <span
               className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center"
               style={{
-                background: '#2DA67E',
+                background: 'var(--brand-primary)',
                 color: 'white',
                 fontSize: '0.5625rem',
                 fontWeight: 700,
-                boxShadow: '0 0 0 1.5px #1A2D3A',
+                boxShadow: '0 0 0 1.5px var(--brand-navy)',
               }}
             >
               {newMessageCount}
@@ -541,12 +541,12 @@ function CollapsedRail({
           aria-label="Expand AI panel"
           className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150"
           style={{
-            background: 'rgba(45,166,126,0.15)',
+            background: 'rgba(var(--brand-primary-rgb),0.15)',
             color: '#86EFAC',
-            border: '1px solid rgba(45,166,126,0.3)',
+            border: '1px solid rgba(var(--brand-primary-rgb),0.3)',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(45,166,126,0.25)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(45,166,126,0.15)'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(var(--brand-primary-rgb),0.25)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(var(--brand-primary-rgb),0.15)'; }}
         >
           <PanelRightOpen size={14} />
         </button>
@@ -557,7 +557,7 @@ function CollapsedRail({
 
 function InsightStat({ label, value, tone }: { label: string; value: number; tone: 'good' | 'warn' | 'bad' | 'neutral' }) {
   const colors: Record<string, { color: string; bg: string }> = {
-    good: { color: '#1F7A5C', bg: 'rgba(45,166,126,0.08)' },
+    good: { color: 'var(--brand-primary-dark)', bg: 'rgba(var(--brand-primary-rgb),0.08)' },
     warn: { color: '#B45309', bg: 'rgba(251,191,36,0.10)' },
     bad: { color: '#B91C1C', bg: 'rgba(220,38,38,0.08)' },
     neutral: { color: 'var(--text-secondary)', bg: 'var(--bg-secondary)' },
@@ -587,11 +587,11 @@ function Message({ msg, userAvatar, onCardClick }: { msg: ChatMessage; userAvata
         <div
           className="rounded-2xl rounded-tr-md px-3 py-2 max-w-[85%]"
           style={{
-            background: 'linear-gradient(135deg, #2DA67E 0%, #228866 100%)',
+            background: 'var(--gradient-brand)',
             color: 'white',
             fontSize: '0.8125rem',
             lineHeight: 1.45,
-            boxShadow: '0 2px 8px rgba(45,166,126,0.25)',
+            boxShadow: '0 2px 8px rgba(var(--brand-primary-rgb),0.25)',
           }}
         >
           {msg.content}
@@ -611,8 +611,8 @@ function Message({ msg, userAvatar, onCardClick }: { msg: ChatMessage; userAvata
       <div
         className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0"
         style={{
-          background: 'linear-gradient(135deg, #2DA67E 0%, #5BC09D 100%)',
-          boxShadow: '0 2px 6px rgba(45,166,126,0.3)',
+          background: 'var(--gradient-brand)',
+          boxShadow: '0 2px 6px rgba(var(--brand-primary-rgb),0.3)',
         }}
       >
         <Sparkles size={13} style={{ color: 'white' }} />
@@ -642,7 +642,7 @@ function Message({ msg, userAvatar, onCardClick }: { msg: ChatMessage; userAvata
                   background: 'var(--bg-elevated)',
                   border: '1px solid var(--border-default)',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(45,166,126,0.4)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(15,30,41,0.06)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(var(--brand-primary-rgb),0.4)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(15,30,41,0.06)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.boxShadow = 'none'; }}
               >
                 <div className="flex-1 min-w-0">
@@ -661,7 +661,7 @@ function Message({ msg, userAvatar, onCardClick }: { msg: ChatMessage; userAvata
                     fontSize: '0.75rem',
                     fontWeight: 700,
                     color:
-                      card.tone === 'good' ? '#1F7A5C' :
+                      card.tone === 'good' ? 'var(--brand-primary-dark)' :
                       card.tone === 'warn' ? '#B45309' :
                       card.tone === 'bad' ? '#B91C1C' : 'var(--text-secondary)',
                   }}
@@ -684,7 +684,7 @@ function ThinkingIndicator() {
       <div
         className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0"
         style={{
-          background: 'linear-gradient(135deg, #2DA67E 0%, #5BC09D 100%)',
+          background: 'var(--gradient-brand)',
         }}
       >
         <Sparkles size={13} style={{ color: 'white' }} />

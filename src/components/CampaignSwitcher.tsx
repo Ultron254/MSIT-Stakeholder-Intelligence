@@ -131,8 +131,8 @@ export default function CampaignSwitcher({ variant = 'sidebar', collapsed = fals
         onClick={() => setOpen(o => !o)}
         className="w-full text-left rounded-xl overflow-hidden transition-all"
         style={{
-          background: 'linear-gradient(135deg, rgba(45,166,126,0.18) 0%, rgba(45,166,126,0.06) 100%)',
-          border: '1px solid rgba(45, 166, 126, 0.25)',
+          background: 'linear-gradient(135deg, rgba(var(--brand-primary-rgb),0.18) 0%, rgba(var(--brand-primary-rgb),0.06) 100%)',
+          border: '1px solid rgba(var(--brand-primary-rgb), 0.25)',
           padding: 12,
         }}
       >
@@ -160,7 +160,7 @@ function CampaignRow({ c, active, onClick }: { c: Campaign; active: boolean; onC
     <button
       onClick={onClick}
       className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors"
-      style={{ background: active ? 'rgba(45,166,126,0.08)' : 'transparent' }}
+      style={{ background: active ? 'rgba(var(--brand-primary-rgb),0.08)' : 'transparent' }}
       onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--bg-secondary)'; }}
       onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
     >

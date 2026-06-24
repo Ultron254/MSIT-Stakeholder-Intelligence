@@ -19,6 +19,7 @@ import Approvals from './pages/Approvals';
 import Clients from './pages/Clients';
 import TeamActivity from './pages/TeamActivity';
 import Partners from './pages/Partners';
+import Appearance from './pages/Appearance';
 import ScoreUpdatePanel from './components/ScoreUpdatePanel';
 import EngagementDetailModal from './components/EngagementDetailModal';
 import LogEngagementModal from './components/LogEngagementModal';
@@ -50,7 +51,7 @@ function App() {
     );
   }
 
-  const mgmtPages = ['approvals', 'team-activity', 'clients', 'scoring-config', 'users'];
+  const mgmtPages = ['approvals', 'team-activity', 'clients', 'scoring-config', 'users', 'appearance'];
   const partnerPages = ['partners'];
   const isMgmt = user.role === 'lead' || user.role === 'partner' || user.role === 'admin';
   const isPartner = user.role === 'partner' || user.role === 'admin';
@@ -77,12 +78,16 @@ function App() {
       case 'clients': return <Clients />;
       case 'team-activity': return <TeamActivity />;
       case 'partners': return <Partners />;
+      case 'appearance': return <Appearance />;
       default: return <Dashboard />;
     }
   };
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+    <div
+      className="flex min-h-screen"
+      style={{ backgroundColor: 'var(--bg-primary)', backgroundImage: 'var(--bg-texture)', backgroundSize: '22px 22px' }}
+    >
       <Sidebar />
       <div
         className="flex-1 flex flex-col min-h-screen transition-all duration-250"

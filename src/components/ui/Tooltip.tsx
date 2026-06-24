@@ -151,13 +151,13 @@ export default function Tooltip({
           <div
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md whitespace-nowrap"
             style={{
-              background: '#0F1E29',
+              background: 'var(--brand-navy-dark)',
               color: '#FFFFFF',
               fontSize: '0.75rem',
               fontWeight: 500,
               lineHeight: 1.3,
               boxShadow: '0 8px 24px rgba(15,30,41,0.25), 0 2px 4px rgba(15,30,41,0.1)',
-              border: '1px solid rgba(45, 166, 126, 0.25)',
+              border: '1px solid rgba(var(--brand-primary-rgb), 0.25)',
               maxWidth: 280,
             }}
           >

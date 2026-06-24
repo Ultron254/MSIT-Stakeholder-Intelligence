@@ -1,29 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ArrowRight, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAppStore, users } from '../lib/store';
+import { THEMES } from '../lib/theme';
 import { ROLE_LABELS } from '../lib/types';
 import Portrait from '../components/ui/Portrait';
-
-// HD imagery of African professionals at work — collaborative teams in
-// modern African workplaces — on-brand for Momentum's people-centred,
-// Africa-focused advocacy work.
-const SLIDES = [
-  {
-    image: '/login-team.png',
-    title: 'Map the people who move policy',
-    subtitle: 'Score, classify and engage the stakeholders shaping Africa\'s agenda.',
-  },
-  {
-    image: '/login-pair.png',
-    title: 'Turn intelligence into influence',
-    subtitle: 'Data-driven decisions for smarter advocacy and partnerships.',
-  },
-  {
-    image: '/login-focus.png',
-    title: 'See the whole board, in real time',
-    subtitle: 'Track quadrants, risks and engagement gaps as every focal point moves.',
-  },
-];
 
 // Sheila (analyst), Eric (lead), Ronny (partner), Ivy (admin), Grace (client).
 const DEMO_IDS = ['u-001', 'u-002', 'u-003', 'u-005', 'u-006'];
@@ -32,6 +12,9 @@ export default function Login() {
   const login = useAppStore(s => s.login);
   const loginAs = useAppStore(s => s.loginAs);
   const addToast = useAppStore(s => s.addToast);
+  const themeId = useAppStore(s => s.themeId);
+  const brand = THEMES[themeId].brand;
+  const slides = brand.slides;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,9 +24,9 @@ export default function Login() {
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setSlide(s => (s + 1) % SLIDES.length), 6000);
+    const t = setInterval(() => setSlide(s => (s + 1) % slides.length), 6000);
     return () => clearInterval(t);
-  }, []);
+  }, [slides.length]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,19 +46,17 @@ export default function Login() {
   };
 
   const demoUsers = DEMO_IDS.map(id => users.find(u => u.id === id)).filter(Boolean) as typeof users;
+  const isOrb = brand.loginShowcase === 'orb';
 
   return (
-    <div
-      className="fixed inset-0 flex overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0A201B 0%, #0C2A22 55%, #0A1F1B 100%)' }}
-    >
-      {/* Faint full-bleed photo backdrop — the imagery also lives behind everything */}
-      {SLIDES.map((s, i) => (
+    <div className="fixed inset-0 flex overflow-hidden" style={{ background: brand.loginBackdrop }}>
+      {/* Faint full-bleed photo backdrop */}
+      {slides.map((s, i) => (
         <div
           key={s.image}
           className="absolute inset-0 transition-opacity duration-1000 ease-in-out pointer-events-none"
           style={{
-            opacity: i === slide ? 0.32 : 0,
+            opacity: i === slide ? 0.3 : 0,
             backgroundImage: `url(${s.image})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -83,82 +64,89 @@ export default function Login() {
           }}
         />
       ))}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: brand.loginScrim }} />
+
+      {/* Decorative floating orbs (more pronounced for the Oxygène treatment) */}
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(110deg, rgba(10,32,27,0.96) 0%, rgba(10,32,27,0.84) 45%, rgba(10,32,27,0.42) 100%)' }}
+        className="absolute pointer-events-none hero-orb-1 hidden md:block"
+        style={{ right: '18vw', top: '12vh', width: 220, height: 220, borderRadius: '50%', background: 'var(--gradient-brand)', filter: 'blur(60px)', opacity: isOrb ? 0.4 : 0.22 }}
+        aria-hidden
+      />
+      <div
+        className="absolute pointer-events-none hero-orb-2 hidden md:block"
+        style={{ right: '6vw', bottom: '10vh', width: 160, height: 160, borderRadius: '50%', background: 'var(--brand-navy-light)', filter: 'blur(55px)', opacity: 0.35 }}
+        aria-hidden
       />
 
-      {/* Right: Africa showcase — the continent silhouette (login-africa.png)
-          masks the same rotating slide imagery, so the photos inside Africa
-          cross-fade in sync with the headline and backdrop. The artwork's
-          arcs stay as transparent negative-space bands. */}
+      {/* Right showcase */}
       <div
-        className="absolute top-1/2 hidden md:block pointer-events-none"
-        style={{ right: '2.5vw', transform: 'translateY(-50%)', height: '90vh', width: '46vw', filter: 'drop-shadow(0 24px 50px rgba(0,0,0,0.5))' }}
+        className="absolute top-1/2 hidden md:flex items-center justify-center pointer-events-none"
+        style={{ right: isOrb ? '4vw' : '2.5vw', transform: 'translateY(-50%)', height: '92vh', width: '46vw' }}
         aria-hidden
       >
-        <div
-          className="relative w-full h-full"
-          style={{
-            WebkitMaskImage: 'url(/login-africa.png)',
-            maskImage: 'url(/login-africa.png)',
-            WebkitMaskSize: 'contain',
-            maskSize: 'contain',
-            WebkitMaskRepeat: 'no-repeat',
-            maskRepeat: 'no-repeat',
-            WebkitMaskPosition: 'center',
-            maskPosition: 'center',
-          }}
-        >
-          {/* Dark base so any gaps read as deep green, not blank */}
-          <div className="absolute inset-0" style={{ background: '#0A241E' }} />
-          {/* Rotating slide imagery, cross-fading in sync with `slide` */}
-          {SLIDES.map((s, i) => (
-            <div
-              key={s.image}
-              className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
-              style={{
-                opacity: i === slide ? 1 : 0,
-                backgroundImage: `url(${s.image})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            />
-          ))}
-          {/* Green duotone tint to match the brand showcase */}
+        {isOrb ? (
+          // Oxygène "O2" orb — the rotating imagery masked into a circle, the
+          // brand mark of oxygen. Replaces the Africa silhouette entirely.
+          <div className="relative" style={{ width: 'min(560px, 42vw)', aspectRatio: '1 / 1', filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.5))' }}>
+            <div className="absolute rounded-full" style={{ inset: '-6%', border: '1px solid rgba(var(--brand-primary-rgb),0.35)' }} />
+            <div className="absolute rounded-full hero-orb-2" style={{ inset: '-12%', border: '1px dashed rgba(255,255,255,0.14)' }} />
+            <div className="relative w-full h-full rounded-full overflow-hidden" style={{ boxShadow: '0 0 0 8px rgba(255,255,255,0.05)' }}>
+              <div className="absolute inset-0" style={{ background: 'var(--brand-navy-dark)' }} />
+              {slides.map((s, i) => (
+                <div
+                  key={s.image}
+                  className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                  style={{ opacity: i === slide ? 1 : 0, backgroundImage: `url(${s.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                />
+              ))}
+              <div className="absolute inset-0" style={{ background: brand.loginTint }} />
+            </div>
+            {/* Small accent bubble */}
+            <div className="absolute rounded-full" style={{ width: '18%', height: '18%', right: '2%', top: '8%', background: 'var(--gradient-brand)', boxShadow: 'var(--shadow-brand)' }} />
+          </div>
+        ) : (
+          // Momentum — continent silhouette mask.
           <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(135deg, rgba(11,42,36,0.55) 0%, rgba(17,74,59,0.4) 55%, rgba(45,166,126,0.55) 100%)' }}
-          />
-        </div>
+            className="relative w-full h-full"
+            style={{
+              WebkitMaskImage: 'url(/login-africa.png)', maskImage: 'url(/login-africa.png)',
+              WebkitMaskSize: 'contain', maskSize: 'contain',
+              WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat',
+              WebkitMaskPosition: 'center', maskPosition: 'center',
+              filter: 'drop-shadow(0 24px 50px rgba(0,0,0,0.5))',
+            }}
+          >
+            <div className="absolute inset-0" style={{ background: '#0A241E' }} />
+            {slides.map((s, i) => (
+              <div
+                key={s.image}
+                className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                style={{ opacity: i === slide ? 1 : 0, backgroundImage: `url(${s.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+              />
+            ))}
+            <div className="absolute inset-0" style={{ background: brand.loginTint }} />
+          </div>
+        )}
       </div>
 
       {/* Left: brand + sign-in */}
       <div className="no-scrollbar relative z-10 flex flex-col w-full md:w-[52%] lg:w-[48%] px-6 sm:px-12 lg:px-16 py-8 overflow-y-auto">
-        {/* Brand */}
         <div className="mb-auto">
-          <span
-            className="inline-flex rounded-xl px-3.5 py-2.5"
-            style={{ background: 'rgba(255,255,255,0.97)', boxShadow: '0 6px 20px rgba(0,0,0,0.28)' }}
-          >
-            <img src="/momentum-logo.png" alt="Momentum Africa Partners" className="h-9 w-auto object-contain block" />
+          <span className="inline-flex rounded-xl px-3.5 py-2.5" style={{ background: 'rgba(255,255,255,0.97)', boxShadow: '0 6px 20px rgba(0,0,0,0.28)' }}>
+            <img src={brand.logo} alt={brand.name} className="h-9 w-auto object-contain block" />
           </span>
-          <span className="block mt-3" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.22em' }}>
-            STAKEHOLDER INTELLIGENCE TOOL
+          <span className="block mt-3" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
+            {brand.product}
           </span>
         </div>
 
         <div className="py-8" style={{ maxWidth: 460 }}>
-          {/* Rotating headline */}
           <div key={slide} className="hero-fade-in mb-7">
-            <h1
-              className="font-display"
-              style={{ color: 'white', fontSize: 'clamp(2.1rem, 3.4vw, 2.95rem)', lineHeight: 1.08, letterSpacing: '-0.02em', maxWidth: 380 }}
-            >
-              {SLIDES[slide].title}
+            <h1 className="font-display" style={{ color: 'white', fontSize: 'clamp(2.1rem, 3.4vw, 2.95rem)', lineHeight: 1.08, letterSpacing: '-0.02em', maxWidth: 400 }}>
+              {slides[slide].title}
             </h1>
             <p style={{ color: 'rgba(255,255,255,0.72)', marginTop: 12, fontSize: '0.95rem', lineHeight: 1.55 }}>
-              {SLIDES[slide].subtitle}
+              {slides[slide].subtitle}
             </p>
           </div>
 
@@ -176,7 +164,7 @@ export default function Login() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@momentum.africa"
+                  placeholder={`you@${brand.emailDomain}`}
                   className="w-full rounded-lg outline-none text-body-sm"
                   style={{ padding: '11px 12px 11px 36px', border: '1px solid rgba(255,255,255,0.16)', background: 'rgba(255,255,255,0.06)', color: 'white' }}
                 />
@@ -252,19 +240,15 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Footer + slide dots */}
         <div className="mt-auto pt-6 flex flex-col items-center gap-2.5">
           <div className="flex items-center gap-2">
-            {SLIDES.map((_, i) => (
+            {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setSlide(i)}
                 aria-label={`Slide ${i + 1}`}
                 className="rounded-full transition-all duration-300"
-                style={{
-                  width: i === slide ? 26 : 8, height: 8,
-                  background: i === slide ? 'var(--brand-primary)' : 'rgba(255,255,255,0.3)',
-                }}
+                style={{ width: i === slide ? 26 : 8, height: 8, background: i === slide ? 'var(--brand-primary)' : 'rgba(255,255,255,0.3)' }}
               />
             ))}
           </div>

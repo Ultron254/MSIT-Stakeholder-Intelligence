@@ -165,8 +165,8 @@ export default function ClientApp() {
         )}
 
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl mb-6" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${campaign.accent || '#2DA67E'} 16%, #0A1722) 0%, color-mix(in srgb, ${campaign.accent || '#2DA67E'} 30%, #0A1722) 48%, color-mix(in srgb, ${campaign.accent || '#2DA67E'} 58%, #0A1722) 100%)`, boxShadow: 'var(--shadow-lg)' }}>
-          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-30 pointer-events-none" style={{ background: `radial-gradient(circle, color-mix(in srgb, ${campaign.accent || '#2DA67E'} 70%, transparent) 0%, transparent 70%)` }} />
+        <div className="relative overflow-hidden rounded-2xl mb-6" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${campaign.accent || 'var(--brand-primary)'} 16%, #0A1722) 0%, color-mix(in srgb, ${campaign.accent || 'var(--brand-primary)'} 30%, #0A1722) 48%, color-mix(in srgb, ${campaign.accent || 'var(--brand-primary)'} 58%, #0A1722) 100%)`, boxShadow: 'var(--shadow-lg)' }}>
+          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-30 pointer-events-none" style={{ background: `radial-gradient(circle, color-mix(in srgb, ${campaign.accent || 'var(--brand-primary)'} 70%, transparent) 0%, transparent 70%)` }} />
           <div className="relative p-7 md:p-9">
             <div className="flex items-center gap-2 mb-3">
               <span className="px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.12)', color: '#86EFAC', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.08em' }}>CURATED FOR YOU</span>
@@ -362,7 +362,7 @@ const ENG_ICON: Record<EngagementRecord['engagement_type'], React.ReactNode> = {
   formal_submission: <Briefcase size={13} />,
 };
 const OUTCOME_STYLE: Record<EngagementRecord['outcome'], { label: string; bg: string; text: string }> = {
-  positive: { label: 'Positive', bg: 'rgba(45,166,126,0.12)', text: '#1F7A5C' },
+  positive: { label: 'Positive', bg: 'var(--quadrant-ally-bg)', text: 'var(--quadrant-ally-text)' },
   neutral: { label: 'Neutral', bg: 'rgba(100,116,139,0.12)', text: '#475569' },
   negative: { label: 'Negative', bg: 'rgba(220,38,38,0.1)', text: '#B91C1C' },
   pending: { label: 'Pending', bg: 'rgba(217,119,6,0.12)', text: '#B45309' },
@@ -489,7 +489,7 @@ function StakeholderDossier({
               const v = snap[c.key as keyof typeof snap] as number;
               const pct = (v / 5) * 100;
               const good = c.invert ? 5 - v : v;
-              const barColor = good >= 3.5 ? '#2DA67E' : good >= 2.5 ? '#D97706' : '#DC2626';
+              const barColor = good >= 3.5 ? 'var(--status-success)' : good >= 2.5 ? 'var(--status-warning)' : 'var(--status-danger)';
               return (
                 <div key={c.key}>
                   <div className="flex items-center justify-between">
@@ -519,7 +519,7 @@ function StakeholderDossier({
             <div className="text-label" style={{ fontSize: '0.5rem' }}>Touchpoints</div>
           </div>
           <div className="rounded-lg p-2.5 text-center" style={{ background: 'var(--bg-secondary)' }}>
-            <div className="font-display" style={{ fontSize: '1.25rem', color: '#1F7A5C' }}>{outcomes.positive}</div>
+            <div className="font-display" style={{ fontSize: '1.25rem', color: 'var(--quadrant-ally-text)' }}>{outcomes.positive}</div>
             <div className="text-label" style={{ fontSize: '0.5rem' }}>Positive</div>
           </div>
           <div className="rounded-lg p-2.5 text-center" style={{ background: 'var(--bg-secondary)' }}>
@@ -537,7 +537,7 @@ function StakeholderDossier({
               const os = OUTCOME_STYLE[e.outcome];
               return (
                 <div key={e.id} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2" style={{ background: 'var(--bg-secondary)' }}>
-                  <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(45,166,126,0.1)', color: 'var(--brand-primary)' }}>{ENG_ICON[e.engagement_type]}</span>
+                  <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(var(--brand-primary-rgb),0.1)', color: 'var(--brand-primary)' }}>{ENG_ICON[e.engagement_type]}</span>
                   <div className="flex-1 min-w-0">
                     <div className="text-body-sm capitalize" style={{ color: 'var(--text-primary)', fontSize: '0.75rem', fontWeight: 600 }}>{e.engagement_type.replace(/_/g, ' ')}</div>
                     <div className="text-body-sm" style={{ color: 'var(--text-muted)', fontSize: '0.625rem' }}>{formatDate(e.date)}</div>
@@ -572,7 +572,7 @@ const REQUEST_TYPE_LABELS: Record<ClientRequest['request_type'], string> = {
 const REQUEST_STATUS_LABELS: Record<ClientRequest['status'], { label: string; bg: string; text: string }> = {
   requested: { label: 'Requested', bg: 'rgba(217,119,6,0.12)', text: '#B45309' },
   in_progress: { label: 'In progress', bg: 'rgba(37,99,235,0.1)', text: '#2563EB' },
-  scheduled: { label: 'Scheduled', bg: 'rgba(45,166,126,0.12)', text: '#1F7A5C' },
+  scheduled: { label: 'Scheduled', bg: 'var(--quadrant-ally-bg)', text: 'var(--quadrant-ally-text)' },
   declined: { label: 'Declined', bg: 'rgba(100,116,139,0.12)', text: '#475569' },
 };
 
@@ -600,7 +600,7 @@ function ClientEngage({
             { icon: <MessageSquare size={16} />, title: 'Request a briefing', body: 'Get a tailored intelligence briefing on a stakeholder or theme.' },
           ].map(c => (
             <div key={c.title} className="rounded-xl p-4" style={{ background: 'var(--bg-secondary)' }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style={{ background: 'rgba(45,166,126,0.12)', color: 'var(--brand-primary)' }}>{c.icon}</div>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style={{ background: 'rgba(var(--brand-primary-rgb),0.12)', color: 'var(--brand-primary)' }}>{c.icon}</div>
               <div className="text-heading-sm" style={{ color: 'var(--text-primary)', fontSize: '0.8125rem' }}>{c.title}</div>
               <div className="text-body-sm mt-1" style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{c.body}</div>
             </div>
@@ -619,7 +619,7 @@ function ClientEngage({
                 <div className="text-body-sm truncate" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{s.full_name}</div>
                 <div className="text-body-sm truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{s.organization}</div>
               </div>
-              <button onClick={() => onRequest(s)} className="flex items-center gap-1 rounded-lg btn-press shrink-0" style={{ padding: '6px 11px', background: 'rgba(45,166,126,0.1)', color: 'var(--brand-primary)', fontSize: '0.6875rem', fontWeight: 600 }}>
+              <button onClick={() => onRequest(s)} className="flex items-center gap-1 rounded-lg btn-press shrink-0" style={{ padding: '6px 11px', background: 'rgba(var(--brand-primary-rgb),0.1)', color: 'var(--brand-primary)', fontSize: '0.6875rem', fontWeight: 600 }}>
                 <Send size={12} /> Request
               </button>
             </div>
@@ -639,7 +639,7 @@ function ClientEngage({
               const ss = REQUEST_STATUS_LABELS[r.status];
               return (
                 <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'var(--bg-secondary)' }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(45,166,126,0.12)', color: 'var(--brand-primary)' }}><Handshake size={15} /></div>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(var(--brand-primary-rgb),0.12)', color: 'var(--brand-primary)' }}><Handshake size={15} /></div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-body-sm" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{REQUEST_TYPE_LABELS[r.request_type]} · {st?.full_name ?? 'Stakeholder'}</span>
@@ -784,8 +784,8 @@ function ClientChat({
 
   return (
     <div className="rounded-2xl overflow-hidden flex flex-col" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-sm)', height: '70vh' }}>
-      <div className="flex items-center gap-3 px-5 py-3.5" style={{ background: 'linear-gradient(135deg, #0F1E29 0%, #1A2D3A 60%, #1F4D45 100%)' }}>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2DA67E 0%, #5BC09D 100%)' }}><Sparkles size={18} style={{ color: 'white' }} /></div>
+      <div className="flex items-center gap-3 px-5 py-3.5" style={{ background: 'var(--gradient-brand-hero)' }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--gradient-brand)' }}><Sparkles size={18} style={{ color: 'white' }} /></div>
         <div>
           <div style={{ color: 'white', fontWeight: 700, fontSize: '0.875rem' }}>Momentum Assistant</div>
           <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.6875rem' }}>Answers from your curated portfolio</div>
@@ -811,7 +811,7 @@ function ClientChat({
                           <div className="text-body-sm truncate" style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.75rem' }}>{s.full_name}</div>
                           <div className="text-body-sm truncate" style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{s.organization}</div>
                         </button>
-                        <button onClick={() => onRequest(s)} className="rounded-md shrink-0" style={{ padding: '4px 9px', background: 'rgba(45,166,126,0.1)', color: 'var(--brand-primary)', fontSize: '0.625rem', fontWeight: 700 }}>Request</button>
+                        <button onClick={() => onRequest(s)} className="rounded-md shrink-0" style={{ padding: '4px 9px', background: 'rgba(var(--brand-primary-rgb),0.1)', color: 'var(--brand-primary)', fontSize: '0.625rem', fontWeight: 700 }}>Request</button>
                       </div>
                     );
                   })}
@@ -823,7 +823,7 @@ function ClientChat({
         {messages.length <= 1 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
             {prompts.map(p => (
-              <button key={p} onClick={() => send(p)} className="px-2.5 py-1.5 rounded-full" style={{ background: 'rgba(45,166,126,0.06)', border: '1px solid rgba(45,166,126,0.18)', color: '#1F7A5C', fontSize: '0.6875rem', fontWeight: 500 }}>{p}</button>
+              <button key={p} onClick={() => send(p)} className="px-2.5 py-1.5 rounded-full" style={{ background: 'rgba(var(--brand-primary-rgb),0.06)', border: '1px solid rgba(var(--brand-primary-rgb),0.18)', color: 'var(--brand-primary-dark)', fontSize: '0.6875rem', fontWeight: 500 }}>{p}</button>
             ))}
           </div>
         )}

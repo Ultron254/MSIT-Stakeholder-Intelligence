@@ -24,6 +24,7 @@ const PAGE_TITLES: Record<string, string> = {
   clients: 'Clients',
   'team-activity': 'Team Activity',
   partners: 'Partner Controls',
+  appearance: 'Appearance',
 };
 
 export default function Header() {

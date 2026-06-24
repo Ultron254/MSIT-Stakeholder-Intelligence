@@ -3,6 +3,11 @@ import type { ReactNode, ErrorInfo } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { initTheme } from './lib/theme'
+
+// Apply the persisted theme before first paint so there is no flash of the
+// default palette on reload.
+initTheme()
 
 interface EBProps { children: ReactNode }
 interface EBState { hasError: boolean; error: Error | null }

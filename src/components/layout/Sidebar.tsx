@@ -2,10 +2,11 @@ import React from 'react';
 import {
   LayoutDashboard, Users, UserPlus, Target, MessageSquare, ClipboardList,
   AlertTriangle, Settings, Radio, UserCog, Megaphone, CheckSquare,
-  Activity, Briefcase, Handshake, PanelLeftClose, PanelLeftOpen,
+  Activity, Briefcase, Handshake, PanelLeftClose, PanelLeftOpen, Palette,
 } from 'lucide-react';
 import { useAppStore, useCurrentRole, type Page } from '../../lib/store';
 import type { UserRole } from '../../lib/types';
+import { THEMES } from '../../lib/theme';
 import Tooltip from '../ui/Tooltip';
 import CampaignSwitcher from '../CampaignSwitcher';
 
@@ -61,6 +62,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Settings',
     items: [
+      { id: 'appearance', label: 'Appearance', icon: Palette, roles: MGMT },
       { id: 'scoring-config', label: 'Scoring Config', icon: Settings, roles: MGMT },
       { id: 'users', label: 'Users & Access', icon: UserCog, roles: MGMT },
       { id: 'partners', label: 'Partners', icon: Handshake, roles: PARTNER },
@@ -71,6 +73,8 @@ const navGroups: NavGroup[] = [
 export default function Sidebar() {
   const { currentPage, setPage, sidebarCollapsed, toggleSidebar } = useAppStore();
   const role = useCurrentRole() ?? 'viewer';
+  const themeId = useAppStore(s => s.themeId);
+  const brand = THEMES[themeId].brand;
 
   const visibleGroups = navGroups
     .map(g => ({ ...g, items: g.items.filter(i => i.roles.includes(role)) }))
@@ -81,14 +85,14 @@ export default function Sidebar() {
       className="fixed left-0 top-0 h-screen flex flex-col transition-all duration-250 ease-in-out z-40"
       style={{
         width: sidebarCollapsed ? 64 : 260,
-        background: 'linear-gradient(180deg, #0F1E29 0%, #1A2D3A 100%)',
-        borderRight: '1px solid rgba(45, 166, 126, 0.15)',
+        background: 'var(--gradient-sidebar)',
+        borderRight: '1px solid rgba(var(--brand-primary-rgb), 0.15)',
         boxShadow: '4px 0 20px rgba(0,0,0,0.08)',
       }}
     >
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, #2DA67E 0%, transparent 60%)' }}
+        className="absolute inset-0 pointer-events-none opacity-[0.05]"
+        style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, var(--brand-primary) 0%, transparent 60%)' }}
       />
 
       {/* Logo row with collapse toggle at top-right */}
@@ -103,7 +107,7 @@ export default function Sidebar() {
               aria-label="Expand sidebar"
               className="w-10 h-10 mx-auto flex items-center justify-center rounded-lg transition-colors"
               style={{ color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.06)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(45,166,126,0.2)'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(var(--brand-primary-rgb),0.2)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
             >
               <PanelLeftOpen size={18} />
@@ -113,8 +117,8 @@ export default function Sidebar() {
           <>
             <div className="rounded-lg px-3 py-2 flex items-center" style={{ background: '#FFFFFF', boxShadow: '0 2px 10px rgba(0,0,0,0.18)' }}>
               <img
-                src="/momentum-logo.png"
-                alt="Momentum Africa Partners"
+                src={brand.logo}
+                alt={brand.name}
                 className="h-7 w-auto object-contain block"
                 style={{ maxWidth: 150 }}
               />
@@ -159,11 +163,11 @@ export default function Sidebar() {
                     height: 40,
                     padding: '0 12px',
                     justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-                    background: isActive ? 'rgba(45, 166, 126, 0.15)' : 'transparent',
+                    background: isActive ? 'rgba(var(--brand-primary-rgb), 0.18)' : 'transparent',
                     color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.65)',
                     fontWeight: isActive ? 600 : 500,
                     fontSize: '0.875rem',
-                    border: isActive ? '1px solid rgba(45, 166, 126, 0.35)' : '1px solid transparent',
+                    border: isActive ? '1px solid rgba(var(--brand-primary-rgb), 0.4)' : '1px solid transparent',
                   }}
                   onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#FFFFFF'; } }}
                   onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; } }}
@@ -171,15 +175,15 @@ export default function Sidebar() {
                   {isActive && (
                     <div
                       className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-r-full"
-                      style={{ background: '#2DA67E', boxShadow: '0 0 8px rgba(45,166,126,0.6)' }}
+                      style={{ background: 'var(--brand-primary-light)', boxShadow: '0 0 8px rgba(var(--brand-primary-rgb),0.6)' }}
                     />
                   )}
-                  <Icon size={18} style={{ color: isActive ? '#2DA67E' : 'inherit', transition: 'color 0.2s' }} />
+                  <Icon size={18} style={{ color: isActive ? 'var(--brand-primary-light)' : 'inherit', transition: 'color 0.2s' }} />
                   {!sidebarCollapsed && <span>{item.label}</span>}
                   {sidebarCollapsed && (
                     <div
                       className="absolute left-full ml-2 px-2.5 py-1 rounded-md whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 pointer-events-none z-50"
-                      style={{ background: '#0F1E29', color: '#FFFFFF', fontSize: '0.75rem', fontWeight: 500, boxShadow: '0 8px 24px rgba(0,0,0,0.4)', border: '1px solid rgba(45, 166, 126, 0.25)' }}
+                      style={{ background: 'var(--brand-navy-dark)', color: '#FFFFFF', fontSize: '0.75rem', fontWeight: 500, boxShadow: '0 8px 24px rgba(0,0,0,0.4)', border: '1px solid rgba(var(--brand-primary-rgb), 0.25)' }}
                     >
                       {item.label}
                     </div>

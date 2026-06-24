@@ -57,7 +57,7 @@ export default function UserMenu() {
         aria-expanded={open}
       >
         <div className="relative">
-          <div style={{ boxShadow: '0 0 0 2px rgba(45,166,126,0.25)' }} className="rounded-full">
+          <div style={{ boxShadow: '0 0 0 2px rgba(var(--brand-primary-rgb),0.25)' }} className="rounded-full">
             <Portrait name={user.display_name} gender={user.gender} portraitUrl={user.portrait_url} size={32} />
           </div>
           <span
@@ -104,12 +104,12 @@ export default function UserMenu() {
           <div
             className="relative px-4 pt-4 pb-3"
             style={{
-              background: 'linear-gradient(135deg, rgba(45,166,126,0.10) 0%, rgba(26,45,58,0.05) 100%)',
+              background: 'linear-gradient(135deg, rgba(var(--brand-primary-rgb),0.10) 0%, rgba(26,45,58,0.05) 100%)',
               borderBottom: '1px solid var(--border-subtle)',
             }}
           >
             <div className="flex items-center gap-3">
-              <div style={{ boxShadow: '0 0 0 2px rgba(45,166,126,0.4), 0 4px 12px rgba(15,30,41,0.1)' }} className="rounded-full shrink-0">
+              <div style={{ boxShadow: '0 0 0 2px rgba(var(--brand-primary-rgb),0.4), 0 4px 12px rgba(15,30,41,0.1)' }} className="rounded-full shrink-0">
                 <Portrait name={user.display_name} gender={user.gender} portraitUrl={user.portrait_url} size={48} />
               </div>
               <div className="min-w-0 flex-1">
@@ -215,11 +215,11 @@ export default function UserMenu() {
                       setOpen(false);
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors"
-                    style={{ background: isActive ? 'rgba(45,166,126,0.08)' : 'transparent' }}
+                    style={{ background: isActive ? 'rgba(var(--brand-primary-rgb),0.08)' : 'transparent' }}
                     onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                     onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <div style={{ boxShadow: isActive ? '0 0 0 2px #2DA67E' : 'none' }} className="rounded-full shrink-0">
+                    <div style={{ boxShadow: isActive ? '0 0 0 2px var(--brand-primary)' : 'none' }} className="rounded-full shrink-0">
                       <Portrait name={u.display_name} gender={u.gender} portraitUrl={u.portrait_url} size={32} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -230,7 +230,7 @@ export default function UserMenu() {
                         {ROLE_LABEL[u.role]}
                       </div>
                     </div>
-                    {isActive && <Check size={14} style={{ color: '#2DA67E' }} />}
+                    {isActive && <Check size={14} style={{ color: 'var(--brand-primary)' }} />}
                   </button>
                 );
               })}
@@ -264,8 +264,8 @@ function MenuItem({
       <span
         className="w-7 h-7 rounded-md flex items-center justify-center"
         style={{
-          background: danger ? 'rgba(220,38,38,0.08)' : 'rgba(45,166,126,0.08)',
-          color: danger ? '#DC2626' : '#2DA67E',
+          background: danger ? 'rgba(220,38,38,0.08)' : 'rgba(var(--brand-primary-rgb),0.08)',
+          color: danger ? '#DC2626' : 'var(--brand-primary)',
         }}
       >
         {icon}
