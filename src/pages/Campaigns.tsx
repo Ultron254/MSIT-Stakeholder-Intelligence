@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Plus, X, Megaphone, MapPin, Calendar, Users as UsersIcon, ArrowRight,
   CheckCircle2, Circle, Sparkles,
@@ -194,11 +195,11 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
     setPage('dashboard');
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 modal-backdrop" style={{ background: 'rgba(15,30,41,0.45)' }} onClick={onClose} />
-      <div className="modal-content relative w-full rounded-2xl overflow-hidden" style={{ maxWidth: 560, background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
-        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      <div className="modal-content relative w-full rounded-2xl overflow-hidden flex flex-col" style={{ maxWidth: 560, maxHeight: '92vh', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
+        <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(45,166,126,0.12)', color: 'var(--brand-primary)' }}>
               <Megaphone size={16} />
@@ -211,7 +212,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} aria-label="Close"><X size={18} style={{ color: 'var(--text-muted)' }} /></button>
         </div>
 
-        <div className="p-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-6">
           {created ? (
             <div className="text-center py-4">
               <div className="success-pop w-14 h-14 mx-auto rounded-full flex items-center justify-center" style={{ background: 'rgba(45,166,126,0.12)', color: 'var(--brand-primary)' }}>
@@ -292,7 +293,8 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

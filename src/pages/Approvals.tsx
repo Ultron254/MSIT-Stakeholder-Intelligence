@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Check, X, FileText, ChevronDown, ChevronUp, Clock, ShieldCheck,
 } from 'lucide-react';
@@ -250,11 +251,11 @@ export default function Approvals() {
       {/* Return-for-revision modal: capture a reason (required) + evidence */}
       {rejecting && (() => {
         const st = stakeholderName(rejecting.stakeholder_id);
-        return (
+        return createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 modal-backdrop" style={{ background: 'rgba(15,30,41,0.45)' }} onClick={() => setRejecting(null)} />
-            <div className="modal-content relative w-full rounded-2xl overflow-hidden" style={{ maxWidth: 520, background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
-              <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            <div className="modal-content relative w-full rounded-2xl overflow-hidden flex flex-col" style={{ maxWidth: 520, maxHeight: '92vh', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
+              <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(220,38,38,0.1)', color: '#B91C1C' }}><X size={16} /></div>
                   <div>
@@ -264,7 +265,7 @@ export default function Approvals() {
                 </div>
                 <button onClick={() => setRejecting(null)} aria-label="Close"><X size={18} style={{ color: 'var(--text-muted)' }} /></button>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4">
                 <div>
                   <label className="text-label" style={{ display: 'block', marginBottom: 6 }}>Reason for returning <span style={{ color: 'var(--status-danger)' }}>*</span></label>
                   <textarea
@@ -286,7 +287,7 @@ export default function Approvals() {
                   The analyst will see this reason and evidence against the returned submission so they can revise and resubmit.
                 </div>
               </div>
-              <div className="flex items-center justify-end gap-3 px-6 py-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+              <div className="flex items-center justify-end gap-3 px-6 py-4 shrink-0" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                 <button onClick={() => setRejecting(null)} className="rounded-lg" style={{ padding: '9px 16px', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 600 }}>Cancel</button>
                 {(() => {
                   const ready = reason.trim() && rejectEvidence.trim();
@@ -302,7 +303,8 @@ export default function Approvals() {
                 })()}
               </div>
             </div>
-          </div>
+          </div>,
+          document.body,
         );
       })()}
     </div>

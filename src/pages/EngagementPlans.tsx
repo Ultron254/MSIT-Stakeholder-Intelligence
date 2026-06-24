@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, X, Pencil, Target as TargetIcon, CalendarDays, AlertCircle } from 'lucide-react';
 import { differenceInDays, parseISO } from 'date-fns';
 import { useAppStore, useCurrentUser } from '../lib/store';
@@ -202,7 +203,7 @@ function EditPlanModal({ plan, stakeholderName, onClose }: { plan: EngagementPla
     onClose();
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 modal-backdrop" style={{ background: 'rgba(15,30,41,0.45)' }} onClick={onClose} />
       <div className="modal-content relative w-full rounded-2xl overflow-hidden flex flex-col" style={{ maxWidth: 640, maxHeight: '90vh', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
@@ -274,6 +275,7 @@ function EditPlanModal({ plan, stakeholderName, onClose }: { plan: EngagementPla
           <button onClick={save} disabled={datesInvalid} className="rounded-lg btn-press" style={{ padding: '9px 18px', background: datesInvalid ? 'var(--bg-inset)' : 'var(--gradient-brand)', color: datesInvalid ? 'var(--text-muted)' : 'white', fontSize: '0.8125rem', fontWeight: 600 }}>Save plan</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

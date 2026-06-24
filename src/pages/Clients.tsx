@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Plus, X, Briefcase, Building2, User as UserIcon, Check, Clock, Eye,
   CheckCircle2, ShieldAlert, Search, MapPin,
@@ -236,7 +237,7 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
     onClose();
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 modal-backdrop" style={{ background: 'rgba(15,30,41,0.45)' }} onClick={onClose} />
       <div className="modal-content relative w-full rounded-2xl overflow-hidden flex flex-col" style={{ maxWidth: 680, maxHeight: '92vh', background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-xl)' }}>
@@ -383,7 +384,8 @@ function CreateClientModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
